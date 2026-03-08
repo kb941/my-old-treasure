@@ -133,13 +133,12 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               task={task}
               onToggle={onToggleTask}
               onMove={moveTask}
-              onDelete={deleteTask}
-              onEdit={openEditModal}
               onTimerComplete={onTimerComplete}
               onDone={onTaskDone}
               onStartFocus={onStartFocus}
               showTimer={columnId === 'today'}
               isDraggable={false}
+              isEditMode={false}
               pomodoroSettings={pomodoroSettings}
             />
           ))}
