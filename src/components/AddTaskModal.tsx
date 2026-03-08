@@ -392,7 +392,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                   setChapterId(newId);
                                   setTopicId('');
                                   setExpandedChapter(isChapterSelected ? null : chapter.id);
-                                  if (newId && !title) autoFillTitle(chapter.name);
+                                  updateAutoTitle(undefined, subjectId, newId, '');
                                 }}
                                 className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
                                   isChapterSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
