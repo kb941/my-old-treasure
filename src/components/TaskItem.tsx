@@ -185,7 +185,7 @@ export function TaskItem({
                     {phase.replace('-', ' ')}
                   </span>
                 </div>
-                <span className="text-[11px] text-muted-foreground">Session {sessionCount + 1}</span>
+                <span className="text-[11px] text-muted-foreground">Pomodoro {sessionCount + 1}</span>
               </div>
 
               <div className="flex items-center gap-2">
