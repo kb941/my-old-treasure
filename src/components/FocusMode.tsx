@@ -257,9 +257,8 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                 {/* Controls */}
                 <div className="flex items-center gap-3 shrink-0">
                   <Button variant="outline" size="icon" className="w-10 h-10 rounded-full" onClick={() => {
-                    // Skip task - move to next without completing
-                    if (incompleteTasks.length > 1) {
-                      setCurrentTaskIndex(prev => (prev + 1) % incompleteTasks.length);
+                    if (currentTask) {
+                      setSkippedTasks(prev => new Set(prev).add(currentTask.id));
                     }
                     setIsRunning(false);
                     setPhase('study');
