@@ -33,10 +33,11 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
   const [showConfidence, setShowConfidence] = useState(false);
   const [selectedConfidence, setSelectedConfidence] = useState(3);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [skippedTasks, setSkippedTasks] = useState<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id));
-  const currentTask = incompleteTasks[currentTaskIndex] || null;
+  const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id) && !skippedTasks.has(t.id));
+  const currentTask = incompleteTasks[0] || null;
 
   const getPhaseDuration = (p: TimerPhase) => {
     switch (p) {
@@ -58,6 +59,7 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
       setSessionCount(0);
       setTotalStudyTime(0);
       setCompletedTasks(new Set());
+      setSkippedTasks(new Set());
     } else {
       document.body.style.overflow = '';
     }
@@ -255,9 +257,8 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                 {/* Controls */}
                 <div className="flex items-center gap-3 shrink-0">
                   <Button variant="outline" size="icon" className="w-10 h-10 rounded-full" onClick={() => {
-                    // Skip task - move to next without completing
-                    if (incompleteTasks.length > 1) {
-                      setCurrentTaskIndex(prev => (prev + 1) % incompleteTasks.length);
+                    if (currentTask) {
+                      setSkippedTasks(prev => new Set(prev).add(currentTask.id));
                     }
                     setIsRunning(false);
                     setPhase('study');
