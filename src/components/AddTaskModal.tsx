@@ -487,7 +487,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
   };
 
   // PYQ exam mode fields
-  const renderPyqExamMode = () => (
+  const renderPyqExamMode = (showSubject = true) => (
     <>
       {/* Subject pills */}
       <div>
