@@ -513,7 +513,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
           {['NEET PG', 'INICET', 'FMGE', 'All'].map(exam => (
             <button
               key={exam}
-              onClick={() => { setPyqExam(exam); setPyqSessions([]); }}
+              onClick={() => { setPyqExam(exam); setPyqSessions([]); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, exam, pyqYears, []), 0); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 pyqExam === exam ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
               }`}
