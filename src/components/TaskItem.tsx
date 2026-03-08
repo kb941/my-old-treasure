@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 
 const typeIcons: Record<string, typeof BookOpen> = {
   study: BookOpen,
@@ -56,6 +57,7 @@ export function TaskItem({
   const [showConfidencePicker, setShowConfidencePicker] = useState(false);
   const [selectedConfidence, setSelectedConfidence] = useState(3);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkboxRef = useRef<HTMLButtonElement | null>(null);
 
   const currentColumnIndex = columnOrder.indexOf(task.column);
   const canMoveLeft = currentColumnIndex > 0;
@@ -154,7 +156,26 @@ export function TaskItem({
         )}
 
         <button
-          onClick={(e) => { e.stopPropagation(); onToggle(task.id); }}
+          ref={checkboxRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!task.completed) {
+              const rect = (e.target as HTMLElement).getBoundingClientRect();
+              confetti({
+                particleCount: 40,
+                spread: 50,
+                startVelocity: 15,
+                gravity: 0.8,
+                scalar: 0.6,
+                origin: {
+                  x: rect.left / window.innerWidth + rect.width / window.innerWidth / 2,
+                  y: rect.top / window.innerHeight,
+                },
+                colors: ['#14b8a6', '#6366f1', '#f59e0b', '#22c55e', '#ec4899'],
+              });
+            }
+            onToggle(task.id);
+          }}
           className={cn(
             "w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all",
             task.completed ? "bg-primary border-primary" : "border-muted-foreground/40 hover:border-primary"
