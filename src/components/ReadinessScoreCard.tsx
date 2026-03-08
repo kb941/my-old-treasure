@@ -143,7 +143,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 30 }}
                 onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-3 top-6 bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
+                className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
               >
                 <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
                   <h2 className="font-semibold text-base">🎯 Exam Readiness Breakdown</h2>
