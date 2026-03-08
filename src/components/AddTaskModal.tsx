@@ -112,14 +112,8 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
     setSearchQuery('');
     setPyqFullMock(false);
     setTestSource('');
-    // Update title prefix if auto-generated
-    if (title && Object.values(typeLabels).some(l => title.startsWith(l + ' - '))) {
-      const suffix = title.split(' - ').slice(1).join(' - ');
-      if (suffix) setTitle(`${typeLabels[newType]} - ${suffix}`);
-      else setTitle('');
-    } else if (!title) {
-      // keep empty
-    }
+    // Clear title on type change so auto-title regenerates fresh
+    setTitle('');
   };
 
   // Scroll to selected subject after search selection
