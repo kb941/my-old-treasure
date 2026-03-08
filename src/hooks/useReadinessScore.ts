@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme } from '@/types';
+import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme, ContentType } from '@/types';
 import { PYQEntry } from '@/components/PYQTracker';
 
 interface ReadinessInput {
