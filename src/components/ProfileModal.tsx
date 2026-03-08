@@ -132,7 +132,11 @@ export function ProfileModal({
     const ms = EXAM_MARKING[exam];
     if (ms) setLocalMarkingScheme({ ...ms });
     const w = EXAM_WEIGHTAGES[exam];
-    if (w) setWeightages(prev => ({ ...prev, ...w }));
+    if (w) {
+      const mapped: Record<string, number> = {};
+      Object.entries(w).forEach(([k, v]) => { mapped[k] = v.avg; });
+      setWeightages(prev => ({ ...prev, ...mapped }));
+    }
   }, []);
 
   const handleSave = () => {
