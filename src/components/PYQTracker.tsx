@@ -329,52 +329,68 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="border-t border-border"
+                  className="border-t border-border bg-secondary/20"
                 >
-                  {/* Two-row grid: toggle row + optional score row per subject */}
-                  <div className="grid grid-cols-[1fr] divide-y divide-border/30">
+                  <div className="p-2 space-y-1">
                     {subjectEntries.map(entry => {
                       const subjectName = subjects.find(s => s.id === entry.subjectId)?.name || entry.subjectId;
                       const accuracy = entry.totalQuestions && entry.totalQuestions > 0
                         ? Math.round(((entry.correctAnswers || 0) / entry.totalQuestions) * 100)
                         : null;
                       return (
-                        <div key={entry.subjectId} className="flex items-center gap-2 px-3 py-1.5">
+                        <div
+                          key={entry.subjectId}
+                          className={`rounded-lg transition-all ${
+                            entry.done ? 'bg-primary/5 border border-primary/15' : 'bg-card border border-border/50'
+                          }`}
+                        >
+                          {/* Subject row - tap to toggle */}
                           <button
                             onClick={() => toggleEntry(selectedExam, session, entry.subjectId)}
-                            className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-                              entry.done ? 'bg-primary border-primary' : 'border-muted-foreground/30'
-                            }`}
+                            className="w-full flex items-center gap-2.5 px-3 py-2"
                           >
-                            {entry.done && <span className="text-primary-foreground text-[9px]">✓</span>}
+                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                              entry.done ? 'bg-primary border-primary' : 'border-muted-foreground/25 hover:border-primary/50'
+                            }`}>
+                              {entry.done && <span className="text-primary-foreground text-[10px] font-bold">✓</span>}
+                            </div>
+                            <span className={`text-xs flex-1 text-left ${entry.done ? 'text-primary font-medium' : 'text-foreground'}`}>
+                              {subjectName}
+                            </span>
+                            {accuracy !== null && (
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
+                                accuracy >= 75 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                : accuracy >= 50 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                : 'bg-destructive/10 text-destructive'
+                              }`}>
+                                {accuracy}%
+                              </span>
+                            )}
                           </button>
-                          <span className={`text-xs flex-1 truncate ${entry.done ? 'text-primary font-medium' : 'text-foreground'}`}>
-                            {subjectName}
-                          </span>
+
+                          {/* Score entry row - slides open when done */}
                           {entry.done && (
-                            <div className="flex items-center gap-0.5 shrink-0">
-                              <input
-                                type="number"
-                                placeholder="✓"
-                                value={entry.correctAnswers || ''}
-                                onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'correctAnswers', parseInt(e.target.value) || 0)}
-                                className="w-8 h-5 text-[10px] text-center bg-secondary/50 rounded border border-border/50 text-foreground"
-                              />
-                              <span className="text-[9px] text-muted-foreground">/</span>
-                              <input
-                                type="number"
-                                placeholder="T"
-                                value={entry.totalQuestions || ''}
-                                onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'totalQuestions', parseInt(e.target.value) || 0)}
-                                className="w-8 h-5 text-[10px] text-center bg-secondary/50 rounded border border-border/50 text-foreground"
-                              />
-                              {accuracy !== null && (
-                                <span className={`text-[9px] font-semibold ml-0.5 w-7 text-right ${
-                                  accuracy >= 75 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'
-                                }`}>
-                                  {accuracy}%
-                                </span>
-                              )}
+                            <div className="flex items-center gap-2 px-3 pb-2 pt-0">
+                              <span className="text-[10px] text-muted-foreground w-12">Score:</span>
+                              <div className="flex items-center gap-1.5 flex-1">
+                                <input
+                                  type="number"
+                                  placeholder="Correct"
+                                  value={entry.correctAnswers || ''}
+                                  onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'correctAnswers', parseInt(e.target.value) || 0)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex-1 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                                />
+                                <span className="text-xs text-muted-foreground">/</span>
+                                <input
+                                  type="number"
+                                  placeholder="Total"
+                                  value={entry.totalQuestions || ''}
+                                  onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'totalQuestions', parseInt(e.target.value) || 0)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex-1 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                                />
+                              </div>
                             </div>
                           )}
                         </div>
