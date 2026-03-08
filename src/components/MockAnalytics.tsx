@@ -340,7 +340,8 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
                   <p className="text-xs text-muted-foreground">{test.source} • {new Date(test.date).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  {markingScheme.totalMarks || 800}className="font-bold text-gradient-primary">{test.score}/<p className="font-bold text-gradient-primary">{test.score}/{markingScheme.totalMarks || 800}ectAnswers / test.attemptedQuestions) * 100)}%</p>
+                   <p className="font-bold text-gradient-primary">{test.score}/{markingScheme.totalMarks || 800}</p>
+                   <p className="text-xs text-muted-foreground">{Math.round((test.correctAnswers / test.attemptedQuestions) * 100)}%</p>
                 </div>
               </div>
             ))}
