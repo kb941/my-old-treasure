@@ -586,17 +586,8 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
         </div>
       )}
 
-      {/* How it works */}
-      <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-        <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1.5">
-          <Lightbulb className="w-3.5 h-3.5 text-primary" />
-          <span className="text-primary">How it's calculated</span>
-        </h4>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Syllabus (35) + Revision (20) + MCQ (20) + PYQ (15) + Mocks (10) = 100 base points. 
-          Bonuses for streaks, balance, and consistency. Penalties for inactivity or imbalanced prep.
-        </p>
-      </div>
+      {/* How it works - expandable */}
+      <HowItsCalculated />
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
