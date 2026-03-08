@@ -112,30 +112,24 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const hasStudyLogs = studyLogs.length > 0;
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
-    // Dynamic weighting based on enabled content types in profile:
-    // main-video only → 100%; main + rr → 70/30; rr only → 100%; btr only → 100%
-    // rr + btr → 70/30; main + rr + btr → 50/30/20
-    const videoTypes = ['main-video', 'rr-video', 'btr-video', 'extra-video'] as const;
-    const enabledVideoTypes = contentTypes
-      .filter(ct => videoTypes.includes(ct.id as any) && ct.enabled)
+    // Only main-video, rr-video, btr-video count for syllabus score.
+    // Dynamic weights based on which of these 3 are enabled in profile:
+    // 1 type → 100%; 2 types → 70/30; 3 types → 50/30/20
+    const SCORABLE_STAGES = ['main-video', 'rr-video', 'btr-video'] as const;
+    const enabledStages = contentTypes
+      .filter(ct => SCORABLE_STAGES.includes(ct.id as any) && ct.enabled)
       .map(ct => ct.id);
 
-    // Compute dynamic weights for each enabled video type
     const stageWeights: Record<string, number> = {};
-    if (enabledVideoTypes.length === 1) {
-      stageWeights[enabledVideoTypes[0]] = 1.0;
-    } else if (enabledVideoTypes.length === 2) {
-      stageWeights[enabledVideoTypes[0]] = 0.7;
-      stageWeights[enabledVideoTypes[1]] = 0.3;
-    } else if (enabledVideoTypes.length === 3) {
-      stageWeights[enabledVideoTypes[0]] = 0.5;
-      stageWeights[enabledVideoTypes[1]] = 0.3;
-      stageWeights[enabledVideoTypes[2]] = 0.2;
-    } else if (enabledVideoTypes.length >= 4) {
-      stageWeights[enabledVideoTypes[0]] = 0.4;
-      stageWeights[enabledVideoTypes[1]] = 0.25;
-      stageWeights[enabledVideoTypes[2]] = 0.2;
-      stageWeights[enabledVideoTypes[3]] = 0.15;
+    if (enabledStages.length === 1) {
+      stageWeights[enabledStages[0]] = 1.0;
+    } else if (enabledStages.length === 2) {
+      stageWeights[enabledStages[0]] = 0.7;
+      stageWeights[enabledStages[1]] = 0.3;
+    } else if (enabledStages.length >= 3) {
+      stageWeights[enabledStages[0]] = 0.5;
+      stageWeights[enabledStages[1]] = 0.3;
+      stageWeights[enabledStages[2]] = 0.2;
     }
 
     let weightedSyllabusCoverage = 0;
@@ -158,13 +152,13 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
       const mcqGoal = mcqGoalPerSubject * subTopics.length;
 
-      // Calculate weighted coverage based on enabled content types
+      // Calculate weighted coverage using only scorable stages
       let subCoverage = 0;
-      if (enabledVideoTypes.length === 0) {
-        // Fallback: any completed stage counts
+      if (enabledStages.length === 0) {
+        // Fallback: any completed stage
         subCoverage = withAny / subTopics.length;
       } else {
-        for (const stageId of enabledVideoTypes) {
+        for (const stageId of enabledStages) {
           const completed = subTopics.filter(t => t.completedStages.includes(stageId)).length;
           subCoverage += (completed / subTopics.length) * (stageWeights[stageId] || 0);
         }
@@ -227,49 +221,84 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const revisionScore = Math.max(0, (revisionCompleteness - overduePenalty - criticalPenalty)) * 20;
 
-    // ===== 3. MCQ PRACTICE (20%) =====
-    const totalMcqsSolved = allTopics.reduce((s, t) => s + t.questionsSolved, 0);
-    const mcqGoal = mcqGoalPerSubject * subjects.length;
-    const volumeProgress = Math.min(totalMcqsSolved / (mcqGoal || 1), 1) * 50;
-
+    // ===== 3. MCQ PRACTICE (20%) — weightage-based per subject =====
+    let weightedMcqVolume = 0;
     let weightedAccuracy = 0;
     let hasAccuracyData = false;
+    let hasMcqData = false;
+
     subjects.forEach(sub => {
+      const subTopics = allTopics.filter(t => t.subjectId === sub.id);
+      const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
+      const mcqGoalForSub = mcqGoalPerSubject * subTopics.length;
+      const weight = sub.weightage / totalWeightage;
+
+      if (mcqsDone > 0) hasMcqData = true;
+      weightedMcqVolume += Math.min(mcqsDone / (mcqGoalForSub || 1), 1) * weight;
+
+      // Accuracy from mock test subject scores
       const subScores = mockTests.flatMap(m => m.subjectScores).filter(s => s.subjectId === sub.id);
       if (subScores.length > 0) {
         hasAccuracyData = true;
         const avgAcc = subScores.reduce((s, sc) => s + sc.accuracy, 0) / subScores.length;
-        weightedAccuracy += (avgAcc / 100) * (sub.weightage / totalWeightage);
+        weightedAccuracy += (avgAcc / 100) * weight;
       }
     });
     if (!hasAccuracyData) weightedAccuracy = (stats.averageAccuracy || 0) / 100;
 
+    const volumeProgress = weightedMcqVolume * 50;
     const accuracyTarget = 0.75;
     const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
+    const mcqScore = !hasMcqData ? 0 : (volumeProgress + accuracyScore) * 20 / 100;
 
-    const mcqScore = totalMcqsSolved === 0 ? 0 : (volumeProgress + accuracyScore) * 20 / 100;
+    // ===== 4. PYQ COMPLETION (15%) — two dimensions, weightage-based =====
+    // Dimension A: Chapter-wise PYQs (topic.pyqDone) — weightage-based
+    let weightedChapterPyq = 0;
+    let hasChapterPyqData = false;
+    subjects.forEach(sub => {
+      const subTopics = allTopics.filter(t => t.subjectId === sub.id);
+      if (subTopics.length === 0) return;
+      const pyqDoneCount = subTopics.filter(t => t.pyqDone).length;
+      if (pyqDoneCount > 0) hasChapterPyqData = true;
+      const weight = sub.weightage / totalWeightage;
+      weightedChapterPyq += (pyqDoneCount / subTopics.length) * weight;
+    });
 
-    // ===== 4. PYQ COMPLETION (15%) =====
+    // Dimension B: Year/paper-based PYQs (from PYQ Tracker) — weightage-based
+    let weightedPaperPyq = 0;
+    let weightedPyqAccuracy = 0;
+    let hasPaperPyqData = false;
     const pyqSubjectEntries = pyqData.filter(e => e.subjectId !== 'all');
-    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
-    const totalPyqEntries = pyqSubjectEntries.length || 1;
-    const pyqVolumeScore = Math.min(pyqsDone / totalPyqEntries, 1) * 60;
 
-    const pyqWithMarks = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0);
-    let pyqAccuracyScore = 0;
-    if (pyqWithMarks.length > 0) {
-      const avgPyqAcc = pyqWithMarks.reduce((s, e) => s + ((e.correctAnswers || 0) / (e.totalQuestions || 1)), 0) / pyqWithMarks.length;
-      pyqAccuracyScore = Math.min((avgPyqAcc / 0.8) * 40, 40);
-    }
+    subjects.forEach(sub => {
+      const subEntries = pyqSubjectEntries.filter(e => e.subjectId === sub.id);
+      if (subEntries.length === 0) return;
+      const done = subEntries.filter(e => e.done).length;
+      if (done > 0) hasPaperPyqData = true;
+      const weight = sub.weightage / totalWeightage;
+      weightedPaperPyq += (done / subEntries.length) * weight;
+
+      // Accuracy for this subject's PYQs
+      const withMarks = subEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0);
+      if (withMarks.length > 0) {
+        const avgAcc = withMarks.reduce((s, e) => s + ((e.correctAnswers || 0) / (e.totalQuestions || 1)), 0) / withMarks.length;
+        weightedPyqAccuracy += avgAcc * weight;
+      }
+    });
 
     const yearsRange = pyqYearTo - pyqYearFrom + 1;
+    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
     const uniqueYears = new Set(pyqSubjectEntries.filter(e => e.done).map(e => {
       const match = e.session?.match(/(\d{4})/);
       return match ? parseInt(match[1]) : 0;
     }).filter(y => y >= pyqYearFrom && y <= pyqYearTo));
     const yearCoverageBonus = yearsRange > 0 ? (uniqueYears.size / yearsRange) * 5 : 0;
 
-    const pyqScore = pyqsDone === 0 ? 0 : (pyqVolumeScore + pyqAccuracyScore + yearCoverageBonus) * 15 / 100;
+    // Combine: 40% chapter-wise + 50% paper-based + 10% year coverage
+    const hasAnyPyq = hasChapterPyqData || hasPaperPyqData;
+    const chapterPyqComponent = weightedChapterPyq * 40;
+    const paperPyqComponent = (weightedPaperPyq * 30 + Math.min((weightedPyqAccuracy / 0.8) * 20, 20));
+    const pyqScore = !hasAnyPyq ? 0 : (chapterPyqComponent + paperPyqComponent + yearCoverageBonus) * 15 / 100;
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
@@ -450,7 +479,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
-    if (pyqsDone < totalPyqEntries * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
+    if (pyqsDone < pyqSubjectEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
     if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
       recommendations.push(`Biggest gap: ${subjectBreakdown[0].subjectName} (${subjectBreakdown[0].syllabusPct}% done)`);
     }

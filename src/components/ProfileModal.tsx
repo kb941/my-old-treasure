@@ -68,6 +68,7 @@ interface ProfileModalProps {
   onSave: (data: ProfileData) => void;
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
+  onClearSampleData?: () => void;
 }
 
 export interface ProfileData {
@@ -90,7 +91,7 @@ export interface ProfileData {
 
 export function ProfileModal({ 
   isOpen, onClose, examDate, examName, targetScore, targetRank, subjects, pomodoroSettings,
-  srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus
+  srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus, onClearSampleData
 }: ProfileModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [newExamDate, setNewExamDate] = useState<Date>(examDate);
@@ -463,6 +464,28 @@ export function ProfileModal({
                         <Plus className="w-3 h-3" />
                       </Button>
                     </div>
+                  </div>
+
+                  {/* Clear Sample Data */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Trash2 className="w-4 h-4 text-amber-500" />
+                      Clear Sample Data
+                    </h3>
+                    <Button
+                      variant="outline"
+                      className="w-full border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                      onClick={() => {
+                        onClearSampleData?.();
+                        onClose();
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Clear Mock Tests & Reset Stats
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Removes sample mock tests and resets stats to zero. Your syllabus progress and tasks are preserved.
+                    </p>
                   </div>
 
                   {/* Reset Syllabus Data */}
