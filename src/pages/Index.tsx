@@ -589,35 +589,13 @@ const Index = () => {
           )}
 
           {activeTab === 'analytics' && (
-            <div className="space-y-3">
-              {/* Predictions — always visible at top */}
-              <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
-
-              {/* Readiness Score — compact */}
-              <ReadinessScoreCard result={readinessResult} compact />
-
-              {/* Weekly + MCQ compact row */}
-              <div className="grid grid-cols-2 gap-3">
-                <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
-                <McqWeeklyChart mcqLogs={mcqLogs} />
-              </div>
-
-              {/* Collapsible sections */}
-              <InsightsSection title="Content Progress" defaultOpen={false}>
-                <ContentProgressDashboard chapters={chapters} contentTypes={contentTypes} />
-              </InsightsSection>
-
-              <InsightsSection title="Study Patterns" defaultOpen={false}>
-                <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
-              </InsightsSection>
-
-              <InsightsSection title="PYQ Analysis" defaultOpen={false}>
-                <PYQAccuracyTrends subjects={subjects} />
-              </InsightsSection>
-
-              {/* Achievements */}
-              <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={() => setActiveTab('achievements' as Tab)} />
-            </div>
+            <AnalyticsTab
+              mockTests={mockTests} markingScheme={markingScheme} stats={stats}
+              chapters={chapters} studyLogs={studyLogs} mcqLogs={mcqLogs}
+              readinessResult={readinessResult} subjects={subjects}
+              contentTypes={contentTypes} pyqAchievements={pyqAchievements}
+              onViewAchievements={() => setActiveTab('achievements' as Tab)}
+            />
           )}
 
           {/* Achievements full tab */}
