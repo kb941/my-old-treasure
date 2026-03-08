@@ -153,10 +153,10 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const pyqVolumeScore = Math.min(pyqsDone / totalPyqEntries, 1) * 60;
 
     // PYQ accuracy from entries that have marks
-    const pyqWithMarks = pyqSubjectEntries.filter(e => e.done && e.totalMarks && e.totalMarks > 0);
+    const pyqWithMarks = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0);
     let pyqAccuracyScore = 0;
     if (pyqWithMarks.length > 0) {
-      const avgPyqAcc = pyqWithMarks.reduce((s, e) => s + ((e.correctMarks || 0) / (e.totalMarks || 1)), 0) / pyqWithMarks.length;
+      const avgPyqAcc = pyqWithMarks.reduce((s, e) => s + ((e.correctAnswers || 0) / (e.totalQuestions || 1)), 0) / pyqWithMarks.length;
       pyqAccuracyScore = Math.min((avgPyqAcc / 0.8) * 40, 40);
     }
 
