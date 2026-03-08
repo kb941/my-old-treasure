@@ -276,12 +276,12 @@ export function ProfileModal({
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full justify-start text-left font-normal h-10",
+                                "w-full justify-start text-left font-normal h-10 text-xs",
                                 !newExamDate && "text-muted-foreground"
                               )}
                             >
-                              <Calendar className="mr-2 h-4 w-4" />
-                              {newExamDate ? format(newExamDate, "PPP") : <span>Pick a date</span>}
+                              <Calendar className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{newExamDate ? format(newExamDate, "dd MMM yyyy") : "Pick date"}</span>
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
