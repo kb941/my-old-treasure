@@ -606,9 +606,16 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
             {/* Full PYQ Mock option */}
             <button
               onClick={() => {
-                setPyqFullMock(!pyqFullMock);
-                if (!pyqFullMock) setTitle('Full PYQ Mock');
-                else setTitle('');
+                const newVal = !pyqFullMock;
+                setPyqFullMock(newVal);
+                if (newVal) {
+                  setSubjectId('');
+                  setChapterId('');
+                  setTopicId('');
+                  updateAutoTitle(undefined, '', '', '', '', newVal);
+                } else {
+                  setTitle('');
+                }
               }}
               className={`w-full p-2.5 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 ${
                 pyqFullMock ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/50 text-muted-foreground hover:text-primary'
@@ -618,12 +625,14 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <span className="text-xs font-medium">Full PYQ Mock</span>
             </button>
 
+            {pyqFullMock && renderPyqExamMode()}
+
             {!pyqFullMock && (
               <>
                 {/* Mode toggle */}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setPyqMode('chapter'); setSubjectId(''); setChapterId(''); }}
+                    onClick={() => { setPyqMode('chapter'); setSubjectId(''); setChapterId(''); setTitle(''); }}
                     className={`flex-1 p-2 rounded-lg border-2 text-xs font-medium transition-all text-center ${
                       pyqMode === 'chapter' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
                     }`}
@@ -631,7 +640,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                     Subject + Chapter
                   </button>
                   <button
-                    onClick={() => { setPyqMode('exam'); setSubjectId(''); setChapterId(''); }}
+                    onClick={() => { setPyqMode('exam'); setSubjectId(''); setChapterId(''); setTitle(''); }}
                     className={`flex-1 p-2 rounded-lg border-2 text-xs font-medium transition-all text-center ${
                       pyqMode === 'exam' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
                     }`}
