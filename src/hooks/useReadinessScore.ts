@@ -100,7 +100,7 @@ function getMessage(score: number): string {
 export function useReadinessScore(input: ReadinessInput): ReadinessResult {
   const {
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs,
-    pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
+    pyqData, examDate, examName, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
   } = input;
 
   const result = useMemo(() => {
