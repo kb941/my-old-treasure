@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme } from '@/types';
+import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme, ContentType } from '@/types';
 import { PYQEntry } from '@/components/PYQTracker';
 
 interface ReadinessInput {
@@ -15,6 +15,7 @@ interface ReadinessInput {
   markingScheme: MarkingScheme;
   pyqYearFrom: number;
   pyqYearTo: number;
+  contentTypes: ContentType[];
 }
 
 export interface SubjectReadiness {
@@ -98,7 +99,7 @@ function getMessage(score: number): string {
 export function useReadinessScore(input: ReadinessInput): ReadinessResult {
   const {
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs,
-    pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo,
+    pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
   } = input;
 
   const result = useMemo(() => {
@@ -111,10 +112,33 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const hasStudyLogs = studyLogs.length > 0;
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
-    // Count topics with ANY completed stage (not just main-video) for broader sensitivity,
-    // but weight main-video completion higher (70% of syllabus score) vs any-stage (30%)
-    let weightedMainCoverage = 0;
-    let weightedAnyCoverage = 0;
+    // Dynamic weighting based on enabled content types in profile:
+    // main-video only → 100%; main + rr → 70/30; rr only → 100%; btr only → 100%
+    // rr + btr → 70/30; main + rr + btr → 50/30/20
+    const videoTypes = ['main-video', 'rr-video', 'btr-video', 'extra-video'] as const;
+    const enabledVideoTypes = contentTypes
+      .filter(ct => videoTypes.includes(ct.id as any) && ct.enabled)
+      .map(ct => ct.id);
+
+    // Compute dynamic weights for each enabled video type
+    const stageWeights: Record<string, number> = {};
+    if (enabledVideoTypes.length === 1) {
+      stageWeights[enabledVideoTypes[0]] = 1.0;
+    } else if (enabledVideoTypes.length === 2) {
+      stageWeights[enabledVideoTypes[0]] = 0.7;
+      stageWeights[enabledVideoTypes[1]] = 0.3;
+    } else if (enabledVideoTypes.length === 3) {
+      stageWeights[enabledVideoTypes[0]] = 0.5;
+      stageWeights[enabledVideoTypes[1]] = 0.3;
+      stageWeights[enabledVideoTypes[2]] = 0.2;
+    } else if (enabledVideoTypes.length >= 4) {
+      stageWeights[enabledVideoTypes[0]] = 0.4;
+      stageWeights[enabledVideoTypes[1]] = 0.25;
+      stageWeights[enabledVideoTypes[2]] = 0.2;
+      stageWeights[enabledVideoTypes[3]] = 0.15;
+    }
+
+    let weightedSyllabusCoverage = 0;
     const subjectBreakdown: SubjectReadiness[] = [];
 
     subjects.forEach(sub => {
@@ -134,23 +158,30 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
       const mcqGoal = mcqGoalPerSubject * subTopics.length;
 
-      const mainPct = withMain / subTopics.length;
-      const anyPct = withAny / subTopics.length;
+      // Calculate weighted coverage based on enabled content types
+      let subCoverage = 0;
+      if (enabledVideoTypes.length === 0) {
+        // Fallback: any completed stage counts
+        subCoverage = withAny / subTopics.length;
+      } else {
+        for (const stageId of enabledVideoTypes) {
+          const completed = subTopics.filter(t => t.completedStages.includes(stageId)).length;
+          subCoverage += (completed / subTopics.length) * (stageWeights[stageId] || 0);
+        }
+      }
+
       const weight = sub.weightage / totalWeightage;
+      weightedSyllabusCoverage += subCoverage * weight;
 
-      weightedMainCoverage += mainPct * weight;
-      weightedAnyCoverage += anyPct * weight;
-
-      // Subject contribution to syllabus score
-      const subContribution = (mainPct * 0.7 + anyPct * 0.3) * weight * 35;
+      const subContribution = subCoverage * weight * 35;
       const maxContribution = weight * 35;
 
       subjectBreakdown.push({
         subjectId: sub.id,
         subjectName: sub.name,
         weightage: sub.weightage,
-        syllabusPct: Math.round(anyPct * 100),
-        mainVideoPct: Math.round(mainPct * 100),
+        syllabusPct: Math.round((withAny / subTopics.length) * 100),
+        mainVideoPct: Math.round((withMain / subTopics.length) * 100),
         revisionPct: subTopics.length > 0 ? Math.round((withRR1 / subTopics.length) * 100) : 0,
         mcqProgress: mcqGoal > 0 ? Math.round((mcqsDone / mcqGoal) * 100) : 0,
         contribution: Math.round(subContribution * 10) / 10,
@@ -158,9 +189,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       });
     });
 
-    // Blend: 70% main-video weight + 30% any-stage weight for more responsive scoring
-    const blendedCoverage = weightedMainCoverage * 0.7 + weightedAnyCoverage * 0.3;
-    const syllabusScore = blendedCoverage * 35;
+    const syllabusScore = weightedSyllabusCoverage * 35;
 
     // ===== 2. REVISION QUALITY (20%) =====
     const topicsWithMain = allTopics.filter(t => t.completedStages.includes('main-video'));
@@ -344,7 +373,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
-    if (hasAnyProgress && blendedCoverage > 0.05) {
+    if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
       const weak = subjects.filter(s => criticalSubjectIds.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
         const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
@@ -390,7 +419,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     let imbalanced = 0;
-    if (hasAnyProgress && blendedCoverage > 0.1) {
+    if (hasAnyProgress && weightedSyllabusCoverage > 0.1) {
       const neglected = subjects.filter(sub => {
         if (sub.weightage < 20) return false;
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
@@ -464,7 +493,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       message: getMessage(finalScore),
       recommendations: recommendations.slice(0, 4),
     };
-  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo]);
+  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes]);
 
   // Persist daily score snapshot for trend tracking
   useEffect(() => {
