@@ -542,6 +542,56 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
   );
 }
 
+function HowItsCalculated() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-primary/15 overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors"
+      >
+        <span className="text-[11px] font-semibold flex items-center gap-1.5">
+          <Lightbulb className="w-3.5 h-3.5 text-primary" />
+          <span className="text-primary">How it's calculated</span>
+        </span>
+        {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 py-3 space-y-3 text-[11px] text-muted-foreground leading-relaxed">
+              <p className="font-medium text-foreground">Your readiness score is based on 5 weighted components:</p>
+              <div className="space-y-1.5">
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><BookOpen className="w-3 h-3 text-blue-500" /> Syllabus Coverage</span><span className="font-semibold text-foreground">35 pts</span></div>
+                <p className="pl-[18px] text-[10px]">% of topics marked as mastered, weighted by subject exam weightage</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><RotateCcw className="w-3 h-3 text-violet-500" /> Revision Quality</span><span className="font-semibold text-foreground">20 pts</span></div>
+                <p className="pl-[18px] text-[10px]">How many topics have active spaced repetition with ≥3 confidence</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileQuestion className="w-3 h-3 text-amber-500" /> MCQ Practice</span><span className="font-semibold text-foreground">20 pts</span></div>
+                <p className="pl-[18px] text-[10px]">Questions solved vs target, weighted by accuracy percentage</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-500" /> PYQ Completion</span><span className="font-semibold text-foreground">15 pts</span></div>
+                <p className="pl-[18px] text-[10px]">% of topics with completed previous year question sessions</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><GraduationCap className="w-3 h-3 text-primary" /> Mock Performance</span><span className="font-semibold text-foreground">10 pts</span></div>
+                <p className="pl-[18px] text-[10px]">Based on latest mock score percentile and improvement trend</p>
+              </div>
+              <div className="border-t border-border pt-2 space-y-1">
+                <p><span className="text-emerald-500 font-medium">Bonuses</span> for study streaks, balanced subject coverage, and consistent daily practice</p>
+                <p><span className="text-destructive font-medium">Penalties</span> for inactivity (&gt;3 days gap), heavily imbalanced prep, or declining mock scores</p>
+              </div>
+              <p className="text-[10px] italic">Score = Base (100) + Bonuses − Penalties, capped at 0–100</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
   const { score, breakdown, color, recommendations } = result;
 
