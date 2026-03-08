@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus, Rocket, Target, Zap, Brain, Clock, Award, CheckCircle2, Flame, Star } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus, Rocket, Target, Zap, Brain, Clock, Award, CheckCircle2, Flame, Star, Calculator } from 'lucide-react';
 import { ReadinessResult, getReadinessTrend, SubjectReadiness } from '@/hooks/useReadinessScore';
 
 interface ReadinessScoreCardProps {
@@ -16,14 +16,15 @@ const getBaseItems = (breakdown: ReadinessResult['breakdown']) => [
   { icon: GraduationCap, label: 'Mock Performance', value: breakdown.base.mocks, max: 10, color: 'text-primary' },
 ];
 
-// Phase configuration with evidence-based tips
+// Minimalist phase configuration - solid colors, no heavy gradients
 type Phase = {
   range: [number, number];
   name: string;
   emoji: string;
-  gradient: string;
-  borderColor: string;
-  bgColor: string;
+  color: string;        // primary solid color for accents
+  bgClass: string;       // subtle background
+  borderClass: string;   // border
+  textClass: string;     // text color
   message: string;
   tips: { icon: typeof Rocket; text: string; color: string }[];
 };
@@ -33,10 +34,11 @@ const phases: Phase[] = [
     range: [0, 10],
     name: 'Just Starting',
     emoji: '🌱',
-    gradient: 'from-emerald-500 to-teal-500',
-    borderColor: 'border-emerald-500/30',
-    bgColor: 'bg-gradient-to-br from-emerald-500/10 to-teal-500/5',
-    message: 'Every expert was once a beginner. Your only job right now is to show up daily — even 1 hour counts.',
+    color: 'hsl(160, 60%, 45%)',
+    bgClass: 'bg-emerald-500/5',
+    borderClass: 'border-emerald-500/20',
+    textClass: 'text-emerald-600 dark:text-emerald-400',
+    message: 'Every expert was once a beginner. Show up daily — even 1 hour counts.',
     tips: [
       { icon: Clock, text: 'Start with just 2 focused hours/day — build the habit before increasing volume', color: 'text-emerald-500' },
       { icon: BookOpen, text: 'Begin with your highest-weightage subjects (Pathology, Pharmacology, Medicine) for maximum ROI', color: 'text-blue-500' },
@@ -48,12 +50,13 @@ const phases: Phase[] = [
     range: [10, 25],
     name: 'Building Foundation',
     emoji: '🧱',
-    gradient: 'from-blue-500 to-indigo-500',
-    borderColor: 'border-blue-500/30',
-    bgColor: 'bg-gradient-to-br from-blue-500/10 to-indigo-500/5',
-    message: 'Great start! Now build depth in high-weightage subjects while keeping momentum.',
+    color: 'hsl(220, 60%, 55%)',
+    bgClass: 'bg-blue-500/5',
+    borderClass: 'border-blue-500/20',
+    textClass: 'text-blue-600 dark:text-blue-400',
+    message: 'Great start! Build depth in high-weightage subjects while keeping momentum.',
     tips: [
-      { icon: BookOpen, text: 'Prioritize high-weightage subjects first — Pharma, Patho, PSM, Medicine, Surgery carry 40%+ marks', color: 'text-blue-500' },
+      { icon: BookOpen, text: 'Prioritize high-weightage subjects — Pharma, Patho, PSM, Medicine, Surgery carry 40%+ marks', color: 'text-blue-500' },
       { icon: Brain, text: 'Start revising finished topics immediately — the forgetting curve is steepest in the first 48 hours', color: 'text-violet-500' },
       { icon: FileQuestion, text: 'Increase to 50+ MCQs/day — always analyze wrong answers and note the "why"', color: 'text-amber-500' },
       { icon: Target, text: 'Begin PYQ practice for completed subjects — understand recurring exam patterns early', color: 'text-emerald-500' },
@@ -63,10 +66,11 @@ const phases: Phase[] = [
     range: [25, 45],
     name: 'Gaining Momentum',
     emoji: '🚀',
-    gradient: 'from-violet-500 to-purple-500',
-    borderColor: 'border-violet-500/30',
-    bgColor: 'bg-gradient-to-br from-violet-500/10 to-purple-500/5',
-    message: 'You\'re past the toughest phase! Now deepen understanding and start identifying weak spots.',
+    color: 'hsl(270, 55%, 55%)',
+    bgClass: 'bg-violet-500/5',
+    borderClass: 'border-violet-500/20',
+    textClass: 'text-violet-600 dark:text-violet-400',
+    message: 'You\'re past the toughest phase! Deepen understanding and identify weak spots.',
     tips: [
       { icon: RotateCcw, text: 'Dedicate 30% of study time to revision — it\'s more valuable than covering new topics now', color: 'text-violet-500' },
       { icon: FileQuestion, text: 'Push to 100+ MCQs/day — focus extra on your weakest 3 subjects', color: 'text-amber-500' },
@@ -78,10 +82,11 @@ const phases: Phase[] = [
     range: [45, 65],
     name: 'Solidifying',
     emoji: '⚡',
-    gradient: 'from-amber-500 to-orange-500',
-    borderColor: 'border-amber-500/30',
-    bgColor: 'bg-gradient-to-br from-amber-500/10 to-orange-500/5',
-    message: 'You\'re in the zone! Sharpen weak areas and build exam stamina through mocks.',
+    color: 'hsl(35, 85%, 50%)',
+    bgClass: 'bg-amber-500/5',
+    borderClass: 'border-amber-500/20',
+    textClass: 'text-amber-600 dark:text-amber-400',
+    message: 'You\'re in the zone! Sharpen weak areas and build exam stamina.',
     tips: [
       { icon: AlertTriangle, text: 'Identify your bottom 5 subjects by accuracy — give them 2x attention this week', color: 'text-destructive' },
       { icon: GraduationCap, text: 'Take weekly mocks and create an "error log" — categorize mistakes by type', color: 'text-primary' },
@@ -93,10 +98,11 @@ const phases: Phase[] = [
     range: [65, 80],
     name: 'Strong Position',
     emoji: '🔥',
-    gradient: 'from-orange-500 to-red-500',
-    borderColor: 'border-orange-500/30',
-    bgColor: 'bg-gradient-to-br from-orange-500/10 to-red-500/5',
-    message: 'Excellent! You\'re well-prepared. Now optimize for accuracy and exam-day performance.',
+    color: 'hsl(15, 80%, 55%)',
+    bgClass: 'bg-orange-500/5',
+    borderClass: 'border-orange-500/20',
+    textClass: 'text-orange-600 dark:text-orange-400',
+    message: 'Excellent! You\'re well-prepared. Optimize for accuracy and exam-day performance.',
     tips: [
       { icon: Target, text: 'Shift focus from speed to accuracy — eliminating silly mistakes gains more marks than new topics', color: 'text-amber-500' },
       { icon: GraduationCap, text: 'Do full 3.5-hour mock simulations with no breaks — train your exam stamina', color: 'text-primary' },
@@ -108,10 +114,11 @@ const phases: Phase[] = [
     range: [80, 101],
     name: 'Exam Ready',
     emoji: '👑',
-    gradient: 'from-emerald-500 to-green-500',
-    borderColor: 'border-emerald-500/30',
-    bgColor: 'bg-gradient-to-br from-emerald-500/10 to-green-500/5',
-    message: 'Outstanding preparation! Maintain your edge, stay sharp, and trust the work you\'ve put in.',
+    color: 'hsl(152, 60%, 42%)',
+    bgClass: 'bg-emerald-500/5',
+    borderClass: 'border-emerald-500/20',
+    textClass: 'text-emerald-600 dark:text-emerald-400',
+    message: 'Outstanding preparation! Maintain your edge, stay sharp, trust the work you\'ve done.',
     tips: [
       { icon: CheckCircle2, text: 'Keep daily revision touch-points — even 30 min/subject prevents cold spots', color: 'text-emerald-500' },
       { icon: Award, text: 'Master question selection strategy — know when to attempt vs skip for maximum score', color: 'text-primary' },
@@ -163,7 +170,6 @@ function TrendBadge({ trend }: { trend: number[] }) {
   );
 }
 
-// Phase-aware tips card shown in the detail panel
 function PhaseTipsCard({ score, color, label, result }: { score: number; color: string; label: string; result: ReadinessResult }) {
   const phase = getPhase(score);
   const [showBreakdown, setShowBreakdown] = useState(true);
@@ -171,15 +177,15 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
 
   return (
     <div className="space-y-4">
-      {/* Phase header with gradient accent */}
-      <div className={`rounded-xl p-4 ${phase.bgColor} border ${phase.borderColor}`}>
+      {/* Phase header - minimalist */}
+      <div className={`rounded-xl p-4 ${phase.bgClass} border ${phase.borderClass}`}>
         <div className="flex items-center gap-4">
           <div className="relative flex-shrink-0">
             <svg className="w-20 h-20 transform -rotate-90">
               <circle cx="40" cy="40" r="34" stroke="hsl(var(--secondary))" strokeWidth="6" fill="none" />
               <motion.circle
                 cx="40" cy="40" r="34"
-                stroke={color}
+                stroke={phase.color}
                 strokeWidth="6" fill="none" strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 34}
                 initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
@@ -188,13 +194,13 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold" style={{ color }}>{Math.round(score)}%</span>
+              <span className="text-lg font-bold" style={{ color: phase.color }}>{Math.round(score)}%</span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xl">{phase.emoji}</span>
-              <span className={`text-sm font-bold bg-gradient-to-r ${phase.gradient} bg-clip-text text-transparent`}>
+              <span className={`text-sm font-bold ${phase.textClass}`}>
                 {phase.name}
               </span>
             </div>
@@ -211,10 +217,10 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
               <div className={`w-full h-1.5 rounded-full transition-all ${
-                isPast ? `bg-gradient-to-r ${p.gradient}` :
-                isCurrent ? `bg-gradient-to-r ${p.gradient} opacity-60` :
+                isPast ? 'bg-foreground/30' :
+                isCurrent ? 'bg-foreground/20' :
                 'bg-secondary'
-              }`} />
+              }`} style={isPast || isCurrent ? { backgroundColor: p.color, opacity: isPast ? 0.8 : 0.4 } : {}} />
               {isCurrent && (
                 <span className="text-[8px] font-medium text-muted-foreground">{p.emoji}</span>
               )}
@@ -272,21 +278,19 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
                           <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
                           <span className="font-medium">{item.label}</span>
                         </div>
-                        <span className="text-muted-foreground">{item.value}/{item.max}</span>
+                        <span className="text-muted-foreground">{item.value.toFixed(1)}/{item.max}</span>
                       </div>
                       <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
-                          className="h-full rounded-full" style={{ backgroundColor: color }} />
+                          className="h-full rounded-full" style={{ backgroundColor: phase.color }} />
                       </div>
                     </div>
                   );
                 })}
-
-                {/* Summary row */}
                 <div className="flex justify-between text-xs pt-2 border-t border-border">
                   <span className="font-semibold">Total</span>
-                  <span className="font-bold" style={{ color }}>{Math.round(score)}%</span>
+                  <span className="font-bold" style={{ color: phase.color }}>{Math.round(score)}%</span>
                 </div>
               </div>
             </motion.div>
@@ -312,7 +316,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={() => setShowDetail(true)}
-          className="rounded-xl p-3 border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] bg-card border-border"
+          className={`rounded-xl p-3 border cursor-pointer transition-all active:scale-[0.98] bg-card ${phase.borderClass}`}
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
@@ -320,7 +324,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 <circle cx="24" cy="24" r="20" stroke="hsl(var(--secondary))" strokeWidth="4" fill="none" />
                 <motion.circle
                   cx="24" cy="24" r="20"
-                  stroke={color}
+                  stroke={phase.color}
                   strokeWidth="4" fill="none" strokeLinecap="round"
                   strokeDasharray={2 * Math.PI * 20}
                   initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
@@ -329,15 +333,15 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[11px] font-bold" style={{ color }}>{Math.round(score)}%</span>
+                <span className="text-[11px] font-bold" style={{ color: phase.color }}>{Math.round(score)}%</span>
               </div>
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-xs font-semibold">Exam Readiness</span>
-                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${color}20`, color }}>
-                  {label}
+                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${phase.bgClass} ${phase.textClass}`}>
+                  {phase.name}
                 </span>
                 <TrendBadge trend={trendData} />
               </div>
@@ -345,8 +349,8 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 {items.map(item => {
                   const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
                   return (
-                    <div key={item.label} className="flex-1 h-1 bg-secondary/60 rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
+                    <div key={item.label} className="flex-1 h-1 bg-secondary/60 rounded-full overflow-hidden" title={`${item.label}: ${item.value.toFixed(1)}/${item.max}`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: phase.color }} />
                     </div>
                   );
                 })}
@@ -354,7 +358,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-[9px] text-muted-foreground">Tap for breakdown & tips</p>
                 {trendData.length >= 2 && (
-                  <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
+                  <Sparkline data={trendData.slice(-14)} color={phase.color} width={50} height={14} />
                 )}
               </div>
             </div>
@@ -377,21 +381,19 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 onClick={(e) => e.stopPropagation()}
                 className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
               >
-                <div className={`sticky top-0 z-10 border-b border-border px-5 py-3 flex items-center justify-between rounded-t-2xl bg-gradient-to-r ${phase.gradient}`}>
+                <div className={`sticky top-0 z-10 border-b px-5 py-3 flex items-center justify-between rounded-t-2xl ${phase.bgClass} ${phase.borderClass}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{phase.emoji}</span>
-                    <h2 className="font-semibold text-base text-white">Exam Readiness</h2>
+                    <h2 className={`font-semibold text-base ${phase.textClass}`}>Exam Readiness</h2>
                   </div>
-                  <button onClick={() => setShowDetail(false)} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-                    <X className="w-4 h-4 text-white" />
+                  <button onClick={() => setShowDetail(false)} className="p-1.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors">
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="p-5">
-                  <PhaseTipsCard score={score} color={color} label={label} result={result} />
-
-                  {/* Full breakdown below tips */}
+                  <PhaseTipsCard score={score} color={phase.color} label={label} result={result} />
                   <div className="mt-5 pt-5 border-t border-border">
-                    <FullBreakdown result={result} trendData={trendData} />
+                    <FullBreakdown result={result} trendData={trendData} phaseColor={phase.color} />
                   </div>
                 </div>
               </motion.div>
@@ -415,7 +417,7 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-xl shadow-card border overflow-hidden ${phase.bgColor} ${phase.borderColor}`}
+      className={`rounded-xl shadow-card border overflow-hidden ${phase.bgClass} ${phase.borderClass}`}
     >
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
@@ -424,7 +426,7 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
             <h3 className="font-semibold text-base">Exam Readiness</h3>
             <TrendBadge trend={trendData} />
           </div>
-          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gradient-to-r ${phase.gradient} text-white`}>
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${phase.bgClass} ${phase.textClass} border ${phase.borderClass}`}>
             {phase.name}
           </span>
         </div>
@@ -433,7 +435,7 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
           <div className="relative flex-shrink-0">
             <svg className="w-32 h-32 transform -rotate-90">
               <circle cx="64" cy="64" r="56" stroke="hsl(var(--secondary))" strokeWidth="8" fill="none" />
-              <motion.circle cx="64" cy="64" r="56" stroke={color} strokeWidth="8" fill="none" strokeLinecap="round"
+              <motion.circle cx="64" cy="64" r="56" stroke={phase.color} strokeWidth="8" fill="none" strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 56}
                 initial={{ strokeDashoffset: 2 * Math.PI * 56 }}
                 animate={{ strokeDashoffset: 2 * Math.PI * 56 * (1 - score / 100) }}
@@ -441,7 +443,7 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold" style={{ color }}>{Math.round(score)}%</span>
+              <span className="text-2xl font-bold" style={{ color: phase.color }}>{Math.round(score)}%</span>
               <span className="text-[10px] text-muted-foreground">Ready</span>
             </div>
           </div>
@@ -456,16 +458,16 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
                     <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="h-full rounded-full" style={{ backgroundColor: color }} />
+                        className="h-full rounded-full" style={{ backgroundColor: phase.color }} />
                     </div>
                   </div>
-                  <span className="text-[9px] text-muted-foreground w-10 text-right flex-shrink-0">{item.value}/{item.max}</span>
+                  <span className="text-[9px] text-muted-foreground w-10 text-right flex-shrink-0">{item.value.toFixed(1)}/{item.max}</span>
                 </div>
               );
             })}
             {trendData.length >= 2 && (
               <div className="pt-1">
-                <Sparkline data={trendData.slice(-30)} color={color} width={120} height={20} />
+                <Sparkline data={trendData.slice(-30)} color={phase.color} width={120} height={20} />
               </div>
             )}
           </div>
@@ -484,8 +486,8 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }} className="overflow-hidden">
             <div className="px-5 pb-5 border-t border-border pt-4 space-y-5">
-              <PhaseTipsCard score={score} color={color} label={label} result={result} />
-              <FullBreakdown result={result} trendData={trendData} />
+              <PhaseTipsCard score={score} color={phase.color} label={label} result={result} />
+              <FullBreakdown result={result} trendData={trendData} phaseColor={phase.color} />
             </div>
           </motion.div>
         )}
@@ -516,7 +518,7 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
                   animate={{ width: `${Math.min(sub.syllabusPct, 100)}%` }}
                   transition={{ duration: 0.5 }}
                   className="h-full rounded-full"
-                  style={{ backgroundColor: sub.syllabusPct > 60 ? 'hsl(var(--success))' : sub.syllabusPct > 30 ? color : 'hsl(var(--destructive))' }}
+                  style={{ backgroundColor: color }}
                 />
               </div>
             </div>
@@ -545,14 +547,14 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
 function HowItsCalculated() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border border-primary/15 overflow-hidden">
+    <div className="rounded-xl border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors"
       >
         <span className="text-[11px] font-semibold flex items-center gap-1.5">
-          <Lightbulb className="w-3.5 h-3.5 text-primary" />
-          <span className="text-primary">How it's calculated</span>
+          <Calculator className="w-3.5 h-3.5 text-primary" />
+          <span>How it's calculated</span>
         </span>
         {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
       </button>
@@ -569,19 +571,19 @@ function HowItsCalculated() {
               <p className="font-medium text-foreground">Your readiness score is based on 5 weighted components:</p>
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span className="flex items-center gap-1.5"><BookOpen className="w-3 h-3 text-blue-500" /> Syllabus Coverage</span><span className="font-semibold text-foreground">35 pts</span></div>
-                <p className="pl-[18px] text-[10px]">% of topics marked as mastered, weighted by subject exam weightage</p>
+                <p className="pl-[18px] text-[10px]">% of topics with video stages done, weighted by subject exam weightage</p>
                 <div className="flex justify-between"><span className="flex items-center gap-1.5"><RotateCcw className="w-3 h-3 text-violet-500" /> Revision Quality</span><span className="font-semibold text-foreground">20 pts</span></div>
                 <p className="pl-[18px] text-[10px]">How many topics have active spaced repetition with ≥3 confidence</p>
                 <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileQuestion className="w-3 h-3 text-amber-500" /> MCQ Practice</span><span className="font-semibold text-foreground">20 pts</span></div>
-                <p className="pl-[18px] text-[10px]">Questions solved vs target, weighted by accuracy percentage</p>
+                <p className="pl-[18px] text-[10px]">Questions solved vs target per topic (marking MCQs done in subjects counts here)</p>
                 <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-500" /> PYQ Completion</span><span className="font-semibold text-foreground">15 pts</span></div>
                 <p className="pl-[18px] text-[10px]">% of topics with completed previous year question sessions</p>
                 <div className="flex justify-between"><span className="flex items-center gap-1.5"><GraduationCap className="w-3 h-3 text-primary" /> Mock Performance</span><span className="font-semibold text-foreground">10 pts</span></div>
                 <p className="pl-[18px] text-[10px]">Based on latest mock score percentile and improvement trend</p>
               </div>
               <div className="border-t border-border pt-2 space-y-1">
-                <p><span className="text-emerald-500 font-medium">Bonuses</span> for study streaks, balanced subject coverage, and consistent daily practice</p>
-                <p><span className="text-destructive font-medium">Penalties</span> for inactivity (&gt;3 days gap), heavily imbalanced prep, or declining mock scores</p>
+                <p><span className="text-emerald-500 font-medium">Bonuses</span> for study streaks, balanced coverage, and consistent daily practice</p>
+                <p><span className="text-destructive font-medium">Penalties</span> for inactivity (&gt;3 days gap), heavily imbalanced prep, or declining mocks</p>
               </div>
               <p className="text-[10px] italic">Score = Base (100) + Bonuses − Penalties, capped at 0–100</p>
             </div>
@@ -592,17 +594,16 @@ function HowItsCalculated() {
   );
 }
 
-function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
+function FullBreakdown({ result, trendData, phaseColor }: { result: ReadinessResult; trendData: number[]; phaseColor?: string }) {
   const { score, breakdown, color, recommendations } = result;
+  const displayColor = phaseColor || color;
 
   return (
     <div className="space-y-5">
-      {/* Subject Breakdown */}
       {breakdown.subjectBreakdown.length > 0 && (
-        <SubjectBreakdownSection subjects={breakdown.subjectBreakdown} color={color} />
+        <SubjectBreakdownSection subjects={breakdown.subjectBreakdown} color={displayColor} />
       )}
 
-      {/* Bonuses */}
       {breakdown.bonuses.total > 0 && (
         <div className="bg-emerald-500/5 rounded-lg p-3 border border-emerald-500/10">
           <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
@@ -619,7 +620,6 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
         </div>
       )}
 
-      {/* Penalties */}
       {breakdown.penalties.total < 0 && (
         <div className="bg-destructive/5 rounded-lg p-3 border border-destructive/10">
           <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
@@ -636,10 +636,8 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
         </div>
       )}
 
-      {/* How it works - expandable */}
       <HowItsCalculated />
 
-      {/* Recommendations */}
       {recommendations.length > 0 && (
         <div>
           <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
