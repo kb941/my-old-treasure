@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, BookOpen, Brain, FileText, Clock, Minus, ChevronDown, ChevronRight, ChevronLeft, ClipboardList, AlertTriangle, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
