@@ -297,10 +297,21 @@ export function ProfileModal({
                         />
                       </div>
                     </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Total Marks</label>
+                        <Input
+                          type="number"
+                          value={localMarkingScheme.totalMarks}
+                          onChange={(e) => setLocalMarkingScheme(prev => ({ ...prev, totalMarks: Number(e.target.value) }))}
+                          min={100} max={1600} step={50}
+                        />
+                      </div>
+                    </div>
                     <div className="p-3 bg-secondary/30 rounded-lg">
                       <p className="text-xs text-muted-foreground">
-                        Example: 150 correct, 40 wrong, 10 skipped → <span className="text-primary font-semibold">
-                        {150 * localMarkingScheme.correctMarks + 40 * localMarkingScheme.incorrectMarks + 10 * localMarkingScheme.unansweredMarks} marks
+                        Total: {localMarkingScheme.totalMarks} marks · Example: 150✓, 40✗, 10 skip → <span className="text-primary font-semibold">
+                        {Math.round(150 * localMarkingScheme.correctMarks + 40 * localMarkingScheme.incorrectMarks + 10 * localMarkingScheme.unansweredMarks)}/{localMarkingScheme.totalMarks}
                         </span>
                       </p>
                     </div>
