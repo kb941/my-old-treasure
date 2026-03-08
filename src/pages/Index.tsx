@@ -399,10 +399,6 @@ const Index = () => {
                 onCompleteRevision={handleCompleteRevision}
                 onNavigateToRevision={() => setActiveTab('revision')}
               />
-              <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={() => setIsProfileOpen(true)} className="h-9 w-9">
-                <User className="w-4 h-4" />
-              </Button>
               <Button variant="outline" size="sm" onClick={() => { setMockModalMode('mock'); setIsMockModalOpen(true); }} className="hidden sm:flex h-8 text-xs">
                 <FileText className="w-3.5 h-3.5 mr-1.5" /> Mock
               </Button>
