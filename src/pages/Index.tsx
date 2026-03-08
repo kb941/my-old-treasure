@@ -13,7 +13,7 @@ import { AchievementBadge } from '@/components/AchievementBadge';
 import { AchievementsDetailView } from '@/components/AchievementsDetailView';
 import { QuickLogModal, LogData } from '@/components/QuickLogModal';
 import { MockTestModal, MockModalMode } from '@/components/MockTestModal';
-import { ProfileData } from '@/components/ProfileModal';
+import { Profile/components/ProfileModal';
 import { FocusMode } from '@/components/FocusMode';
 import { PYQTracker, PYQSummaryCard, PYQEntry, EXAM_CONFIGS } from '@/components/PYQTracker';
 import { RevisionHub } from '@/components/RevisionHub';
@@ -53,8 +53,7 @@ const Index = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
   const [mockModalMode, setMockModalMode] = useState<MockModalMode>('mock');
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [examDate, setExamDate] = useLocalStorage<Date>('neetpg-examdate', new Date('2027-03-15'));
+  const [isProfi// Profile is now a tab, no modal neededDate, setExamDate] = useLocalStorage<Date>('neetpg-examdate', new Date('2027-03-15'));
   const [examName, setExamName] = useLocalStorage<string>('neetpg-examname', 'NEET PG');
   const [targetScore, setTargetScore] = useLocalStorage<number>('neetpg-target', 650);
   const [targetRank, setTargetRank] = useLocalStorage<number>('neetpg-target-rank', 5000);
