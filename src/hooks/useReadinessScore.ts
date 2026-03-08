@@ -440,11 +440,20 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     // ===== PENALTIES (gated behind meaningful activity) =====
     const penaltyDetails: string[] = [];
 
+    // Procrastination = exam near but not studying (based on recent activity, not score)
     let procrastination = 0;
-    if (hasAnyProgress) {
-      if (daysUntilExam < 90 && baseScore < 60) { procrastination = -8; penaltyDetails.push(`Exam in ${daysUntilExam} days! Intensify prep`); }
-      else if (daysUntilExam < 60 && baseScore < 70) { procrastination = -5; penaltyDetails.push(`${daysUntilExam} days left! Focus urgently`); }
-      else if (daysUntilExam < 30 && baseScore < 80) { procrastination = -3; penaltyDetails.push('Final month! Maximum intensity'); }
+    if (hasAnyProgress && hasStudyLogs) {
+      const recentStudyDays = studyLogs.filter(l => {
+        const d = new Date(l.date);
+        return d > new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      }).length;
+      const studyingRecently = recentStudyDays >= 5; // at least 5 of last 14 days
+
+      if (!studyingRecently) {
+        if (daysUntilExam < 30) { procrastination = -8; penaltyDetails.push(`Exam in ${daysUntilExam} days but barely studying!`); }
+        else if (daysUntilExam < 60) { procrastination = -5; penaltyDetails.push(`${daysUntilExam} days left but low recent activity`); }
+        else if (daysUntilExam < 90) { procrastination = -3; penaltyDetails.push('Exam approaching — increase study frequency'); }
+      }
     }
 
     let criticalWeakPenalty = 0;
