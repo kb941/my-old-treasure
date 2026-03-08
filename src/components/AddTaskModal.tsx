@@ -496,7 +496,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
           {initialSubjects.map(s => (
             <button
               key={s.id}
-              onClick={() => { setSubjectId(s.id); updateAutoTitle(undefined, s.id); }}}
+              onClick={() => { setSubjectId(s.id); updateAutoTitle(undefined, s.id); }}
               className={`px-2.5 py-1 rounded-full text-xs transition-all ${
                 subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
               }`}
