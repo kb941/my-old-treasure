@@ -53,7 +53,8 @@ const Index = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
   const [mockModalMode, setMockModalMode] = useState<MockModalMode>('mock');
-  const [isProfi// Profile is now a tab, no modal neededDate, setExamDate] = useLocalStorage<Date>('neetpg-examdate', new Date('2027-03-15'));
+  // Profile is now a tab, no modal needed
+  const [examDate, setExamDate] = useLocalStorage<Date>('neetpg-examdate', new Date('2027-03-15'));
   const [examName, setExamName] = useLocalStorage<string>('neetpg-examname', 'NEET PG');
   const [targetScore, setTargetScore] = useLocalStorage<number>('neetpg-target', 650);
   const [targetRank, setTargetRank] = useLocalStorage<number>('neetpg-target-rank', 5000);
