@@ -482,8 +482,8 @@ const Index = () => {
               />
               {tasks.filter(t => t.column === 'today' && !t.completed).length > 0 && (
                 <div className="flex justify-center">
-                  <Button onClick={() => { setFocusTaskId(null); setIsFocusMode(true); }} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white shadow-lg shadow-violet-500/25 px-6 py-5 text-sm rounded-xl">
-                    <Sparkles className="w-4 h-4 mr-2" /> Focus Mode
+                  <Button onClick={() => { setFocusTaskId(null); setIsFocusMode(true); }} className="animate-breathe bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white px-6 py-5 text-sm rounded-xl">
+                    <Orbit className="w-4 h-4 mr-2" /> Focus Mode
                   </Button>
                 </div>
               )}
