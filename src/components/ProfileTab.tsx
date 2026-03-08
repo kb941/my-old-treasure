@@ -66,10 +66,11 @@ interface ProfileTabProps {
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
   onClearSampleData?: () => void;
+  onRecalculateReadinessFromStages?: () => void;
 }
 
 export function ProfileTab(props: ProfileTabProps) {
-  const { subjects, onSave, onResetAll, onResetSyllabus, onClearSampleData } = props;
+  const { subjects, onSave, onResetAll, onResetSyllabus, onClearSampleData, onRecalculateReadinessFromStages } = props;
   const navigate = useNavigate();
 
   // Initialize/reset local state from props
@@ -497,6 +498,24 @@ export function ProfileTab(props: ProfileTabProps) {
               <Button variant="outline" className="w-full" onClick={() => onResetSyllabus?.()}>
                 <RotateCcw className="w-4 h-4 mr-2" /> Reset to Default Syllabus
               </Button>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t border-border">
+              <h3 className="font-semibold flex items-center gap-2">
+                <RotateCcw className="w-4 h-4 text-primary" />
+                Repair Readiness (Legacy)
+              </h3>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={!onRecalculateReadinessFromStages}
+                onClick={() => onRecalculateReadinessFromStages?.()}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" /> Recalculate from topic stages
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Syncs MCQ/PYQ completion fields from your existing topic checkmarks (no data is deleted).
+              </p>
             </div>
 
             <div className="space-y-3 pt-4 border-t border-border">

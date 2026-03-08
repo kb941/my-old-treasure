@@ -238,6 +238,33 @@ const Index = () => {
     toast({ title: "Profile updated!" });
   };
 
+  // Utility: repair derived readiness fields from existing topic stage checkmarks (legacy data)
+  const handleRecalculateReadinessFromStages = () => {
+    setChapters(prev =>
+      prev.map(chapter => ({
+        ...chapter,
+        topics: chapter.topics.map(topic => {
+          const stages = topic.completedStages || [];
+          const hasMcqs = stages.includes('mcqs');
+          const hasPyqs = stages.includes('pyqs');
+
+          return {
+            ...topic,
+            questionsSolved: hasMcqs
+              ? Math.max(topic.questionsSolved ?? 0, topic.targetQuestions ?? 50)
+              : (topic.questionsSolved ?? 0),
+            pyqDone: hasPyqs,
+          };
+        }),
+      }))
+    );
+
+    toast({
+      title: 'Recalculated from topic stages',
+      description: 'Repaired MCQ/PYQ fields from your existing checkmarks; readiness will update instantly.',
+    });
+  };
+
   const handleTaskDone = (taskId: string, duration: number, confidence?: number) => {
     const task = tasks.find(t => t.id === taskId);
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: true, column: 'done' as const } : t));
@@ -614,6 +641,7 @@ const Index = () => {
               contentTypes={contentTypes} breakDuration={breakDuration}
               markingScheme={markingScheme} onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
+              onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}
               pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
               mcqGoalPerSubject={mcqGoalPerSubject}
             />
