@@ -113,23 +113,33 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
     // Only main-video, rr-video, btr-video count for syllabus score.
-    // Dynamic weights based on which of these 3 are enabled in profile:
-    // 1 type → 100%; 2 types → 70/30; 3 types → 50/30/20
+    // Weights by identity, based on which are enabled:
+    // main only → 100%; rr only → 100%; btr only → 100%
+    // main+rr → 70/30; rr+btr → 70/30; main+btr → 70/30
+    // main+rr+btr → 50/30/20
     const SCORABLE_STAGES = ['main-video', 'rr-video', 'btr-video'] as const;
     const enabledStages = contentTypes
       .filter(ct => SCORABLE_STAGES.includes(ct.id as any) && ct.enabled)
       .map(ct => ct.id);
 
+    // Build weights map based on which specific types are enabled
     const stageWeights: Record<string, number> = {};
-    if (enabledStages.length === 1) {
+    const hasMain = enabledStages.includes('main-video');
+    const hasRR = enabledStages.includes('rr-video');
+    const hasBTR = enabledStages.includes('btr-video');
+    const enabledCount = enabledStages.length;
+
+    if (enabledCount === 1) {
       stageWeights[enabledStages[0]] = 1.0;
-    } else if (enabledStages.length === 2) {
+    } else if (enabledCount === 2) {
+      // First enabled gets 70%, second gets 30%
       stageWeights[enabledStages[0]] = 0.7;
       stageWeights[enabledStages[1]] = 0.3;
-    } else if (enabledStages.length >= 3) {
-      stageWeights[enabledStages[0]] = 0.5;
-      stageWeights[enabledStages[1]] = 0.3;
-      stageWeights[enabledStages[2]] = 0.2;
+    } else if (enabledCount >= 3) {
+      // main=50%, rr=30%, btr=20%
+      if (hasMain) stageWeights['main-video'] = 0.5;
+      if (hasRR) stageWeights['rr-video'] = 0.3;
+      if (hasBTR) stageWeights['btr-video'] = 0.2;
     }
 
     let weightedSyllabusCoverage = 0;
@@ -185,41 +195,51 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const syllabusScore = weightedSyllabusCoverage * 35;
 
-    // ===== 2. REVISION QUALITY (20%) =====
-    const topicsWithMain = allTopics.filter(t => t.completedStages.includes('main-video'));
-    const topicsWithMainCount = topicsWithMain.length || 1;
-
-    const rr1 = topicsWithMain.filter(t => t.revisionSession >= 1).length;
-    const rr2 = topicsWithMain.filter(t => t.revisionSession >= 2).length;
-    const rr3 = topicsWithMain.filter(t => t.revisionSession >= 3).length;
-
-    const revisionCompleteness = (
-      (rr1 / topicsWithMainCount) * 0.4 +
-      (rr2 / topicsWithMainCount) * 0.35 +
-      (rr3 / topicsWithMainCount) * 0.25
-    );
-
+    // ===== 2. REVISION QUALITY (20%) — weightage-based per subject =====
     const now = new Date();
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-    let overduePenalty = 0;
-    let criticalPenalty = 0;
     const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
 
-    if (topicsWithMain.length > 0) {
-      const overdueTopics = topicsWithMain.filter(t =>
+    let weightedRevision = 0;
+    let hasRevisionData = false;
+
+    subjects.forEach(sub => {
+      const subTopics = allTopics.filter(t => t.subjectId === sub.id);
+      const subWithMain = subTopics.filter(t => t.completedStages.includes('main-video'));
+      if (subWithMain.length === 0) return;
+
+      const weight = sub.weightage / totalWeightage;
+      const subMainCount = subWithMain.length;
+
+      const rr1 = subWithMain.filter(t => t.revisionSession >= 1).length;
+      const rr2 = subWithMain.filter(t => t.revisionSession >= 2).length;
+      const rr3 = subWithMain.filter(t => t.revisionSession >= 3).length;
+
+      if (rr1 > 0) hasRevisionData = true;
+
+      const subRevision = (
+        (rr1 / subMainCount) * 0.4 +
+        (rr2 / subMainCount) * 0.35 +
+        (rr3 / subMainCount) * 0.25
+      );
+
+      // Overdue penalty for this subject
+      let subOverduePenalty = 0;
+      const overdueTopics = subWithMain.filter(t =>
         t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
       ).length;
-      overduePenalty = (overdueTopics / topicsWithMainCount) * 0.15;
+      subOverduePenalty = (overdueTopics / subMainCount) * 0.15;
 
-      const criticalTopics = topicsWithMain.filter(t => criticalSubjectIds.includes(t.subjectId));
-      const criticalOverdue = criticalTopics.filter(t =>
-        t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
-      ).length;
-      criticalPenalty = criticalTopics.length > 0 ? (criticalOverdue / criticalTopics.length) * 0.1 : 0;
-    }
+      // Extra penalty for critical subjects
+      if (criticalSubjectIds.includes(sub.id)) {
+        const critOverdue = overdueTopics;
+        subOverduePenalty += (critOverdue / subMainCount) * 0.1;
+      }
 
-    const revisionScore = Math.max(0, (revisionCompleteness - overduePenalty - criticalPenalty)) * 20;
+      weightedRevision += Math.max(0, subRevision - subOverduePenalty) * weight;
+    });
+
+    const revisionScore = weightedRevision * 20;
 
     // ===== 3. MCQ PRACTICE (20%) — weightage-based per subject =====
     let weightedMcqVolume = 0;
@@ -475,7 +495,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       recommendations.push('Start by going to Subjects tab and marking completed stages');
     }
     if (syllabusScore < 20 && hasAnyProgress) recommendations.push('Focus on completing Main videos for all subjects');
-    if (revisionScore < 8 && topicsWithMain.length > 0) recommendations.push(`Complete RR1 for ${topicsWithMainCount - rr1} pending topics`);
+    if (revisionScore < 8 && hasAnyProgress) recommendations.push('Complete more revision cycles across subjects');
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');

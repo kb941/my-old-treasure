@@ -286,23 +286,23 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
 
           return (
             <div key={session} className="rounded-xl border border-border overflow-hidden">
-              <button
+              <div
                 onClick={() => setExpandedSession(isExpanded ? null : session)}
-                className={`w-full flex items-center justify-between p-3 transition-all ${
+                className={`w-full flex items-center justify-between p-3 transition-all cursor-pointer ${
                   stats.done === stats.total && stats.total > 0 ? 'bg-primary/5' : 'bg-card'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <button
+                  <div
                     onClick={(e) => { e.stopPropagation(); toggleWholeSession(selectedExam, session); }}
-                    className="shrink-0"
+                    className="shrink-0 cursor-pointer"
                   >
                     {stats.done === stats.total && stats.total > 0 ? (
                       <CheckCircle2 className="w-5 h-5 text-primary" />
                     ) : (
                       <Circle className="w-5 h-5 text-muted-foreground/40" />
                     )}
-                  </button>
+                  </div>
                   <div className="text-left">
                     <span className="text-sm font-medium text-foreground">{session}</span>
                     <span className="text-[10px] text-muted-foreground block">
@@ -321,7 +321,7 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                   </div>
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </div>
-              </button>
+              </div>
 
               {isExpanded && (
                 <motion.div
@@ -345,9 +345,9 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                           }`}
                         >
                           {/* Subject row - tap to toggle */}
-                          <button
+                          <div
                             onClick={() => toggleEntry(selectedExam, session, entry.subjectId)}
-                            className="w-full flex items-center gap-2.5 px-3 py-2"
+                            className="w-full flex items-center gap-2.5 px-3 py-2 cursor-pointer"
                           >
                             <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
                               entry.done ? 'bg-primary border-primary' : 'border-muted-foreground/25 hover:border-primary/50'
@@ -366,7 +366,7 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                                 {accuracy}%
                               </span>
                             )}
-                          </button>
+                          </div>
 
                           {/* Score entry row - slides open when done */}
                           {entry.done && (
