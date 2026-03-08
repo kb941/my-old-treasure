@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, BookOpen, BarChart3, FileText, User, Orbit, RotateCcw, Bell } from 'lucide-react';
-import { InsightsSection } from '@/components/InsightsSection';
+import { AnalyticsTab } from '@/components/AnalyticsTab';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
 import { StatsBar } from '@/components/StatsBar';
@@ -9,18 +9,12 @@ import { StatDetailPanel } from '@/components/StatDetailPanel';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { SubjectDetails } from '@/components/SubjectDetails';
 import { AchievementBadge } from '@/components/AchievementBadge';
-import { AchievementsBadgePanel } from '@/components/AchievementsBadgePanel';
 import { AchievementsDetailView } from '@/components/AchievementsDetailView';
 import { QuickLogModal, LogData } from '@/components/QuickLogModal';
 import { MockTestModal, MockModalMode } from '@/components/MockTestModal';
-import { MockAnalytics } from '@/components/MockAnalytics';
-import { WeeklyStats } from '@/components/WeeklyStats';
-import { AdvancedAnalytics } from '@/components/AdvancedAnalytics';
 import { ProfileModal, ProfileData } from '@/components/ProfileModal';
 import { FocusMode } from '@/components/FocusMode';
-import { ContentProgressDashboard } from '@/components/ContentProgressDashboard';
 import { PYQTracker, PYQSummaryCard, PYQEntry, EXAM_CONFIGS } from '@/components/PYQTracker';
-import { PYQAccuracyTrends } from '@/components/PYQAccuracyTrends';
 import { RevisionHub } from '@/components/RevisionHub';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { BottomNav, Tab } from '@/components/BottomNav';
@@ -28,7 +22,7 @@ import { initialSubjects, mockTasks, mockStats, achievements, sampleMockTests } 
 import { defaultChapters } from '@/data/syllabusChapters';
 import { TopicSearch } from '@/components/TopicSearch';
 import { SyllabusProgressCard } from '@/components/SyllabusProgressCard';
-import { McqWeeklyChart } from '@/components/McqWeeklyChart';
+
 import { ReadinessScoreCard } from '@/components/ReadinessScoreCard';
 import { useReadinessScore } from '@/hooks/useReadinessScore';
 import { Task, Subject, UserStats, MockTest, Chapter, Achievement, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME, StudyLog } from '@/types';
@@ -589,35 +583,13 @@ const Index = () => {
           )}
 
           {activeTab === 'analytics' && (
-            <div className="space-y-3">
-              {/* Predictions — always visible at top */}
-              <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
-
-              {/* Readiness Score — compact */}
-              <ReadinessScoreCard result={readinessResult} compact />
-
-              {/* Weekly + MCQ compact row */}
-              <div className="grid grid-cols-2 gap-3">
-                <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
-                <McqWeeklyChart mcqLogs={mcqLogs} />
-              </div>
-
-              {/* Collapsible sections */}
-              <InsightsSection title="Content Progress" defaultOpen={false}>
-                <ContentProgressDashboard chapters={chapters} contentTypes={contentTypes} />
-              </InsightsSection>
-
-              <InsightsSection title="Study Patterns" defaultOpen={false}>
-                <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
-              </InsightsSection>
-
-              <InsightsSection title="PYQ Analysis" defaultOpen={false}>
-                <PYQAccuracyTrends subjects={subjects} />
-              </InsightsSection>
-
-              {/* Achievements */}
-              <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={() => setActiveTab('achievements' as Tab)} />
-            </div>
+            <AnalyticsTab
+              mockTests={mockTests} markingScheme={markingScheme} stats={stats}
+              chapters={chapters} studyLogs={studyLogs} mcqLogs={mcqLogs}
+              readinessResult={readinessResult} subjects={subjects}
+              contentTypes={contentTypes} pyqAchievements={pyqAchievements}
+              onViewAchievements={() => setActiveTab('achievements' as Tab)}
+            />
           )}
 
           {/* Achievements full tab */}
