@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus, Rocket, Target, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus, Rocket, Target, Zap, Brain, Clock, Award, CheckCircle2, Flame, Star } from 'lucide-react';
 import { ReadinessResult, getReadinessTrend, SubjectReadiness } from '@/hooks/useReadinessScore';
 
 interface ReadinessScoreCardProps {
@@ -15,6 +15,115 @@ const getBaseItems = (breakdown: ReadinessResult['breakdown']) => [
   { icon: FileText, label: 'PYQ Completion', value: breakdown.base.pyq, max: 15, color: 'text-emerald-500' },
   { icon: GraduationCap, label: 'Mock Performance', value: breakdown.base.mocks, max: 10, color: 'text-primary' },
 ];
+
+// Phase configuration with evidence-based tips
+type Phase = {
+  range: [number, number];
+  name: string;
+  emoji: string;
+  gradient: string;
+  borderColor: string;
+  bgColor: string;
+  message: string;
+  tips: { icon: typeof Rocket; text: string; color: string }[];
+};
+
+const phases: Phase[] = [
+  {
+    range: [0, 10],
+    name: 'Just Starting',
+    emoji: '🌱',
+    gradient: 'from-emerald-500 to-teal-500',
+    borderColor: 'border-emerald-500/30',
+    bgColor: 'bg-gradient-to-br from-emerald-500/10 to-teal-500/5',
+    message: 'The hardest part is starting — and you\'ve done that. Focus on building daily habits first, the scores will follow.',
+    tips: [
+      { icon: Clock, text: 'Build a daily 2-hour study habit before increasing hours', color: 'text-emerald-500' },
+      { icon: BookOpen, text: 'Pick ONE high-yield subject (Anatomy/Physiology) and finish its videos first', color: 'text-blue-500' },
+      { icon: Target, text: 'Solve 20-30 MCQs daily from what you\'ve studied — active recall beats passive reading', color: 'text-amber-500' },
+      { icon: Flame, text: 'Maintain a 7-day streak — consistency matters more than marathon sessions', color: 'text-orange-500' },
+    ],
+  },
+  {
+    range: [10, 25],
+    name: 'Building Foundation',
+    emoji: '🧱',
+    gradient: 'from-blue-500 to-indigo-500',
+    borderColor: 'border-blue-500/30',
+    bgColor: 'bg-gradient-to-br from-blue-500/10 to-indigo-500/5',
+    message: 'You\'re building a solid base. Focus on covering high-weightage subjects and starting MCQ practice early.',
+    tips: [
+      { icon: BookOpen, text: 'Complete Pre-clinical subjects first — they form 30%+ of the exam', color: 'text-blue-500' },
+      { icon: Brain, text: 'Start spaced revision for topics you\'ve finished — don\'t wait till the end', color: 'text-violet-500' },
+      { icon: FileQuestion, text: 'Aim for 50+ MCQs/day with analysis of wrong answers', color: 'text-amber-500' },
+      { icon: Target, text: 'Begin PYQ practice for completed subjects — understand exam patterns early', color: 'text-emerald-500' },
+    ],
+  },
+  {
+    range: [25, 45],
+    name: 'Gaining Momentum',
+    emoji: '🚀',
+    gradient: 'from-violet-500 to-purple-500',
+    borderColor: 'border-violet-500/30',
+    bgColor: 'bg-gradient-to-br from-violet-500/10 to-purple-500/5',
+    message: 'Great momentum! You\'re past the toughest phase. Now focus on depth and filling weak areas.',
+    tips: [
+      { icon: RotateCcw, text: 'Revision is king now — schedule 30% of study time for revision', color: 'text-violet-500' },
+      { icon: FileQuestion, text: 'Target 100+ MCQs/day with focus on weak subjects', color: 'text-amber-500' },
+      { icon: GraduationCap, text: 'Take your first mock test — it\'s diagnostic, not judgmental', color: 'text-primary' },
+      { icon: FileText, text: 'Complete last 3 years PYQs for subjects you\'ve covered', color: 'text-emerald-500' },
+    ],
+  },
+  {
+    range: [45, 65],
+    name: 'Solidifying',
+    emoji: '⚡',
+    gradient: 'from-amber-500 to-orange-500',
+    borderColor: 'border-amber-500/30',
+    bgColor: 'bg-gradient-to-br from-amber-500/10 to-orange-500/5',
+    message: 'You\'re in the zone! Focus on weak areas and mock test improvement. Consistency is your superpower.',
+    tips: [
+      { icon: AlertTriangle, text: 'Identify bottom 5 subjects and give them extra focus', color: 'text-destructive' },
+      { icon: GraduationCap, text: 'Take weekly mocks and analyze every wrong answer', color: 'text-primary' },
+      { icon: FileText, text: 'Complete 5 years of PYQs — they repeat patterns', color: 'text-emerald-500' },
+      { icon: Brain, text: 'Use image-based & clinical MCQs — they\'re increasing in exams', color: 'text-violet-500' },
+    ],
+  },
+  {
+    range: [65, 80],
+    name: 'Strong Position',
+    emoji: '🔥',
+    gradient: 'from-orange-500 to-red-500',
+    borderColor: 'border-orange-500/30',
+    bgColor: 'bg-gradient-to-br from-orange-500/10 to-red-500/5',
+    message: 'Excellent! You\'re well-prepared. Fine-tune weak spots and optimize mock performance.',
+    tips: [
+      { icon: Target, text: 'Focus on accuracy over speed — reduce silly mistakes', color: 'text-amber-500' },
+      { icon: GraduationCap, text: 'Simulate real exam conditions in mocks — 3.5hr, no breaks', color: 'text-primary' },
+      { icon: Star, text: 'Master high-yield topics: pharmacology tables, anatomy one-liners', color: 'text-amber-500' },
+      { icon: RotateCcw, text: 'Rapid revision cycles — cover full syllabus every 2-3 weeks', color: 'text-violet-500' },
+    ],
+  },
+  {
+    range: [80, 101],
+    name: 'Exam Ready',
+    emoji: '👑',
+    gradient: 'from-emerald-500 to-green-500',
+    borderColor: 'border-emerald-500/30',
+    bgColor: 'bg-gradient-to-br from-emerald-500/10 to-green-500/5',
+    message: 'Outstanding preparation! Maintain your edge and trust your preparation.',
+    tips: [
+      { icon: CheckCircle2, text: 'Maintain daily revision — don\'t let any subject go cold', color: 'text-emerald-500' },
+      { icon: Award, text: 'Focus on time management and question selection strategy', color: 'text-primary' },
+      { icon: Brain, text: 'Practice elimination technique for uncertain MCQs', color: 'text-violet-500' },
+      { icon: Flame, text: 'Stay calm and trust your preparation — you\'ve earned this', color: 'text-orange-500' },
+    ],
+  },
+];
+
+function getPhase(score: number): Phase {
+  return phases.find(p => score >= p.range[0] && score < p.range[1]) || phases[0];
+}
 
 function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
   if (data.length < 2) return null;
@@ -54,69 +163,135 @@ function TrendBadge({ trend }: { trend: number[] }) {
   );
 }
 
-// Encouraging "Just Starting" card for low scores
-function JustStartingCard({ score, color, label }: { score: number; color: string; label: string }) {
-  const tips = [
-    { icon: Rocket, text: 'Start with high-weightage subjects first', color: 'text-blue-500' },
-    { icon: Target, text: 'Aim to complete 1 subject per week', color: 'text-emerald-500' },
-    { icon: Zap, text: 'Even 30 min/day builds momentum', color: 'text-amber-500' },
-  ];
+// Phase-aware tips card shown in the detail panel
+function PhaseTipsCard({ score, color, label, result }: { score: number; color: string; label: string; result: ReadinessResult }) {
+  const phase = getPhase(score);
+  const [showBreakdown, setShowBreakdown] = useState(true);
+  const items = getBaseItems(result.breakdown);
 
   return (
-    <div className="space-y-3">
-      {/* Motivational header */}
-      <div className="text-center py-2">
-        <div className="text-3xl mb-2">🚀</div>
-        <h3 className="text-base font-semibold">Your Journey Begins!</h3>
-        <p className="text-xs text-muted-foreground mt-1">Every expert was once a beginner. Let's build your readiness step by step.</p>
-      </div>
-
-      {/* Progress ring with encouraging message */}
-      <div className="flex items-center justify-center gap-5">
-        <div className="relative">
-          <svg className="w-20 h-20 transform -rotate-90">
-            <circle cx="40" cy="40" r="34" stroke="hsl(var(--secondary))" strokeWidth="6" fill="none" />
-            <motion.circle
-              cx="40" cy="40" r="34"
-              stroke={color}
-              strokeWidth="6" fill="none" strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 34}
-              initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
-              animate={{ strokeDashoffset: 2 * Math.PI * 34 * (1 - score / 100) }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-bold" style={{ color }}>{Math.round(score)}%</span>
+    <div className="space-y-4">
+      {/* Phase header with gradient accent */}
+      <div className={`rounded-xl p-4 ${phase.bgColor} border ${phase.borderColor}`}>
+        <div className="flex items-center gap-4">
+          <div className="relative flex-shrink-0">
+            <svg className="w-20 h-20 transform -rotate-90">
+              <circle cx="40" cy="40" r="34" stroke="hsl(var(--secondary))" strokeWidth="6" fill="none" />
+              <motion.circle
+                cx="40" cy="40" r="34"
+                stroke={color}
+                strokeWidth="6" fill="none" strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 34}
+                initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 34 * (1 - score / 100) }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-lg font-bold" style={{ color }}>{Math.round(score)}%</span>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{phase.emoji}</span>
+              <span className={`text-sm font-bold bg-gradient-to-r ${phase.gradient} bg-clip-text text-transparent`}>
+                {phase.name}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{phase.message}</p>
           </div>
         </div>
-        <div className="flex-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: `${color}20`, color }}>
-            {label}
-          </span>
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            You're at the starting line — the perfect place to begin building a strong foundation.
-          </p>
-        </div>
       </div>
 
-      {/* Quick tips */}
+      {/* Phase progress indicator */}
+      <div className="flex items-center gap-1.5">
+        {phases.map((p, i) => {
+          const isCurrent = p === phase;
+          const isPast = score >= p.range[1];
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div className={`w-full h-1.5 rounded-full transition-all ${
+                isPast ? `bg-gradient-to-r ${p.gradient}` :
+                isCurrent ? `bg-gradient-to-r ${p.gradient} opacity-60` :
+                'bg-secondary'
+              }`} />
+              {isCurrent && (
+                <span className="text-[8px] font-medium text-muted-foreground">{p.emoji}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tips for current phase */}
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Quick wins to boost your score</p>
-        {tips.map((tip, i) => (
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+          🎯 Focus Areas for {phase.name}
+        </p>
+        {phase.tips.map((tip, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="flex items-center gap-2.5 p-2.5 bg-muted/30 rounded-lg"
+            transition={{ delay: i * 0.08 }}
+            className="flex items-start gap-2.5 p-2.5 bg-muted/30 rounded-lg"
           >
-            <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center border border-border">
+            <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center border border-border shrink-0 mt-0.5">
               <tip.icon className={`w-3.5 h-3.5 ${tip.color}`} />
             </div>
-            <span className="text-xs font-medium">{tip.text}</span>
+            <span className="text-xs font-medium leading-relaxed">{tip.text}</span>
           </motion.div>
         ))}
+      </div>
+
+      {/* Collapsible Score Breakdown */}
+      <div className="border border-border rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowBreakdown(!showBreakdown)}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-muted/20 hover:bg-muted/30 transition-colors"
+        >
+          <span className="text-xs font-semibold">📊 Score Breakdown</span>
+          {showBreakdown ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+        </button>
+        <AnimatePresence>
+          {showBreakdown && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 py-3 space-y-2.5">
+                {items.map(item => {
+                  const pct = item.max > 0 ? Math.round((item.value / item.max) * 100) : 0;
+                  return (
+                    <div key={item.label}>
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
+                          <span className="font-medium">{item.label}</span>
+                        </div>
+                        <span className="text-muted-foreground">{item.value}/{item.max}</span>
+                      </div>
+                      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          className="h-full rounded-full" style={{ backgroundColor: color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Summary row */}
+                <div className="flex justify-between text-xs pt-2 border-t border-border">
+                  <span className="font-semibold">Total</span>
+                  <span className="font-bold" style={{ color }}>{Math.round(score)}%</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -126,9 +301,9 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
   const [showDetail, setShowDetail] = useState(false);
   const { score, breakdown, color, label, message } = result;
   const items = getBaseItems(breakdown);
+  const phase = getPhase(score);
 
   const trendData = useMemo(() => getReadinessTrend().map(t => t.score), [score]);
-  const isJustStarting = score < 10;
 
   if (compact) {
     return (
@@ -137,7 +312,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={() => setShowDetail(true)}
-          className="bg-card rounded-xl p-3 border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
+          className={`rounded-xl p-3 border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] ${phase.bgColor} ${phase.borderColor}`}
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
@@ -161,36 +336,27 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-xs font-semibold">Exam Readiness</span>
-                <span
-                  className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                  style={{ background: `${color}20`, color }}
-                >
-                  {label}
+                <span className={`text-[8px] font-bold bg-gradient-to-r ${phase.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
+                  {phase.emoji} {phase.name}
                 </span>
                 <TrendBadge trend={trendData} />
               </div>
-              {isJustStarting ? (
-                <p className="text-[10px] text-muted-foreground">🚀 Tap to see how to get started</p>
-              ) : (
-                <>
-                  <div className="flex gap-1">
-                    {items.map(item => {
-                      const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
-                      return (
-                        <div key={item.label} className="flex-1 h-1 bg-secondary rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
-                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-[9px] text-muted-foreground">Tap for breakdown</p>
-                    {trendData.length >= 2 && (
-                      <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
-                    )}
-                  </div>
-                </>
-              )}
+              <div className="flex gap-1">
+                {items.map(item => {
+                  const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
+                  return (
+                    <div key={item.label} className="flex-1 h-1 bg-secondary/60 rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[9px] text-muted-foreground">Tap for breakdown & tips</p>
+                {trendData.length >= 2 && (
+                  <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -211,18 +377,22 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 onClick={(e) => e.stopPropagation()}
                 className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
               >
-                <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
-                  <h2 className="font-semibold text-base">🎯 Exam Readiness Breakdown</h2>
-                  <button onClick={() => setShowDetail(false)} className="p-1 rounded-full hover:bg-secondary">
-                    <X className="w-4 h-4" />
+                <div className={`sticky top-0 z-10 border-b border-border px-5 py-3 flex items-center justify-between rounded-t-2xl bg-gradient-to-r ${phase.gradient}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{phase.emoji}</span>
+                    <h2 className="font-semibold text-base text-white">Exam Readiness</h2>
+                  </div>
+                  <button onClick={() => setShowDetail(false)} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+                    <X className="w-4 h-4 text-white" />
                   </button>
                 </div>
                 <div className="p-5">
-                  {isJustStarting ? (
-                    <JustStartingCard score={score} color={color} label={label} />
-                  ) : (
+                  <PhaseTipsCard score={score} color={color} label={label} result={result} />
+
+                  {/* Full breakdown below tips */}
+                  <div className="mt-5 pt-5 border-t border-border">
                     <FullBreakdown result={result} trendData={trendData} />
-                  )}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
@@ -239,21 +409,23 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
   const [expanded, setExpanded] = useState(false);
   const { score, breakdown, color, label, message } = result;
   const items = getBaseItems(breakdown);
+  const phase = getPhase(score);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl shadow-card border border-border overflow-hidden"
+      className={`rounded-xl shadow-card border overflow-hidden ${phase.bgColor} ${phase.borderColor}`}
     >
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-base">🎯 Exam Readiness</h3>
+            <span>{phase.emoji}</span>
+            <h3 className="font-semibold text-base">Exam Readiness</h3>
             <TrendBadge trend={trendData} />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: `${color}20`, color }}>
-            {label}
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gradient-to-r ${phase.gradient} text-white`}>
+            {phase.name}
           </span>
         </div>
 
@@ -299,11 +471,11 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-3">{message}</p>
+        <p className="text-xs text-muted-foreground mt-3">{phase.message}</p>
 
         <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:underline">
           {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {expanded ? 'Hide details' : 'View full breakdown'}
+          {expanded ? 'Hide details' : 'View breakdown & tips'}
         </button>
       </div>
 
@@ -311,7 +483,8 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
         {expanded && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="px-5 pb-5 border-t border-border pt-4">
+            <div className="px-5 pb-5 border-t border-border pt-4 space-y-5">
+              <PhaseTipsCard score={score} color={color} label={label} result={result} />
               <FullBreakdown result={result} trendData={trendData} />
             </div>
           </motion.div>
@@ -371,64 +544,9 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
 
 function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
   const { score, breakdown, color, recommendations } = result;
-  const items = getBaseItems(breakdown);
 
   return (
     <div className="space-y-5">
-      {/* Score gauge */}
-      <div className="flex items-center justify-center gap-6">
-        <div className="relative">
-          <svg className="w-28 h-28 transform -rotate-90">
-            <circle cx="56" cy="56" r="48" stroke="hsl(var(--secondary))" strokeWidth="7" fill="none" />
-            <motion.circle cx="56" cy="56" r="48" stroke={color} strokeWidth="7" fill="none" strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 48}
-              initial={{ strokeDashoffset: 2 * Math.PI * 48 }}
-              animate={{ strokeDashoffset: 2 * Math.PI * 48 * (1 - score / 100) }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-bold" style={{ color }}>{Math.round(score)}%</span>
-            <span className="text-[9px] text-muted-foreground">Readiness</span>
-          </div>
-        </div>
-        {trendData.length >= 2 && (
-          <div className="text-center">
-            <Sparkline data={trendData.slice(-30)} color={color} width={100} height={32} />
-            <p className="text-[9px] text-muted-foreground mt-1">Last {Math.min(trendData.length, 30)} days</p>
-            <TrendBadge trend={trendData.slice(-7)} />
-          </div>
-        )}
-      </div>
-
-      {/* Base Score Details */}
-      <div>
-        <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
-          📊 Base Score: {breakdown.base.total} / 100 pts
-        </h4>
-        <div className="space-y-2.5">
-          {items.map(item => {
-            const pct = item.max > 0 ? Math.round((item.value / item.max) * 100) : 0;
-            return (
-              <div key={item.label}>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
-                    <span className="font-medium">{item.label}</span>
-                  </div>
-                  <span className="text-muted-foreground">{item.value} / {item.max} ({pct}%)</span>
-                </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="h-full rounded-full" style={{ backgroundColor: color }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Subject Breakdown */}
       {breakdown.subjectBreakdown.length > 0 && (
         <SubjectBreakdownSection subjects={breakdown.subjectBreakdown} color={color} />
@@ -467,30 +585,6 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
           </div>
         </div>
       )}
-
-      {/* Summary */}
-      <div className="bg-muted/30 rounded-lg p-3 space-y-1.5">
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Base Score</span>
-          <span className="font-medium">{breakdown.base.total}</span>
-        </div>
-        {breakdown.bonuses.total > 0 && (
-          <div className="flex justify-between text-xs">
-            <span className="text-emerald-600 dark:text-emerald-400">Bonuses</span>
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">+{breakdown.bonuses.total}</span>
-          </div>
-        )}
-        {breakdown.penalties.total < 0 && (
-          <div className="flex justify-between text-xs">
-            <span className="text-destructive">Penalties</span>
-            <span className="font-medium text-destructive">{breakdown.penalties.total}</span>
-          </div>
-        )}
-        <div className="border-t border-border pt-1.5 flex justify-between text-xs">
-          <span className="font-semibold">Final Score</span>
-          <span className="font-bold" style={{ color }}>{Math.round(score)}%</span>
-        </div>
-      </div>
 
       {/* How it works */}
       <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
