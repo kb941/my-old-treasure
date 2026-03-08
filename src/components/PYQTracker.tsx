@@ -23,9 +23,9 @@ interface ExamConfig {
 const DEFAULT_YEARS = Array.from({ length: 10 }, (_, i) => 2025 - i);
 
 export const EXAM_CONFIGS: ExamConfig[] = [
-  { name: 'NEET PG', sessions: YEARS.map(y => `${y}`) },
-  { name: 'INICET', sessions: YEARS.flatMap(y => [`May ${y}`, `Nov ${y}`]) },
-  { name: 'FMGE', sessions: YEARS.flatMap(y => [`June ${y}`, `Dec ${y}`]) },
+  { name: 'NEET PG', sessions: DEFAULT_YEARS.map(y => `${y}`) },
+  { name: 'INICET', sessions: DEFAULT_YEARS.flatMap(y => [`May ${y}`, `Nov ${y}`]) },
+  { name: 'FMGE', sessions: DEFAULT_YEARS.flatMap(y => [`June ${y}`, `Dec ${y}`]) },
 ];
 
 function generateDefaults(subjects: Subject[]): PYQEntry[] {
