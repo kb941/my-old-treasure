@@ -17,7 +17,7 @@ import { ProfileModal, ProfileData } from '@/components/ProfileModal';
 import { FocusMode } from '@/components/FocusMode';
 import { PYQTracker, PYQSummaryCard, PYQEntry, EXAM_CONFIGS } from '@/components/PYQTracker';
 import { RevisionHub } from '@/components/RevisionHub';
-import { ThemeToggle } from '@/components/ThemeToggle';
+// ThemeToggle moved into ProfileTab
 import { BottomNav, Tab } from '@/components/BottomNav';
 import { initialSubjects, mockTasks, mockStats, achievements, sampleMockTests } from '@/data/subjects';
 import { defaultChapters } from '@/data/syllabusChapters';
