@@ -376,6 +376,7 @@ const Index = () => {
     { id: 'subjects' as Tab, label: 'Subjects' },
     { id: 'revision' as Tab, label: 'Revision' },
     { id: 'analytics' as Tab, label: 'Insights' },
+    { id: 'profile' as Tab, label: 'Profile' },
   ];
 
   return (
