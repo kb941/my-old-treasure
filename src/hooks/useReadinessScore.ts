@@ -419,7 +419,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     let imbalanced = 0;
-    if (hasAnyProweightedSyllabus& blendedCoverage > 0.1) {
+    if (hasAnyProgress && weightedSyllabusCoverage > 0.1) {
       const neglected = subjects.filter(sub => {
         if (sub.weightage < 20) return false;
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
