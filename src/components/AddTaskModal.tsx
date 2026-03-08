@@ -182,23 +182,93 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
     onClose();
   };
 
-  const autoFillTitle = (label: string) => {
-    setTitle(`${typeLabels[type]} - ${label}`);
-  };
+  // Auto-generate title based on current selections
+  const buildAutoTitle = useCallback((
+    overrideType?: Task['type'],
+    overrideSubjectId?: string,
+    overrideChapterId?: string,
+    overrideTopicId?: string,
+    overrideTestSource?: string,
+    overridePyqFullMock?: boolean,
+    overridePyqExam?: string,
+    overridePyqYears?: number[],
+    overridePyqSessions?: string[],
+  ) => {
+    const t = overrideType ?? type;
+    const sId = overrideSubjectId ?? subjectId;
+    const cId = overrideChapterId ?? chapterId;
+    const tId = overrideTopicId ?? topicId;
+    const src = overrideTestSource ?? testSource;
+    const fullMock = overridePyqFullMock ?? pyqFullMock;
+    const exam = overridePyqExam ?? pyqExam;
+    const years = overridePyqYears ?? pyqYears;
+    const sessions = overridePyqSessions ?? pyqSessions;
+
+    const subName = initialSubjects.find(s => s.id === sId)?.name || '';
+    const chName = chapters.find(c => c.id === cId)?.name || '';
+    const topName = (() => {
+      if (!tId) return '';
+      const ch = chapters.find(c => c.id === cId);
+      return ch?.topics.find(tp => tp.id === tId)?.name || '';
+    })();
+
+    const prefix = typeLabels[t];
+    let parts: string[] = [];
+
+    switch (t) {
+      case 'study':
+      case 'mcq':
+      case 'revision':
+        if (topName) parts = [topName];
+        else if (chName) parts = [chName];
+        else if (subName) parts = [subName];
+        break;
+      case 'pyq':
+        if (fullMock) {
+          parts = ['Full Mock'];
+          if (exam) parts.push(exam);
+          if (sessions.length > 0) parts.push(sessions.join(', '));
+          else if (years.length > 0) parts.push(years.join(', '));
+        } else {
+          if (subName) parts = [subName];
+          if (chName) parts.push(chName);
+        }
+        break;
+      case 'test':
+        if (src) parts.push(src);
+        if (subName) parts.push(subName);
+        if (topName) parts.push(topName);
+        else if (chName) parts.push(chName);
+        break;
+      case 'mock':
+        if (src) parts.push(src);
+        break;
+    }
+
+    if (parts.length > 0) return `${prefix} - ${parts.join(' • ')}`;
+    return '';
+  }, [type, subjectId, chapterId, topicId, testSource, pyqFullMock, pyqExam, pyqYears, pyqSessions, chapters]);
+
+  const updateAutoTitle = useCallback((...args: Parameters<typeof buildAutoTitle>) => {
+    const newTitle = buildAutoTitle(...args);
+    setTitle(newTitle);
+  }, [buildAutoTitle]);
 
   const handleSearchResultClick = (result: NonNullable<typeof searchResults>[0]) => {
     setSubjectId(result.subjectId);
     setChapterId(result.chapterId);
     if (result.topicId) {
       setTopicId(result.topicId);
-      autoFillTitle(result.topicName!);
     } else {
       setTopicId('');
-      autoFillTitle(result.chapterName);
     }
     setSearchQuery('');
     setExpandedSubject(result.subjectId);
     setExpandedChapter(result.chapterId);
+    // Defer title update
+    setTimeout(() => {
+      updateAutoTitle(undefined, result.subjectId, result.chapterId, result.topicId || '');
+    }, 0);
   };
 
   const handleSubjectSelect = (id: string) => {
@@ -210,8 +280,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
       setTopicId('');
       setExpandedSubject(id);
       setExpandedChapter(null);
-      const sub = initialSubjects.find(s => s.id === id);
-      if (sub && !title) autoFillTitle(sub.name);
+      updateAutoTitle(undefined, id, '', '');
     }
   };
 
@@ -323,7 +392,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                   setChapterId(newId);
                                   setTopicId('');
                                   setExpandedChapter(isChapterSelected ? null : chapter.id);
-                                  if (newId && !title) autoFillTitle(chapter.name);
+                                  updateAutoTitle(undefined, subjectId, newId, '');
                                 }}
                                 className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
                                   isChapterSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
@@ -353,7 +422,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                           onClick={() => {
                                             const newId = topicId === topic.id ? '' : topic.id;
                                             setTopicId(newId);
-                                            if (newId) setTitle(`${typeLabels[type]} - ${topic.name}`);
+                                            if (newId) updateAutoTitle(undefined, subjectId, chapterId, newId);
                                           }}
                                           className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
                                             topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
@@ -399,7 +468,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                 setSubjectId(item.subjectId);
                 setChapterId(item.chapterId);
                 setTopicId(item.topicId);
-                setTitle(`${typeLabels[type]} - ${item.topicName}`);
+                updateAutoTitle(undefined, item.subjectId, item.chapterId, item.topicId);
               }}
               className={`w-full p-2 rounded-lg text-left text-xs transition-all ${
                 topicId === item.topicId ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
@@ -418,25 +487,26 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
   };
 
   // PYQ exam mode fields
-  const renderPyqExamMode = () => (
+  const renderPyqExamMode = (showSubject = true) => (
     <>
-      {/* Subject pills */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">Subject</label>
-        <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-          {initialSubjects.map(s => (
-            <button
-              key={s.id}
-              onClick={() => { setSubjectId(s.id); if (!title) autoFillTitle(s.name); }}
-              className={`px-2.5 py-1 rounded-full text-xs transition-all ${
-                subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
-              }`}
-            >
-              {s.name}
-            </button>
-          ))}
+      {showSubject && (
+        <div>
+          <label className="text-sm font-medium mb-2 block">Subject</label>
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+            {initialSubjects.map(s => (
+              <button
+                key={s.id}
+                onClick={() => { setSubjectId(s.id); updateAutoTitle(undefined, s.id); }}
+                className={`px-2.5 py-1 rounded-full text-xs transition-all ${
+                  subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
+                }`}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       {/* Exam */}
       <div>
         <label className="text-xs text-muted-foreground mb-1.5 block">Exam</label>
@@ -444,7 +514,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
           {['NEET PG', 'INICET', 'FMGE', 'All'].map(exam => (
             <button
               key={exam}
-              onClick={() => { setPyqExam(exam); setPyqSessions([]); }}
+              onClick={() => { setPyqExam(exam); setPyqSessions([]); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, exam, pyqYears, []), 0); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 pyqExam === exam ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
               }`}
@@ -466,7 +536,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               return years.flatMap(y => [`May ${y}`, `Nov ${y}`]).map(session => (
                 <button
                   key={session}
-                  onClick={() => setPyqSessions(prev => prev.includes(session) ? prev.filter(s => s !== session) : [...prev, session])}
+                  onClick={() => { const newSessions = pyqSessions.includes(session) ? pyqSessions.filter(s => s !== session) : [...pyqSessions, session]; setPyqSessions(newSessions); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, pyqExam, pyqYears, newSessions), 0); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     pyqSessions.includes(session) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
                   }`}
@@ -479,7 +549,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               return years.flatMap(y => [`June ${y}`, `Dec ${y}`]).map(session => (
                 <button
                   key={session}
-                  onClick={() => setPyqSessions(prev => prev.includes(session) ? prev.filter(s => s !== session) : [...prev, session])}
+                  onClick={() => { const newSessions = pyqSessions.includes(session) ? pyqSessions.filter(s => s !== session) : [...pyqSessions, session]; setPyqSessions(newSessions); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, pyqExam, pyqYears, newSessions), 0); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     pyqSessions.includes(session) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
                   }`}
@@ -491,7 +561,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
             return years.map(year => (
               <button
                 key={year}
-                onClick={() => setPyqYears(prev => prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year].sort((a, b) => b - a))}
+                onClick={() => { const newYears = pyqYears.includes(year) ? pyqYears.filter(y => y !== year) : [...pyqYears, year].sort((a, b) => b - a); setPyqYears(newYears); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, pyqExam, newYears, pyqSessions), 0); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   pyqYears.includes(year) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
                 }`}
@@ -537,9 +607,16 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
             {/* Full PYQ Mock option */}
             <button
               onClick={() => {
-                setPyqFullMock(!pyqFullMock);
-                if (!pyqFullMock) setTitle('Full PYQ Mock');
-                else setTitle('');
+                const newVal = !pyqFullMock;
+                setPyqFullMock(newVal);
+                if (newVal) {
+                  setSubjectId('');
+                  setChapterId('');
+                  setTopicId('');
+                  updateAutoTitle(undefined, '', '', '', '', newVal);
+                } else {
+                  setTitle('');
+                }
               }}
               className={`w-full p-2.5 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 ${
                 pyqFullMock ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/50 text-muted-foreground hover:text-primary'
@@ -549,12 +626,14 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <span className="text-xs font-medium">Full PYQ Mock</span>
             </button>
 
+            {pyqFullMock && renderPyqExamMode(false)}
+
             {!pyqFullMock && (
               <>
                 {/* Mode toggle */}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setPyqMode('chapter'); setSubjectId(''); setChapterId(''); }}
+                    onClick={() => { setPyqMode('chapter'); setSubjectId(''); setChapterId(''); setTitle(''); }}
                     className={`flex-1 p-2 rounded-lg border-2 text-xs font-medium transition-all text-center ${
                       pyqMode === 'chapter' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
                     }`}
@@ -562,7 +641,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                     Subject + Chapter
                   </button>
                   <button
-                    onClick={() => { setPyqMode('exam'); setSubjectId(''); setChapterId(''); }}
+                    onClick={() => { setPyqMode('exam'); setSubjectId(''); setChapterId(''); setTitle(''); }}
                     className={`flex-1 p-2 rounded-lg border-2 text-xs font-medium transition-all text-center ${
                       pyqMode === 'exam' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
                     }`}
@@ -585,7 +664,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <label className="text-sm font-medium mb-1.5 block">Source</label>
               <Input
                 value={testSource}
-                onChange={e => setTestSource(e.target.value)}
+                onChange={e => { setTestSource(e.target.value); setTimeout(() => updateAutoTitle(undefined, subjectId, chapterId, topicId, e.target.value), 0); }}
                 placeholder="e.g., Marrow, PrepLadder..."
                 autoFocus={false}
               />
@@ -601,7 +680,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <label className="text-sm font-medium mb-1.5 block">Source</label>
               <Input
                 value={testSource}
-                onChange={e => setTestSource(e.target.value)}
+                onChange={e => { setTestSource(e.target.value); setTimeout(() => updateAutoTitle(undefined, undefined, undefined, undefined, e.target.value), 0); }}
                 placeholder="e.g., Marrow, PrepLadder..."
                 autoFocus={false}
               />
