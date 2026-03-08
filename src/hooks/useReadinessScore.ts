@@ -251,7 +251,10 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
     const mcqScore = !hasMcqData ? 0 : (volumeProgress + accuracyScore) * 20 / 100;
 
-    // ===== 4. PYQ COMPLETION (15%) — two dimensions, weightage-based =====
+    // ===== 4. PYQ COMPLETION (15%) =====
+    // Priority: year/paper-based → 100% if available; chapter-based → 100% if no paper data
+    // If both exist, use year-based only.
+
     // Dimension A: Chapter-wise PYQs (topic.pyqDone) — weightage-based
     let weightedChapterPyq = 0;
     let hasChapterPyqData = false;
@@ -269,6 +272,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let weightedPyqAccuracy = 0;
     let hasPaperPyqData = false;
     const pyqSubjectEntries = pyqData.filter(e => e.subjectId !== 'all');
+    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
 
     subjects.forEach(sub => {
       const subEntries = pyqSubjectEntries.filter(e => e.subjectId === sub.id);
@@ -278,7 +282,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       const weight = sub.weightage / totalWeightage;
       weightedPaperPyq += (done / subEntries.length) * weight;
 
-      // Accuracy for this subject's PYQs
       const withMarks = subEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0);
       if (withMarks.length > 0) {
         const avgAcc = withMarks.reduce((s, e) => s + ((e.correctAnswers || 0) / (e.totalQuestions || 1)), 0) / withMarks.length;
@@ -286,19 +289,16 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       }
     });
 
-    const yearsRange = pyqYearTo - pyqYearFrom + 1;
-    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
-    const uniqueYears = new Set(pyqSubjectEntries.filter(e => e.done).map(e => {
-      const match = e.session?.match(/(\d{4})/);
-      return match ? parseInt(match[1]) : 0;
-    }).filter(y => y >= pyqYearFrom && y <= pyqYearTo));
-    const yearCoverageBonus = yearsRange > 0 ? (uniqueYears.size / yearsRange) * 5 : 0;
-
-    // Combine: 40% chapter-wise + 50% paper-based + 10% year coverage
-    const hasAnyPyq = hasChapterPyqData || hasPaperPyqData;
-    const chapterPyqComponent = weightedChapterPyq * 40;
-    const paperPyqComponent = (weightedPaperPyq * 30 + Math.min((weightedPyqAccuracy / 0.8) * 20, 20));
-    const pyqScore = !hasAnyPyq ? 0 : (chapterPyqComponent + paperPyqComponent + yearCoverageBonus) * 15 / 100;
+    let pyqScore = 0;
+    if (hasPaperPyqData) {
+      // Year-based: 70% volume + 30% accuracy
+      const volumeComponent = weightedPaperPyq * 70;
+      const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
+      pyqScore = (volumeComponent + accComponent) * 15 / 100;
+    } else if (hasChapterPyqData) {
+      // Chapter-based only: 100% volume
+      pyqScore = weightedChapterPyq * 15;
+    }
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
