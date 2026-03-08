@@ -112,30 +112,24 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const hasStudyLogs = studyLogs.length > 0;
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
-    // Dynamic weighting based on enabled content types in profile:
-    // main-video only → 100%; main + rr → 70/30; rr only → 100%; btr only → 100%
-    // rr + btr → 70/30; main + rr + btr → 50/30/20
-    const videoTypes = ['main-video', 'rr-video', 'btr-video', 'extra-video'] as const;
-    const enabledVideoTypes = contentTypes
-      .filter(ct => videoTypes.includes(ct.id as any) && ct.enabled)
+    // Only main-video, rr-video, btr-video count for syllabus score.
+    // Dynamic weights based on which of these 3 are enabled in profile:
+    // 1 type → 100%; 2 types → 70/30; 3 types → 50/30/20
+    const SCORABLE_STAGES = ['main-video', 'rr-video', 'btr-video'] as const;
+    const enabledStages = contentTypes
+      .filter(ct => SCORABLE_STAGES.includes(ct.id as any) && ct.enabled)
       .map(ct => ct.id);
 
-    // Compute dynamic weights for each enabled video type
     const stageWeights: Record<string, number> = {};
-    if (enabledVideoTypes.length === 1) {
-      stageWeights[enabledVideoTypes[0]] = 1.0;
-    } else if (enabledVideoTypes.length === 2) {
-      stageWeights[enabledVideoTypes[0]] = 0.7;
-      stageWeights[enabledVideoTypes[1]] = 0.3;
-    } else if (enabledVideoTypes.length === 3) {
-      stageWeights[enabledVideoTypes[0]] = 0.5;
-      stageWeights[enabledVideoTypes[1]] = 0.3;
-      stageWeights[enabledVideoTypes[2]] = 0.2;
-    } else if (enabledVideoTypes.length >= 4) {
-      stageWeights[enabledVideoTypes[0]] = 0.4;
-      stageWeights[enabledVideoTypes[1]] = 0.25;
-      stageWeights[enabledVideoTypes[2]] = 0.2;
-      stageWeights[enabledVideoTypes[3]] = 0.15;
+    if (enabledStages.length === 1) {
+      stageWeights[enabledStages[0]] = 1.0;
+    } else if (enabledStages.length === 2) {
+      stageWeights[enabledStages[0]] = 0.7;
+      stageWeights[enabledStages[1]] = 0.3;
+    } else if (enabledStages.length >= 3) {
+      stageWeights[enabledStages[0]] = 0.5;
+      stageWeights[enabledStages[1]] = 0.3;
+      stageWeights[enabledStages[2]] = 0.2;
     }
 
     let weightedSyllabusCoverage = 0;
@@ -158,13 +152,13 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
       const mcqGoal = mcqGoalPerSubject * subTopics.length;
 
-      // Calculate weighted coverage based on enabled content types
+      // Calculate weighted coverage using only scorable stages
       let subCoverage = 0;
-      if (enabledVideoTypes.length === 0) {
-        // Fallback: any completed stage counts
+      if (enabledStages.length === 0) {
+        // Fallback: any completed stage
         subCoverage = withAny / subTopics.length;
       } else {
-        for (const stageId of enabledVideoTypes) {
+        for (const stageId of enabledStages) {
           const completed = subTopics.filter(t => t.completedStages.includes(stageId)).length;
           subCoverage += (completed / subTopics.length) * (stageWeights[stageId] || 0);
         }
