@@ -251,13 +251,13 @@ export function ProfileModal({
                     </h3>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {[
-                        { label: 'NEET PG', correct: 4, incorrect: -1, unanswered: 0, total: 200 },
+                        { label: 'NEET PG', correct: 4, incorrect: -1, unanswered: 0, total: 800 },
                         { label: 'INICET', correct: 1, incorrect: -1/3, unanswered: 0, total: 200 },
                         { label: 'FMGE', correct: 1, incorrect: 0, unanswered: 0, total: 300 },
                       ].map(preset => (
                         <button
                           key={preset.label}
-                          onClick={() => setLocalMarkingScheme({ correctMarks: preset.correct, incorrectMarks: preset.incorrect, unansweredMarks: preset.unanswered })}
+                          onClick={() => setLocalMarkingScheme({ correctMarks: preset.correct, incorrectMarks: preset.incorrect, unansweredMarks: preset.unanswered, totalMarks: preset.total })}
                           className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
                             localMarkingScheme.correctMarks === preset.correct && localMarkingScheme.incorrectMarks === preset.incorrect
                               ? 'border-primary bg-primary/10 text-primary'

@@ -150,12 +150,14 @@ export interface MarkingScheme {
   correctMarks: number;
   incorrectMarks: number;
   unansweredMarks: number;
+  totalMarks: number;
 }
 
 export const DEFAULT_MARKING_SCHEME: MarkingScheme = {
   correctMarks: 4,
   incorrectMarks: -1,
   unansweredMarks: 0,
+  totalMarks: 800,
 };
 
 export interface StudyLog {
