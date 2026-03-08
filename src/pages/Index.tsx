@@ -22,7 +22,7 @@ import { initialSubjects, mockTasks, mockStats, achievements, sampleMockTests } 
 import { defaultChapters } from '@/data/syllabusChapters';
 import { TopicSearch } from '@/components/TopicSearch';
 import { SyllabusProgressCard } from '@/components/SyllabusProgressCard';
-import { McqWeeklyChart } from '@/components/McqWeeklyChart';
+
 import { ReadinessScoreCard } from '@/components/ReadinessScoreCard';
 import { useReadinessScore } from '@/hooks/useReadinessScore';
 import { Task, Subject, UserStats, MockTest, Chapter, Achievement, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME, StudyLog } from '@/types';
