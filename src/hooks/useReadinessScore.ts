@@ -250,6 +250,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let hasAccuracyData = false;
     let hasMcqData = false;
 
+    let accuracyTrackedSubjects = 0;
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
@@ -262,17 +263,27 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       // Accuracy from mock test subject scores
       const subScores = mockTests.flatMap(m => m.subjectScores).filter(s => s.subjectId === sub.id);
       if (subScores.length > 0) {
+        accuracyTrackedSubjects++;
         hasAccuracyData = true;
         const avgAcc = subScores.reduce((s, sc) => s + sc.accuracy, 0) / subScores.length;
         weightedAccuracy += (avgAcc / 100) * weight;
       }
     });
-    if (!hasAccuracyData) weightedAccuracy = (stats.averageAccuracy || 0) / 100;
 
-    const volumeProgress = weightedMcqVolume * 50;
-    const accuracyTarget = 0.75;
-    const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
-    const mcqScore = !hasMcqData ? 0 : (volumeProgress + accuracyScore) * 20 / 100;
+    // If accuracy is tracked for less than half the subjects, ignore accuracy and use 100% volume
+    const hasEnoughAccuracy = hasAccuracyData && accuracyTrackedSubjects >= subjects.length * 0.5;
+    let mcqScore = 0;
+    if (hasMcqData) {
+      if (hasEnoughAccuracy) {
+        const volumeProgress = weightedMcqVolume * 50;
+        const accuracyTarget = 0.75;
+        const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
+        mcqScore = (volumeProgress + accuracyScore) * 20 / 100;
+      } else {
+        // Volume only
+        mcqScore = weightedMcqVolume * 20;
+      }
+    }
 
     // ===== 4. PYQ COMPLETION (15%) =====
     // Priority: year/paper-based → 100% if available; chapter-based → 100% if no paper data
