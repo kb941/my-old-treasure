@@ -566,6 +566,19 @@ export function ProfileTab(props: ProfileTabProps) {
             </div>
 
             <div className="space-y-3 pt-4 border-t border-border">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Download className="w-4 h-4 text-primary" />
+                Export Data
+              </h3>
+              <Button variant="outline" className="w-full" onClick={handleExportData}>
+                <Download className="w-4 h-4 mr-2" /> Download Full Backup
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Exports all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t border-border">
               <h3 className="font-semibold flex items-center gap-2 text-destructive">
                 <AlertTriangle className="w-4 h-4" />
                 Danger Zone
