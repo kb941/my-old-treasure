@@ -12,6 +12,8 @@ interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (task: Omit<Task, 'id'>) => void;
+  onEdit?: (task: Task) => void;
+  editTask?: Task | null;
   defaultColumn: TaskColumn;
   chapters?: Chapter[];
   pyqYearFrom?: number;
