@@ -468,7 +468,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                 setSubjectId(item.subjectId);
                 setChapterId(item.chapterId);
                 setTopicId(item.topicId);
-        updateAutoTitle(undefined, item.subjectId, item.chapterId, item.topicIdicName}`);
+                updateAutoTitle(undefined, item.subjectId, item.chapterId, item.topicId);
               }}
               className={`w-full p-2 rounded-lg text-left text-xs transition-all ${
                 topicId === item.topicId ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
