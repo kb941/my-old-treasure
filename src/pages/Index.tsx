@@ -28,6 +28,7 @@ import { useReadinessScore } from '@/hooks/useReadinessScore';
 import { Task, Subject, UserStats, MockTest, Chapter, Achievement, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME, StudyLog } from '@/types';
 import { RevisionReminders } from '@/components/RevisionReminders';
 import { useRevisionReminders } from '@/hooks/useRevisionReminders';
+import { NotificationPanel } from '@/components/NotificationPanel';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { addDays } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
@@ -381,6 +382,14 @@ const Index = () => {
               </h1>
             </div>
             <div className="flex items-center gap-1.5">
+              <NotificationPanel
+                reminders={reminders}
+                achievements={pyqAchievements}
+                streakDays={stats.currentStreak}
+                tasks={tasks}
+                onCompleteRevision={handleCompleteRevision}
+                onNavigateToRevision={() => setActiveTab('revision')}
+              />
               <ThemeToggle />
               <Button variant="ghost" size="icon" onClick={() => setIsProfileOpen(true)} className="h-9 w-9">
                 <User className="w-4 h-4" />

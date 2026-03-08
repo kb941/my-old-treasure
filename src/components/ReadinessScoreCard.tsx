@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus, Rocket, Target, Zap } from 'lucide-react';
 import { ReadinessResult, getReadinessTrend, SubjectReadiness } from '@/hooks/useReadinessScore';
 
 interface ReadinessScoreCardProps {
@@ -16,7 +16,6 @@ const getBaseItems = (breakdown: ReadinessResult['breakdown']) => [
   { icon: GraduationCap, label: 'Mock Performance', value: breakdown.base.mocks, max: 10, color: 'text-primary' },
 ];
 
-// Mini sparkline SVG
 function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
   if (data.length < 2) return null;
   const max = Math.max(...data, 1);
@@ -30,15 +29,7 @@ function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; c
 
   return (
     <svg width={width} height={height} className="inline-block">
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-      />
-      {/* Dot on last point */}
+      <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
       {data.length > 0 && (() => {
         const lastX = width;
         const lastY = height - ((data[data.length - 1] - min) / range) * (height - 4) - 2;
@@ -63,12 +54,81 @@ function TrendBadge({ trend }: { trend: number[] }) {
   );
 }
 
+// Encouraging "Just Starting" card for low scores
+function JustStartingCard({ score, color, label }: { score: number; color: string; label: string }) {
+  const tips = [
+    { icon: Rocket, text: 'Start with high-weightage subjects first', color: 'text-blue-500' },
+    { icon: Target, text: 'Aim to complete 1 subject per week', color: 'text-emerald-500' },
+    { icon: Zap, text: 'Even 30 min/day builds momentum', color: 'text-amber-500' },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* Motivational header */}
+      <div className="text-center py-2">
+        <div className="text-3xl mb-2">🚀</div>
+        <h3 className="text-base font-semibold">Your Journey Begins!</h3>
+        <p className="text-xs text-muted-foreground mt-1">Every expert was once a beginner. Let's build your readiness step by step.</p>
+      </div>
+
+      {/* Progress ring with encouraging message */}
+      <div className="flex items-center justify-center gap-5">
+        <div className="relative">
+          <svg className="w-20 h-20 transform -rotate-90">
+            <circle cx="40" cy="40" r="34" stroke="hsl(var(--secondary))" strokeWidth="6" fill="none" />
+            <motion.circle
+              cx="40" cy="40" r="34"
+              stroke={color}
+              strokeWidth="6" fill="none" strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 34}
+              initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
+              animate={{ strokeDashoffset: 2 * Math.PI * 34 * (1 - score / 100) }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-bold" style={{ color }}>{Math.round(score)}%</span>
+          </div>
+        </div>
+        <div className="flex-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: `${color}20`, color }}>
+            {label}
+          </span>
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+            You're at the starting line — the perfect place to begin building a strong foundation.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick tips */}
+      <div className="space-y-2">
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Quick wins to boost your score</p>
+        {tips.map((tip, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="flex items-center gap-2.5 p-2.5 bg-muted/30 rounded-lg"
+          >
+            <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center border border-border">
+              <tip.icon className={`w-3.5 h-3.5 ${tip.color}`} />
+            </div>
+            <span className="text-xs font-medium">{tip.text}</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCardProps) {
   const [showDetail, setShowDetail] = useState(false);
   const { score, breakdown, color, label, message } = result;
   const items = getBaseItems(breakdown);
 
   const trendData = useMemo(() => getReadinessTrend().map(t => t.score), [score]);
+  const isJustStarting = score < 10;
 
   if (compact) {
     return (
@@ -109,22 +169,28 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 </span>
                 <TrendBadge trend={trendData} />
               </div>
-              <div className="flex gap-1">
-                {items.map(item => {
-                  const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
-                  return (
-                    <div key={item.label} className="flex-1 h-1 bg-secondary rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-[9px] text-muted-foreground">Tap for breakdown</p>
-                {trendData.length >= 2 && (
-                  <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
-                )}
-              </div>
+              {isJustStarting ? (
+                <p className="text-[10px] text-muted-foreground">🚀 Tap to see how to get started</p>
+              ) : (
+                <>
+                  <div className="flex gap-1">
+                    {items.map(item => {
+                      const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
+                      return (
+                        <div key={item.label} className="flex-1 h-1 bg-secondary rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
+                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[9px] text-muted-foreground">Tap for breakdown</p>
+                    {trendData.length >= 2 && (
+                      <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </motion.div>
@@ -152,7 +218,11 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                   </button>
                 </div>
                 <div className="p-5">
-                  <FullBreakdown result={result} trendData={trendData} />
+                  {isJustStarting ? (
+                    <JustStartingCard score={score} color={color} label={label} />
+                  ) : (
+                    <FullBreakdown result={result} trendData={trendData} />
+                  )}
                 </div>
               </motion.div>
             </motion.div>
@@ -253,7 +323,6 @@ function FullCard({ result, trendData }: { result: ReadinessResult; trendData: n
 
 function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadiness[]; color: string }) {
   const [showAll, setShowAll] = useState(false);
-  // Show top 5 gaps by default
   const displayed = showAll ? subjects : subjects.slice(0, 5);
 
   return (
@@ -392,49 +461,60 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
           <div className="space-y-1.5">
             {breakdown.penalties.details.map((d, i) => (
               <p key={i} className="text-[11px] text-foreground/80 flex items-center gap-1.5">
-                <span className="text-destructive">⚠</span> {d}
+                <span className="text-destructive">✗</span> {d}
               </p>
             ))}
           </div>
         </div>
       )}
 
-      {/* Final Score */}
-      <div className="bg-secondary/50 rounded-lg p-3">
-        <p className="text-xs font-semibold text-center">
-          Final: {breakdown.base.total}
-          {breakdown.bonuses.total > 0 ? ` + ${breakdown.bonuses.total}` : ''}
-          {breakdown.penalties.total < 0 ? ` ${breakdown.penalties.total}` : ''}
-          {' = '}
-          <span className="text-sm" style={{ color }}>{Math.round(score)}%</span>
-        </p>
+      {/* Summary */}
+      <div className="bg-muted/30 rounded-lg p-3 space-y-1.5">
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">Base Score</span>
+          <span className="font-medium">{breakdown.base.total}</span>
+        </div>
+        {breakdown.bonuses.total > 0 && (
+          <div className="flex justify-between text-xs">
+            <span className="text-emerald-600 dark:text-emerald-400">Bonuses</span>
+            <span className="font-medium text-emerald-600 dark:text-emerald-400">+{breakdown.bonuses.total}</span>
+          </div>
+        )}
+        {breakdown.penalties.total < 0 && (
+          <div className="flex justify-between text-xs">
+            <span className="text-destructive">Penalties</span>
+            <span className="font-medium text-destructive">{breakdown.penalties.total}</span>
+          </div>
+        )}
+        <div className="border-t border-border pt-1.5 flex justify-between text-xs">
+          <span className="font-semibold">Final Score</span>
+          <span className="font-bold" style={{ color }}>{Math.round(score)}%</span>
+        </div>
       </div>
 
-      {/* Formula */}
-      <div className="bg-secondary/30 rounded-lg p-3">
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2">🧮 How It's Calculated</h4>
-        <div className="space-y-1 text-[10px] text-muted-foreground">
-          <p>• <strong>Syllabus (35%)</strong> — Main×50% + RR×30% + BTR×20% (adjusts if fewer types enabled), weighted by subject importance</p>
-          <p>• <strong>Revision (20%)</strong> — RR1×40% + RR2×35% + RR3×25%, weighted by subject. Overdue penalty only if 14+ days past revision date; extra penalty for critical subjects (Medicine, Pharma, Micro, Patho, Surgery, OBG, PSM)</p>
-          <p>• <strong>MCQ (20%)</strong> — Volume only if accuracy not tracked for most subjects; otherwise Vol×50% + Accuracy×50%, all weighted by subject</p>
-          <p>• <strong>PYQ (15%)</strong> — Year-based priority (vol + accuracy if tracked) OR chapter-based fallback. Volume only if &lt;50% sessions have accuracy data</p>
-          <p>• <strong>Mocks (10%)</strong> — Recent 60 days or last 3 mocks (whichever more). Avg score×70% + Trend×20% + Consistency×10%</p>
-          <p className="pt-1">• <strong>Bonuses (+15 max)</strong> — Early bird, streak ≥14d, accuracy ≥80%, balanced prep, weekly momentum</p>
-          <p>• <strong>Penalties</strong> — Procrastination (exam near + not studying), critical subjects weak (Medicine/Pharma/Micro/Patho/Surgery/OBG/PSM), mock deficit, inactivity (3d: -1, 7d: -3), accuracy decline, imbalanced study</p>
-          <p className="pt-1">• <strong>Spaced Repetition</strong> — Confidence auto-set to 3★ on first completion. After Final review, 90-day Maintenance cycle repeats. 1★ schedule includes 60-day Final interval.</p>
-        </div>
+      {/* How it works */}
+      <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+        <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1.5">
+          <Lightbulb className="w-3.5 h-3.5 text-primary" />
+          <span className="text-primary">How it's calculated</span>
+        </h4>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          Syllabus (35) + Revision (20) + MCQ (20) + PYQ (15) + Mocks (10) = 100 base points. 
+          Bonuses for streaks, balance, and consistency. Penalties for inactivity or imbalanced prep.
+        </p>
       </div>
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
         <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-            Recommendations
+          <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
+            💡 Recommendations
           </h4>
           <div className="space-y-1.5">
-            {recommendations.map((r, i) => (
-              <p key={i} className="text-[11px] text-foreground/80">{i + 1}. {r}</p>
+            {recommendations.map((rec, i) => (
+              <p key={i} className="text-[11px] text-foreground/80 flex items-start gap-1.5">
+                <span className="text-primary mt-0.5">→</span> {rec}
+              </p>
             ))}
           </div>
         </div>
