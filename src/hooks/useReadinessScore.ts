@@ -611,7 +611,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       message: getMessage(finalScore),
       recommendations: recommendations.slice(0, 4),
     };
-  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate,examName, m cqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes]);
+  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, examName, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes]);
 
   // Persist daily score snapshot for trend tracking
   useEffect(() => {
