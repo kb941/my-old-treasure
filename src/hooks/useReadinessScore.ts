@@ -15,6 +15,7 @@ interface ReadinessInput {
   markingScheme: MarkingScheme;
   pyqYearFrom: number;
   pyqYearTo: number;
+  contentTypes: ContentType[];
 }
 
 export interface SubjectReadiness {
