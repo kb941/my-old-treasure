@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, Check, Calendar, Clock, ChevronRight, AlertTriangle, 
@@ -9,7 +9,6 @@ import { Chapter, Topic, SpacedRepetitionSettings, getScheduleForConfidence, Tas
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isBefore, isToday, startOfDay, addDays, differenceInDays, isAfter } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { RevisionCalendar } from '@/components/RevisionCalendar';
 
@@ -41,14 +40,17 @@ interface RevisionHubProps {
 type ViewFilter = 'all' | 'overdue' | 'today' | 'week' | 'month';
 type ViewMode = 'list' | 'calendar';
 
+const PAGE_SIZE = 15;
+
 export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToTasks, subjects, tasks = [] }: RevisionHubProps) {
   const [filter, setFilter] = useState<ViewFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const getSubjectName = (subjectId: string) => 
-    subjects.find(s => s.id === subjectId)?.name || subjectId;
+  const getSubjectName = useCallback((subjectId: string) => 
+    subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
 
-  // Build all revision items
+  // Build only CURRENT revision items (no future projections for performance)
   const allRevisions = useMemo(() => {
     const items: RevisionItem[] = [];
     const today = startOfDay(new Date());
@@ -71,23 +73,6 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
           isOverdue, isDueToday, confidence: topic.confidence,
           revisionSession: topic.revisionSession, totalSessions: schedule.length,
         });
-
-        // Only generate future sessions for the next 60 days to avoid lag
-        if (!isOverdue || isDueToday) {
-          const maxFutureDate = addDays(today, 60);
-          let futureDate = new Date(topic.nextRevisionDate);
-          for (let i = topic.revisionSession + 1; i < schedule.length; i++) {
-            futureDate = addDays(futureDate, schedule[i].daysAfterPrevious);
-            if (isAfter(futureDate, maxFutureDate)) break;
-            items.push({
-              topicId: topic.id, topicName: topic.name, subjectId: topic.subjectId,
-              chapterId: chapter.id, chapterName: chapter.name, dueDate: futureDate,
-              sessionNumber: i + 1, sessionName: schedule[i].name,
-              isOverdue: false, isDueToday: false, confidence: topic.confidence,
-              revisionSession: i, totalSessions: schedule.length,
-            });
-          }
-        }
       });
     });
 
@@ -97,18 +82,6 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
       return a.dueDate.getTime() - b.dueDate.getTime();
     });
   }, [chapters, srSettings]);
-
-  const unscheduledTopics = useMemo(() => {
-    const items: { topic: Topic; chapterName: string; chapterId: string }[] = [];
-    chapters.forEach(chapter => {
-      chapter.topics.forEach(topic => {
-        if (!topic.nextRevisionDate && topic.lastStudied) {
-          items.push({ topic, chapterName: chapter.name, chapterId: chapter.id });
-        }
-      });
-    });
-    return items;
-  }, [chapters]);
 
   const today = startOfDay(new Date());
   const weekEnd = addDays(today, 7);
@@ -124,6 +97,12 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
     }
   }, [allRevisions, filter]);
 
+  // Reset visible count when filter changes
+  const handleFilterChange = (f: ViewFilter) => {
+    setFilter(f);
+    setVisibleCount(PAGE_SIZE);
+  };
+
   const groups = useMemo(() => {
     const overdue = filtered.filter(r => r.isOverdue);
     const dueToday = filtered.filter(r => r.isDueToday && !r.isOverdue);
@@ -136,10 +115,10 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const todayCount = allRevisions.filter(r => r.isDueToday && !r.isOverdue).length;
   const weekCount = allRevisions.filter(r => !r.isOverdue && !r.isDueToday && isBefore(r.dueDate, weekEnd)).length;
 
-  const isInTasks = (topicId: string) =>
-    tasks.some(t => t.topicId === topicId && t.type === 'revision' && !t.completed);
+  const isInTasks = useCallback((topicId: string) =>
+    tasks.some(t => t.topicId === topicId && t.type === 'revision' && !t.completed), [tasks]);
 
-  const handleAddToTask = (item: RevisionItem) => {
+  const handleAddToTask = useCallback((item: RevisionItem) => {
     if (isInTasks(item.topicId)) {
       toast({ title: "Already in tasks", description: "This revision is already on your board." });
       return;
@@ -152,7 +131,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
       priority: item.isOverdue ? 'high' : 'medium',
     });
     toast({ title: "Added to tasks!", description: `${item.topicName} revision added to your board.` });
-  };
+  }, [isInTasks, onAddToTasks]);
 
   const filters: { id: ViewFilter; label: string; count?: number }[] = [
     { id: 'all', label: 'All' },
@@ -162,11 +141,39 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
     { id: 'month', label: 'This Month' },
   ];
 
+  // Flatten all groups into one list for pagination
+  const flatList = useMemo(() => {
+    const result: { item: RevisionItem; group: string; isCurrent: boolean }[] = [];
+    groups.overdue.forEach(item => result.push({ item, group: 'Overdue', isCurrent: true }));
+    groups.dueToday.forEach(item => result.push({ item, group: 'Due Today', isCurrent: true }));
+    groups.thisWeek.forEach(item => result.push({ item, group: 'This Week', isCurrent: true }));
+    groups.later.forEach(item => result.push({ item, group: 'Upcoming', isCurrent: false }));
+    return result;
+  }, [groups]);
+
+  const visibleItems = flatList.slice(0, visibleCount);
+  const hasMore = visibleCount < flatList.length;
+
+  // Group visible items by their group name for rendering
+  const visibleGroups = useMemo(() => {
+    const map = new Map<string, { items: RevisionItem[]; isCurrent: boolean }>();
+    visibleItems.forEach(({ item, group, isCurrent }) => {
+      if (!map.has(group)) map.set(group, { items: [], isCurrent });
+      map.get(group)!.items.push(item);
+    });
+    return map;
+  }, [visibleItems]);
+
+  const groupIcons: Record<string, React.ReactNode> = {
+    'Overdue': <AlertTriangle className="w-4 h-4 text-destructive" />,
+    'Due Today': <Bell className="w-4 h-4 text-amber-500" />,
+    'This Week': <CalendarDays className="w-4 h-4 text-primary" />,
+    'Upcoming': <Calendar className="w-4 h-4 text-muted-foreground" />,
+  };
+
   const renderRevisionCard = (item: RevisionItem, isCurrent: boolean) => (
-    <motion.div
+    <div
       key={`${item.topicId}-s${item.sessionNumber}`}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
       className={cn(
         "flex items-center gap-3 p-3 rounded-xl transition-colors",
         item.isOverdue ? "bg-destructive/10 border border-destructive/20"
@@ -178,7 +185,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         "w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold",
         item.isOverdue ? "bg-destructive/20 text-destructive"
           : item.isDueToday ? "bg-amber-500/20 text-amber-500"
-          : item.sessionNumber >= item.totalSessions ? "bg-gradient-to-br from-primary to-amber-500 text-white"
+          : item.sessionNumber >= item.totalSessions ? "bg-primary/20 text-primary"
           : "bg-primary/15 text-primary"
       )}>
         {item.isOverdue ? <AlertTriangle className="w-4 h-4" />
@@ -192,12 +199,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
           <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
             {getSubjectName(item.subjectId)} · {item.chapterName}
           </span>
-          <span className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded",
-            item.sessionNumber >= item.totalSessions
-              ? "bg-gradient-to-r from-primary/20 to-amber-500/20 text-primary"
-              : "bg-secondary text-muted-foreground"
-          )}>
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
             {item.sessionName}
           </span>
         </div>
@@ -230,44 +232,25 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
           </Button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
-
-  const renderGroup = (title: string, items: RevisionItem[], icon: React.ReactNode, isCurrent: boolean) => {
-    if (items.length === 0) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 px-1">
-          {icon}
-          <h4 className="text-sm font-semibold">{title}</h4>
-          <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{items.length}</span>
-        </div>
-        <div className="space-y-1.5">
-          {items.map(item => renderRevisionCard(item, isCurrent))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-3">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className={cn("rounded-xl p-3 text-center border", overdueCount > 0 ? "bg-destructive/10 border-destructive/20" : "bg-card border-border")}>
+        <div className={cn("rounded-xl p-3 text-center border", overdueCount > 0 ? "bg-destructive/10 border-destructive/20" : "bg-card border-border")}>
           <p className={cn("text-2xl font-bold", overdueCount > 0 ? "text-destructive" : "text-foreground")}>{overdueCount}</p>
           <p className="text-[10px] text-muted-foreground font-medium">Overdue</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-          className="bg-amber-500/10 rounded-xl p-3 text-center border border-amber-500/20">
+        </div>
+        <div className="bg-amber-500/10 rounded-xl p-3 text-center border border-amber-500/20">
           <p className="text-2xl font-bold text-amber-500">{todayCount}</p>
           <p className="text-[10px] text-muted-foreground font-medium">Due Today</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="bg-primary/10 rounded-xl p-3 text-center border border-primary/20">
+        </div>
+        <div className="bg-primary/10 rounded-xl p-3 text-center border border-primary/20">
           <p className="text-2xl font-bold text-primary">{weekCount}</p>
           <p className="text-[10px] text-muted-foreground font-medium">This Week</p>
-        </motion.div>
+        </div>
       </div>
 
       {/* View mode toggle + filter pills */}
@@ -290,7 +273,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         {viewMode === 'list' && (
           <div className="flex gap-1.5 overflow-x-auto flex-1">
             {filters.map(f => (
-              <button key={f.id} onClick={() => setFilter(f.id)} className={cn(
+              <button key={f.id} onClick={() => handleFilterChange(f.id)} className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
                 filter === f.id ? "gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               )}>
@@ -306,52 +289,39 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
       {/* Content */}
       {viewMode === 'calendar' ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-card rounded-2xl p-4 shadow-card border border-border">
+        <div className="bg-card rounded-2xl p-4 shadow-card border border-border">
           <RevisionCalendar chapters={chapters} srSettings={srSettings} />
-        </motion.div>
-      ) : allRevisions.length === 0 && unscheduledTopics.length === 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+        </div>
+      ) : allRevisions.length === 0 ? (
+        <div className="text-center py-16">
           <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mx-auto mb-4">
             <RotateCcw className="w-7 h-7 text-muted-foreground" />
           </div>
           <h3 className="font-semibold text-lg mb-1">No Revisions Yet</h3>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            Start studying topics and revisions will be automatically scheduled based on your confidence level.
+            Start studying topics and revisions will be automatically scheduled.
           </p>
-        </motion.div>
+        </div>
       ) : (
-        <div className="space-y-6">
-          {renderGroup('Overdue', groups.overdue, <AlertTriangle className="w-4 h-4 text-destructive" />, true)}
-          {renderGroup('Due Today', groups.dueToday, <Bell className="w-4 h-4 text-amber-500" />, true)}
-          {renderGroup('This Week', groups.thisWeek, <CalendarDays className="w-4 h-4 text-primary" />, true)}
-          {renderGroup('Upcoming', groups.later, <Calendar className="w-4 h-4 text-muted-foreground" />, false)}
-
-          {unscheduledTopics.length > 0 && (
-            <div className="space-y-2">
+        <div className="space-y-4">
+          {Array.from(visibleGroups.entries()).map(([groupName, { items, isCurrent }]) => (
+            <div key={groupName} className="space-y-2">
               <div className="flex items-center gap-2 px-1">
-                <BookOpen className="w-4 h-4 text-muted-foreground" />
-                <h4 className="text-sm font-semibold text-muted-foreground">Completed All Sessions</h4>
-                <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{unscheduledTopics.length}</span>
+                {groupIcons[groupName]}
+                <h4 className="text-sm font-semibold">{groupName}</h4>
+                <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{items.length}</span>
               </div>
               <div className="space-y-1.5">
-                {unscheduledTopics.map(({ topic, chapterName }) => (
-                  <div key={topic.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/20">
-                    <div className="w-10 h-10 rounded-full bg-green-500/15 flex items-center justify-center shrink-0">
-                      <Check className="w-4 h-4 text-green-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{topic.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{getSubjectName(topic.subjectId)} · {chapterName} · All sessions done</p>
-                    </div>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <Star key={s} className={cn("w-2.5 h-2.5", s <= topic.confidence ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20")} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                {items.map(item => renderRevisionCard(item, isCurrent))}
               </div>
+            </div>
+          ))}
+
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" size="sm" onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)} className="text-xs">
+                <ChevronDown className="w-3 h-3 mr-1" /> Show more ({flatList.length - visibleCount} remaining)
+              </Button>
             </div>
           )}
         </div>
@@ -359,7 +329,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
       <div className="pt-2 border-t border-border">
         <p className="text-xs text-muted-foreground text-center">
-          💡 Revisions are auto-scheduled based on your confidence stars. Higher confidence = longer intervals.
+          💡 Revisions auto-scheduled by confidence. Higher confidence = longer intervals.
         </p>
       </div>
     </div>

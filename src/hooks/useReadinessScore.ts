@@ -254,11 +254,13 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
-      const mcqGoalForSub = mcqGoalPerSubject * subTopics.length;
+      // Use actual topic targetQuestions sum instead of mcqGoalPerSubject * count
+      // This ensures MCQ checkbox toggles (which add targetQuestions) properly count
+      const mcqGoalForSub = subTopics.reduce((s, t) => s + t.targetQuestions, 0) || 1;
       const weight = sub.weightage / totalWeightage;
 
       if (mcqsDone > 0) hasMcqData = true;
-      weightedMcqVolume += Math.min(mcqsDone / (mcqGoalForSub || 1), 1) * weight;
+      weightedMcqVolume += Math.min(mcqsDone / mcqGoalForSub, 1) * weight;
 
       // Accuracy from mock test subject scores
       const subScores = mockTests.flatMap(m => m.subjectScores).filter(s => s.subjectId === sub.id);
