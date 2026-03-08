@@ -373,7 +373,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
-    if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
+    if (hasAnyProgress && weightedSyllabusdSyllabusCoverage > 0.05) {
       const weak = subjects.filter(s => criticalSubjectIds.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
         const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
@@ -419,7 +419,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     let imbalanced = 0;
-    if (hasAnyProgress && blendedCoverage > 0.1) {
+    if (hasAnyProweightedSyllabus& blendedCoverage > 0.1) {
       const neglected = subjects.filter(sub => {
         if (sub.weightage < 20) return false;
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
