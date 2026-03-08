@@ -15,11 +15,13 @@ interface FocusModeProps {
   onTaskDone: (taskId: string, duration: number, confidence?: number) => void;
 }
 
-const typeIcons = {
+const typeIcons: Record<string, typeof BookOpen> = {
   study: BookOpen,
   revision: Brain,
   mcq: FileText,
   mock: FileText,
+  pyq: FileText,
+  test: FileText,
 };
 
 type TimerPhase = 'study' | 'short-break' | 'long-break' | 'custom-break';
