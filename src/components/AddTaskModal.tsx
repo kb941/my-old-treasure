@@ -740,7 +740,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
 
             {/* Header */}
             <div className="flex items-center justify-between p-4 shrink-0">
-              <h2 className="text-lg font-bold">Add Task</h2>
+              <h2 className="text-lg font-bold">{isEditMode ? 'Edit Task' : 'Add Task'}</h2>
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="w-5 h-5" />
               </Button>
