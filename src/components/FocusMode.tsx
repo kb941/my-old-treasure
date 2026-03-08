@@ -260,11 +260,12 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                     if (currentTask) {
                       setSkippedTasks(prev => new Set(prev).add(currentTask.id));
                     }
-                    setIsRunning(false);
                     setPhase('study');
                     setTimeRemaining(pomodoroSettings.studyDuration * 60);
                     setTotalStudyTime(0);
                     setSessionCount(0);
+                    // Auto-start next task
+                    setTimeout(() => setIsRunning(true), 100);
                   }}>
                     <SkipForward className="w-4 h-4" />
                   </Button>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, BookOpen, BarChart3, FileText, User, Rocket, RotateCcw } from 'lucide-react';
+import { Plus, BookOpen, BarChart3, FileText, User, Focus, RotateCcw } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
 import { StatsBar } from '@/components/StatsBar';
@@ -482,8 +482,8 @@ const Index = () => {
               />
               {tasks.filter(t => t.column === 'today' && !t.completed).length > 0 && (
                 <div className="flex justify-center">
-                  <Button onClick={() => { setFocusTaskId(null); setIsFocusMode(true); }} className="gradient-primary text-primary-foreground shadow-glow px-6 py-5 text-sm rounded-xl">
-                    <Rocket className="w-4 h-4 mr-2" /> Start Focus 🚀
+                  <Button onClick={() => { setFocusTaskId(null); setIsFocusMode(true); }} variant="outline" className="border-primary/30 text-primary hover:bg-primary/5 px-6 py-5 text-sm rounded-xl">
+                    <Focus className="w-4 h-4 mr-2" /> Focus Mode
                   </Button>
                 </div>
               )}
