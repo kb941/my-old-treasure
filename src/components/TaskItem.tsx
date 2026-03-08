@@ -260,6 +260,11 @@ export function TaskItem({
 
         {/* Actions */}
         <div className="flex flex-col gap-0.5">
+          {onEdit && (
+            <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1 hover:bg-secondary rounded transition-colors">
+              <Pencil className="w-3 h-3 text-muted-foreground" />
+            </button>
+          )}
           {canMoveLeft && (
             <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }} className="p-1 hover:bg-secondary rounded transition-colors">
               <ArrowLeft className="w-3 h-3 text-muted-foreground" />
