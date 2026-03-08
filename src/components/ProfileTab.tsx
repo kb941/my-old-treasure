@@ -66,6 +66,7 @@ interface ProfileTabProps {
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
   onClearSampleData?: () => void;
+  onRecalculateReadinessFromStages?: () => void;
 }
 
 export function ProfileTab(props: ProfileTabProps) {
