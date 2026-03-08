@@ -574,37 +574,7 @@ const Index = () => {
               {/* Weekly Stats + Readiness */}
               <div className="grid lg:grid-cols-2 gap-4">
                 <WeeklyStats weeklyHours={[6,7,5,8,4,9,7]} weeklyAccuracy={[72,75,68,78,71,80,74]} />
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-xl p-5 shadow-card border border-border"
-                >
-                  <h3 className="font-semibold text-base mb-4">Exam Readiness</h3>
-                  <div className="flex items-center justify-center py-6">
-                    <div className="relative">
-                      <svg className="w-40 h-40 transform -rotate-90">
-                        <circle cx="80" cy="80" r="72" stroke="hsl(var(--secondary))" strokeWidth="10" fill="none" />
-                        <motion.circle
-                          cx="80" cy="80" r="72"
-                          stroke="url(#readinessGrad)" strokeWidth="10" fill="none" strokeLinecap="round"
-                          strokeDasharray={2 * Math.PI * 72}
-                          initial={{ strokeDashoffset: 2 * Math.PI * 72 }}
-                          animate={{ strokeDashoffset: 2 * Math.PI * 72 * (1 - 0.35) }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
-                        />
-                        <defs>
-                          <linearGradient id="readinessGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="hsl(230, 60%, 52%)" />
-                            <stop offset="100%" stopColor="hsl(152, 60%, 42%)" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold text-gradient-primary">35%</span>
-                        <span className="text-xs text-muted-foreground">Ready</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                <ReadinessScoreCard result={readinessResult} />
               </div>
             </div>
           )}
