@@ -96,7 +96,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
           {expandedCard === 'score' && (
             <>
               <div className="text-center py-2">
-                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/800</p>
+                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}</p>
               </div>
               {scoreData.length > 0 && (
                 <div className="h-40">
@@ -104,7 +104,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
                     <LineChart data={scoreData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} domain={[0, 800]} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} domain={[0, markingScheme.totalMarks || 800]} />
                       <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
                       <Line type="monotone" dataKey="score" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: 'hsl(var(--primary))', r: 3 }} />
                     </LineChart>
@@ -241,7 +241,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
             <Target className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground">Predicted Score</span>
           </div>
-          <p className="text-2xl font-bold text-gradient-primary">{prediction.predictedScore}/800</p>
+          <p className="text-2xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className={cardClass} onClick={() => setExpandedCard('marks')}>
@@ -340,8 +340,8 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
                   <p className="text-xs text-muted-foreground">{test.source} • {new Date(test.date).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gradient-primary">{test.score}/800</p>
-                  <p className="text-xs text-muted-foreground">{Math.round((test.correctAnswers / test.attemptedQuestions) * 100)}%</p>
+                   <p className="font-bold text-gradient-primary">{test.score}/{markingScheme.totalMarks || 800}</p>
+                   <p className="text-xs text-muted-foreground">{Math.round((test.correctAnswers / test.attemptedQuestions) * 100)}%</p>
                 </div>
               </div>
             ))}

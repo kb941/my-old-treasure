@@ -210,7 +210,7 @@ const Index = () => {
   const handleLogMockTest = (mockTest: MockTest) => {
     setMockTests(prev => [mockTest, ...prev]);
     setStats(s => ({ ...s, totalXP: s.totalXP + 25 }));
-    toast({ title: "Mock test logged! +25 XP 📝", description: `Score: ${mockTest.score}/800` });
+    toast({ title: "Mock test logged! +25 XP 📝", description: `Score: ${mockTest.score}/${markingScheme.totalMarks || 800}` });
   };
 
   const handleSaveProfile = (data: ProfileData) => {

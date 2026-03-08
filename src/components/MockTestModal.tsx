@@ -64,7 +64,7 @@ export function MockTestModal({ isOpen, onClose, onLog, mode = 'mock', pyqYearFr
     }
   }, [subjectScores, mode]);
 
-  const normalizedScore = Math.round((correctAnswers / totalQuestions) * 800);
+  const normalizedScore = Math.round((correctAnswers / totalQuestions) * 800); // Legacy normalized
   const accuracy = attemptedQuestions > 0 ? Math.round((correctAnswers / attemptedQuestions) * 100) : 0;
 
   const handleSubjectScoreChange = (subjectId: string, field: 'total' | 'correct', value: number) => {
