@@ -96,7 +96,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
           {expandedCard === 'score' && (
             <>
               <div className="text-center py-2">
-                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/800</p>
+                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}</p>
               </div>
               {scoreData.length > 0 && (
                 <div className="h-40">
