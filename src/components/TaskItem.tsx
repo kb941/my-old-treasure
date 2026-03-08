@@ -57,6 +57,7 @@ export function TaskItem({
   const [showConfidencePicker, setShowConfidencePicker] = useState(false);
   const [selectedConfidence, setSelectedConfidence] = useState(3);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkboxRef = useRef<HTMLButtonElement | null>(null);
 
   const currentColumnIndex = columnOrder.indexOf(task.column);
   const canMoveLeft = currentColumnIndex > 0;
