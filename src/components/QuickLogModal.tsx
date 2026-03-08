@@ -83,6 +83,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
     setPyqExam('NEET PG');
     setPyqMode('chapter');
     setPyqSessions([]);
+    setTopicSearch('');
   };
 
   useEffect(() => {
