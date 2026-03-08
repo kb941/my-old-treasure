@@ -459,7 +459,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
     if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
-      const weak = subjects.filter(s => criticalSubjectIds.includes(s.id)).filter(sub => {
+      const weak = subjects.filter(s => CRITICAL_SUBJECT_IDS.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
         const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
         return subTopics.length > 0 && (done / subTopics.length) < 0.5;
