@@ -347,7 +347,7 @@ const Index = () => {
   ];
 
   return (
-    <div className={`min-h-screen bg-background ${isMobile ? 'pb-24' : ''}`}>
+    <div className={`min-h-screen bg-background ${isMobile ? 'pb-28' : ''}`}>
       {/* Header */}
       <header className="sticky top-0 z-40 glass border-b border-border">
         <div className="container py-3">
