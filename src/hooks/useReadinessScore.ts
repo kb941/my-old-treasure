@@ -11,6 +11,7 @@ interface ReadinessInput {
   mcqLogs: { date: string; count: number }[];
   pyqData: PYQEntry[];
   examDate: Date;
+  examName: string;
   mcqGoalPerSubject: number;
   markingScheme: MarkingScheme;
   pyqYearFrom: number;
@@ -99,7 +100,7 @@ function getMessage(score: number): string {
 export function useReadinessScore(input: ReadinessInput): ReadinessResult {
   const {
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs,
-    pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
+    pyqData, examDate, examName, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
   } = input;
 
   const result = useMemo(() => {
@@ -204,11 +205,11 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const syllabusScore = weightedSyllabusCoverage * 35;
 
-    // ===== 2. REVISION QUALITY (20%) — weightage-based per subject =====
+    // ===== 2. REVISION QUALITY (20%) — normalized among started-main topics =====
     const now = new Date();
 
     let weightedRevision = 0;
-    let hasRevisionData = false;
+    let revisionEligibleWeight = 0;
 
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
@@ -217,12 +218,11 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
       const weight = sub.weightage / totalWeightage;
       const subMainCount = subWithMain.length;
+      revisionEligibleWeight += weight;
 
       const rr1 = subWithMain.filter(t => t.revisionSession >= 1).length;
       const rr2 = subWithMain.filter(t => t.revisionSession >= 2).length;
       const rr3 = subWithMain.filter(t => t.revisionSession >= 3).length;
-
-      if (rr1 > 0) hasRevisionData = true;
 
       const subRevision = (
         (rr1 / subMainCount) * 0.4 +
@@ -248,7 +248,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       weightedRevision += Math.max(0, subRevision - subOverduePenalty) * weight;
     });
 
-    const revisionScore = weightedRevision * 20;
+    const normalizedRevision = revisionEligibleWeight > 0 ? (weightedRevision / revisionEligibleWeight) : 0;
+    const revisionScore = normalizedRevision * 20;
 
     // ===== 3. MCQ PRACTICE (20%) — weightage-based per subject =====
     let weightedMcqVolume = 0;
@@ -298,8 +299,20 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     // ===== 4. PYQ COMPLETION (15%) =====
-    // Priority: year/paper-based → 100% if available; chapter-based → 100% if no paper data
-    // If both exist, use year-based only.
+    // Count scoped exam/year paper PYQs and chapter-level PYQs; use the better score.
+
+    const parseYear = (session: string) => {
+      const match = session.match(/(\d{4})/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    const scopedPyqEntries = pyqData.filter(e => {
+      if (e.subjectId === 'all') return false;
+      if (e.exam !== examName) return false;
+      const year = parseYear(e.session);
+      if (!year) return true;
+      return year >= pyqYearFrom && year <= pyqYearTo;
+    });
 
     // Dimension A: Chapter-wise PYQs (topic.pyqDone) — weightage-based
     let weightedChapterPyq = 0;
@@ -317,11 +330,10 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let weightedPaperPyq = 0;
     let weightedPyqAccuracy = 0;
     let hasPaperPyqData = false;
-    const pyqSubjectEntries = pyqData.filter(e => e.subjectId !== 'all');
-    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
+    const pyqsDone = scopedPyqEntries.filter(e => e.done).length;
 
     subjects.forEach(sub => {
-      const subEntries = pyqSubjectEntries.filter(e => e.subjectId === sub.id);
+      const subEntries = scopedPyqEntries.filter(e => e.subjectId === sub.id);
       if (subEntries.length === 0) return;
       const done = subEntries.filter(e => e.done).length;
       if (done > 0) hasPaperPyqData = true;
@@ -336,23 +348,32 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     });
 
     // Check if enough PYQ sessions have accuracy data
-    const pyqEntriesWithAccuracy = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
-    const pyqDoneEntries = pyqSubjectEntries.filter(e => e.done).length;
+    const pyqEntriesWithAccuracy = scopedPyqEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
+    const pyqDoneEntries = scopedPyqEntries.filter(e => e.done).length;
     const hasEnoughPyqAccuracy = pyqDoneEntries > 0 && pyqEntriesWithAccuracy >= pyqDoneEntries * 0.5;
 
-    let pyqScore = 0;
+    const chapterPyqScore = hasChapterPyqData ? weightedChapterPyq * 15 : 0;
+
+    let paperPyqScore = 0;
     if (hasPaperPyqData) {
       if (hasEnoughPyqAccuracy) {
         // Year-based: 70% volume + 30% accuracy
         const volumeComponent = weightedPaperPyq * 70;
         const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
-        pyqScore = (volumeComponent + accComponent) * 15 / 100;
+        paperPyqScore = (volumeComponent + accComponent) * 15 / 100;
       } else {
         // Volume only (not enough accuracy data)
-        pyqScore = weightedPaperPyq * 15;
+        paperPyqScore = weightedPaperPyq * 15;
       }
+    }
+
+    let pyqScore = 0;
+    if (hasPaperPyqData && hasChapterPyqData) {
+      pyqScore = Math.max(paperPyqScore, chapterPyqScore);
+    } else if (hasPaperPyqData) {
+      pyqScore = paperPyqScore;
     } else if (hasChapterPyqData) {
-      pyqScore = weightedChapterPyq * 15;
+      pyqScore = chapterPyqScore;
     }
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
@@ -547,7 +568,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
-    if (pyqsDone < pyqSubjectEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
+    if (pyqsDone < scopedPyqEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
     if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
       recommendations.push(`Biggest gap: ${subjectBreakdown[0].subjectName} (${subjectBreakdown[0].syllabusPct}% done)`);
     }
@@ -590,7 +611,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       message: getMessage(finalScore),
       recommendations: recommendations.slice(0, 4),
     };
-  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes]);
+  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, examName, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes]);
 
   // Persist daily score snapshot for trend tracking
   useEffect(() => {

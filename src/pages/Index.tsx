@@ -100,7 +100,7 @@ const Index = () => {
 
   const readinessResult = useReadinessScore({
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData,
-    examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
+    examDate, examName, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo, contentTypes,
   });
 
   // Build achievements including PYQ milestones
