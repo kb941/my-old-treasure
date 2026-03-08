@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, RotateCcw, Coffee, CheckCircle2, Star, Trash2 } from 'lucide-react';
+import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, RotateCcw, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
