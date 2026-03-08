@@ -312,7 +312,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={() => setShowDetail(true)}
-          className={`rounded-xl p-3 border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] ${phase.bgColor} ${phase.borderColor}`}
+          className="rounded-xl p-3 border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] bg-card border-border"
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
@@ -336,8 +336,8 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-xs font-semibold">Exam Readiness</span>
-                <span className={`text-[8px] font-bold bg-gradient-to-r ${phase.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
-                  {phase.emoji} {phase.name}
+                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${color}20`, color }}>
+                  {label}
                 </span>
                 <TrendBadge trend={trendData} />
               </div>

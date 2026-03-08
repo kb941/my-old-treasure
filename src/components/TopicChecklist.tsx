@@ -42,6 +42,15 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
     
     const updates: Partial<Topic> = { completedStages: newStages, pyqDone };
     
+    // When marking MCQ stage as complete, increment questionsSolved by targetQuestions
+    if (!wasComplete && stageId === 'mcqs') {
+      updates.questionsSolved = topic.questionsSolved + topic.targetQuestions;
+    }
+    // When unmarking MCQ stage, reset questionsSolved
+    if (wasComplete && stageId === 'mcqs') {
+      updates.questionsSolved = Math.max(0, topic.questionsSolved - topic.targetQuestions);
+    }
+    
     // When marking a scorable stage (main/RR/BTR) as complete, auto-set confidence to 3 and start SR
     if (!wasComplete && isScorableStage && topic.confidence === 0) {
       updates.confidence = 3;
