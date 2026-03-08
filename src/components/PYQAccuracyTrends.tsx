@@ -43,7 +43,6 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
     });
   }, [pyqData]);
 
-  // Subject-wise breakdown
   const subjectBreakdown = useMemo(() => {
     if (!pyqData.length || !subjects.length) return [];
     return subjects.map(sub => {
@@ -79,21 +78,15 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
     return '#ef4444';
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl p-5 shadow-card border border-border space-y-5"
-    >
-      <div className="flex items-center gap-2">
-        <FileText className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-base">PYQ Analysis</h3>
-      </div>
+  // Limit subject breakdown to avoid overflow
+  const displayedSubjects = subjectBreakdown.slice(0, 10);
 
+  return (
+    <div className="space-y-3">
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2">
         {overallStats.map(stat => (
-          <div key={stat.name} className="bg-secondary/30 rounded-lg p-2.5 text-center">
+          <div key={stat.name} className="bg-card rounded-xl p-3 border border-border text-center">
             <span className="text-[10px] text-muted-foreground block">{stat.name}</span>
             <span className="text-sm font-bold text-foreground">
               {stat.accuracy !== null ? `${stat.accuracy}%` : '—'}
@@ -105,11 +98,11 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
 
       {/* Accuracy Trend Chart */}
       {hasData ? (
-        <div>
+        <div className="bg-card rounded-xl p-4 border border-border">
           <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> Accuracy Over Sessions
           </h4>
-          <div className="h-40">
+          <div className="h-40 w-full overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -135,7 +128,7 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+        <div className="bg-card rounded-xl border border-border flex flex-col items-center justify-center py-8 text-muted-foreground">
           <TrendingUp className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-xs">Log PYQ marks to see accuracy trends</p>
         </div>
@@ -143,13 +136,13 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
 
       {/* Subject-wise Breakdown */}
       {hasSubjectData && (
-        <div>
+        <div className="bg-card rounded-xl p-4 border border-border">
           <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
             <BarChart3 className="w-3 h-3" /> Subject-wise Accuracy (weakest first)
           </h4>
-          <div className="h-48">
+          <div className="h-48 w-full overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={subjectBreakdown} margin={{ top: 5, right: 5, left: -20, bottom: 5 }} layout="vertical">
+              <BarChart data={displayedSubjects} margin={{ top: 5, right: 5, left: -20, bottom: 5 }} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                 <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(v) => `${v}%`} />
                 <YAxis type="category" dataKey="shortName" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} width={50} />
@@ -162,14 +155,13 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
                   }}
                 />
                 <Bar dataKey="accuracy" radius={[0, 4, 4, 0]}>
-                  {subjectBreakdown.map((entry, index) => (
+                  {displayedSubjects.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={getBarColor(entry.accuracy || 0)} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-          {/* Weakest subjects callout */}
           {subjectBreakdown.length >= 3 && (
             <div className="mt-2 p-2.5 bg-destructive/5 border border-destructive/20 rounded-lg">
               <div className="flex items-center gap-1.5 mb-1">
@@ -183,6 +175,6 @@ export function PYQAccuracyTrends({ subjects }: PYQAccuracyTrendsProps) {
           )}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

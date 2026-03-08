@@ -77,10 +77,8 @@ export function AnalyticsTab({
           <>
             <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
             <ReadinessScoreCard result={readinessResult} compact />
-            <div className="grid grid-cols-2 gap-3">
-              <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
-              <McqWeeklyChart mcqLogs={mcqLogs} />
-            </div>
+            <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
+            <McqWeeklyChart mcqLogs={mcqLogs} />
             <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={onViewAchievements} />
           </>
         )}

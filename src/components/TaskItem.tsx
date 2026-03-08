@@ -20,6 +20,16 @@ const priorityColors = {
   low: 'border-l-muted-foreground',
 };
 
+// Type-based color accents for the task card
+const typeAccents: Record<string, { bg: string; text: string; dot: string }> = {
+  study: { bg: 'bg-blue-500/8', text: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' },
+  revision: { bg: 'bg-violet-500/8', text: 'text-violet-600 dark:text-violet-400', dot: 'bg-violet-500' },
+  mcq: { bg: 'bg-amber-500/8', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' },
+  mock: { bg: 'bg-emerald-500/8', text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  pyq: { bg: 'bg-rose-500/8', text: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-500' },
+  test: { bg: 'bg-teal-500/8', text: 'text-teal-600 dark:text-teal-400', dot: 'bg-teal-500' },
+};
+
 const columnOrder: TaskColumn[] = ['backlog', 'week', 'today', 'done'];
 
 const DEFAULT_POMODORO: PomodoroSettings = {
@@ -49,6 +59,7 @@ export function TaskItem({
   pomodoroSettings = DEFAULT_POMODORO
 }: TaskItemProps) {
   const Icon = typeIcons[task.type];
+  const accent = typeAccents[task.type] || typeAccents.study;
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [phase, setPhase] = useState<TimerPhase>('study');
   const [sessionCount, setSessionCount] = useState(0);
@@ -157,8 +168,9 @@ export function TaskItem({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       className={cn(
-        "bg-card rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
+        "rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
         priorityColors[task.priority],
+        accent.bg,
         task.completed && "opacity-50",
         isDraggable && "cursor-grab active:cursor-grabbing"
       )}
@@ -202,8 +214,9 @@ export function TaskItem({
             {task.title}
           </p>
           <div className="flex items-center gap-2 mt-1">
-            <Icon className="w-3 h-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground capitalize">{task.type}</span>
+            <div className={cn("w-1.5 h-1.5 rounded-full", accent.dot)} />
+            <Icon className={cn("w-3 h-3", accent.text)} />
+            <span className={cn("text-xs capitalize font-medium", accent.text)}>{task.type}</span>
             <span className="text-xs text-muted-foreground">·</span>
             <Clock className="w-3 h-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{task.duration}m</span>
