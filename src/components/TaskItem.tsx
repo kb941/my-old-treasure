@@ -38,12 +38,13 @@ interface TaskItemProps {
   onStartFocus?: (taskId: string) => void;
   showTimer?: boolean;
   isDraggable?: boolean;
+  isEditMode?: boolean;
   pomodoroSettings?: PomodoroSettings;
 }
 
 export function TaskItem({
   task, onToggle, onMove, onTimerComplete, onDone, onDelete, onEdit, onStartFocus,
-  showTimer = false, isDraggable = false,
+  showTimer = false, isDraggable = false, isEditMode = false,
   pomodoroSettings = DEFAULT_POMODORO
 }: TaskItemProps) {
   const Icon = typeIcons[task.type];
