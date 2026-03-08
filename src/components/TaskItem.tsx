@@ -14,10 +14,14 @@ const typeIcons: Record<string, typeof BookOpen> = {
   test: FileText,
 };
 
-const priorityColors = {
-  high: 'border-l-destructive',
-  medium: 'border-l-primary',
-  low: 'border-l-muted-foreground',
+// Type-based left border colors
+const typeBorderColors: Record<string, string> = {
+  study: 'border-l-blue-500',
+  revision: 'border-l-violet-500',
+  mcq: 'border-l-amber-500',
+  mock: 'border-l-emerald-500',
+  pyq: 'border-l-rose-500',
+  test: 'border-l-teal-500',
 };
 
 // Type-based color accents for the task card
