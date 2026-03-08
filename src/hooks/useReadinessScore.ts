@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme, SpacedRepetitionSettings } from '@/types';
+import { useMemo, useEffect } from 'react';
+import { Chapter, Subject, MockTest, UserStats, StudyLog, MarkingScheme } from '@/types';
 import { PYQEntry } from '@/components/PYQTracker';
 
 interface ReadinessInput {
@@ -15,6 +15,18 @@ interface ReadinessInput {
   markingScheme: MarkingScheme;
   pyqYearFrom: number;
   pyqYearTo: number;
+}
+
+export interface SubjectReadiness {
+  subjectId: string;
+  subjectName: string;
+  weightage: number;
+  syllabusPct: number;       // % of topics with any stage done
+  mainVideoPct: number;      // % with main-video
+  revisionPct: number;       // % with RR1+
+  mcqProgress: number;       // questionsSolved vs goal
+  contribution: number;      // how much this subject contributes to total
+  gap: number;               // how much score is lost from this subject
 }
 
 export interface ReadinessBreakdown {
@@ -45,6 +57,7 @@ export interface ReadinessBreakdown {
     total: number;
     details: string[];
   };
+  subjectBreakdown: SubjectReadiness[];
 }
 
 export interface ReadinessResult {
@@ -56,13 +69,19 @@ export interface ReadinessResult {
   recommendations: string[];
 }
 
+export interface ReadinessSnapshot {
+  date: string;
+  score: number;
+}
+
 function getColorAndLabel(score: number): { color: string; label: string } {
   if (score >= 80) return { color: 'hsl(152, 60%, 42%)', label: 'Exam Ready' };
   if (score >= 70) return { color: 'hsl(142, 60%, 45%)', label: 'Nearly Ready' };
   if (score >= 60) return { color: 'hsl(45, 93%, 47%)', label: 'On Track' };
   if (score >= 50) return { color: 'hsl(30, 90%, 50%)', label: 'Needs Focus' };
   if (score >= 40) return { color: 'hsl(0, 72%, 55%)', label: 'Behind Schedule' };
-  return { color: 'hsl(0, 80%, 50%)', label: 'Urgent Action Needed' };
+  if (score >= 20) return { color: 'hsl(0, 65%, 50%)', label: 'Getting Started' };
+  return { color: 'hsl(220, 10%, 50%)', label: 'Just Beginning' };
 }
 
 function getMessage(score: number): string {
@@ -72,37 +91,81 @@ function getMessage(score: number): string {
   if (score >= 55) return "Decent progress. Intensify your efforts ⚡";
   if (score >= 45) return "Need to accelerate. Review your strategy ⚠️";
   if (score >= 30) return "Early stages — keep building momentum 📚";
-  return "Just getting started. Begin with your syllabus 🌱";
+  if (score >= 10) return "You've started! Every topic completed counts 🌱";
+  return "Begin by marking topics as done in Subjects tab 📖";
 }
 
 export function useReadinessScore(input: ReadinessInput): ReadinessResult {
-  return useMemo(() => {
-    const { chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo } = input;
+  const {
+    chapters, subjects, mockTests, stats, studyLogs, mcqLogs,
+    pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo,
+  } = input;
 
+  const result = useMemo(() => {
     const allTopics = chapters.flatMap(ch => ch.topics);
     const totalTopics = allTopics.length;
     const totalWeightage = subjects.reduce((s, sub) => s + sub.weightage, 0) || 200;
 
-    // Determine if user has meaningful activity (gate for penalties)
+    // Activity gates for penalties
     const hasAnyProgress = allTopics.some(t => t.completedStages.length > 0);
     const hasStudyLogs = studyLogs.length > 0;
-    const hasMocks = mockTests.length > 0;
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
-    let weightedCoverage = 0;
+    // Count topics with ANY completed stage (not just main-video) for broader sensitivity,
+    // but weight main-video completion higher (70% of syllabus score) vs any-stage (30%)
+    let weightedMainCoverage = 0;
+    let weightedAnyCoverage = 0;
+    const subjectBreakdown: SubjectReadiness[] = [];
+
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-      if (subTopics.length === 0) return;
+      if (subTopics.length === 0) {
+        subjectBreakdown.push({
+          subjectId: sub.id, subjectName: sub.name, weightage: sub.weightage,
+          syllabusPct: 0, mainVideoPct: 0, revisionPct: 0, mcqProgress: 0,
+          contribution: 0, gap: sub.weightage / totalWeightage * 35,
+        });
+        return;
+      }
+
       const withMain = subTopics.filter(t => t.completedStages.includes('main-video')).length;
-      const coverage = withMain / subTopics.length;
-      weightedCoverage += coverage * (sub.weightage / totalWeightage);
+      const withAny = subTopics.filter(t => t.completedStages.length > 0).length;
+      const withRR1 = subTopics.filter(t => t.revisionSession >= 1).length;
+      const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
+      const mcqGoal = mcqGoalPerSubject * subTopics.length;
+
+      const mainPct = withMain / subTopics.length;
+      const anyPct = withAny / subTopics.length;
+      const weight = sub.weightage / totalWeightage;
+
+      weightedMainCoverage += mainPct * weight;
+      weightedAnyCoverage += anyPct * weight;
+
+      // Subject contribution to syllabus score
+      const subContribution = (mainPct * 0.7 + anyPct * 0.3) * weight * 35;
+      const maxContribution = weight * 35;
+
+      subjectBreakdown.push({
+        subjectId: sub.id,
+        subjectName: sub.name,
+        weightage: sub.weightage,
+        syllabusPct: Math.round(anyPct * 100),
+        mainVideoPct: Math.round(mainPct * 100),
+        revisionPct: subTopics.length > 0 ? Math.round((withRR1 / subTopics.length) * 100) : 0,
+        mcqProgress: mcqGoal > 0 ? Math.round((mcqsDone / mcqGoal) * 100) : 0,
+        contribution: Math.round(subContribution * 10) / 10,
+        gap: Math.round((maxContribution - subContribution) * 10) / 10,
+      });
     });
-    const syllabusScore = weightedCoverage * 35;
+
+    // Blend: 70% main-video weight + 30% any-stage weight for more responsive scoring
+    const blendedCoverage = weightedMainCoverage * 0.7 + weightedAnyCoverage * 0.3;
+    const syllabusScore = blendedCoverage * 35;
 
     // ===== 2. REVISION QUALITY (20%) =====
     const topicsWithMain = allTopics.filter(t => t.completedStages.includes('main-video'));
     const topicsWithMainCount = topicsWithMain.length || 1;
-    
+
     const rr1 = topicsWithMain.filter(t => t.revisionSession >= 1).length;
     const rr2 = topicsWithMain.filter(t => t.revisionSession >= 2).length;
     const rr3 = topicsWithMain.filter(t => t.revisionSession >= 3).length;
@@ -115,17 +178,17 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const now = new Date();
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    
-    // Only apply overdue penalties if there are actually studied topics
+
     let overduePenalty = 0;
     let criticalPenalty = 0;
+    const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
+
     if (topicsWithMain.length > 0) {
-      const overdueTopics = topicsWithMain.filter(t => 
+      const overdueTopics = topicsWithMain.filter(t =>
         t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
       ).length;
       overduePenalty = (overdueTopics / topicsWithMainCount) * 0.15;
 
-      const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
       const criticalTopics = topicsWithMain.filter(t => criticalSubjectIds.includes(t.subjectId));
       const criticalOverdue = criticalTopics.filter(t =>
         t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
@@ -140,7 +203,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const mcqGoal = mcqGoalPerSubject * subjects.length;
     const volumeProgress = Math.min(totalMcqsSolved / (mcqGoal || 1), 1) * 50;
 
-    // Subject-weighted accuracy from mock tests subject scores
     let weightedAccuracy = 0;
     let hasAccuracyData = false;
     subjects.forEach(sub => {
@@ -229,41 +291,35 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const bonusDetails: string[] = [];
     const daysUntilExam = Math.ceil((new Date(examDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Early Bird (+5) — started early AND making progress
     let earlyBirdBonus = 0;
     if (daysUntilExam > 240 && baseScore > 40) {
       earlyBirdBonus = 5;
       bonusDetails.push('Early Bird: Excellent head start! 🌱');
     }
 
-    // Streak Master (+3)
     let streakBonus = 0;
     if (stats.currentStreak >= 60) { streakBonus = 3; bonusDetails.push(`Streak Master: ${stats.currentStreak}-day streak! 🔥`); }
     else if (stats.currentStreak >= 30) { streakBonus = 2; bonusDetails.push(`Streak: ${stats.currentStreak}-day streak ⚡`); }
     else if (stats.currentStreak >= 14) { streakBonus = 1; bonusDetails.push(`Streak: ${stats.currentStreak}-day streak 💪`); }
 
-    // Accuracy Elite (+3)
     let accuracyBonus = 0;
     const overallAccPct = weightedAccuracy * 100;
     if (overallAccPct >= 85) { accuracyBonus = 3; bonusDetails.push('Accuracy Elite: 85%+ accuracy 🎯'); }
     else if (overallAccPct >= 80) { accuracyBonus = 2; bonusDetails.push('Strong Accuracy: 80%+ 📈'); }
 
-    // Balanced Preparation (+2)
     let balancedBonus = 0;
     const criticalSubNames = ['medicine', 'surgery', 'obg', 'pediatrics', 'pathology', 'pharmacology', 'anatomy', 'physiology'];
     const weakCritical = subjects.filter(s => {
       if (!criticalSubNames.includes(s.id)) return false;
       const subTopics = allTopics.filter(t => t.subjectId === s.id);
-      const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
+      const done = subTopics.filter(t => t.completedStages.length > 0).length;
       return subTopics.length > 0 && (done / subTopics.length) < 0.4;
     });
-    // Only award if user has actually started AND all critical subjects are above threshold
     if (weakCritical.length === 0 && hasAnyProgress && totalTopics > 0) {
       balancedBonus = 2;
       bonusDetails.push('Balanced: All critical subjects strong 💎');
     }
 
-    // Momentum Builder (+2)
     let momentumBonus = 0;
     const last7Days = studyLogs.filter(l => {
       const d = new Date(l.date);
@@ -276,11 +332,9 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const totalBonuses = earlyBirdBonus + streakBonus + accuracyBonus + balancedBonus + momentumBonus;
 
-    // ===== PENALTIES (only apply when user has meaningful activity) =====
+    // ===== PENALTIES (gated behind meaningful activity) =====
     const penaltyDetails: string[] = [];
-    const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
 
-    // Procrastination — only if exam is close AND user has been active but is behind
     let procrastination = 0;
     if (hasAnyProgress) {
       if (daysUntilExam < 90 && baseScore < 60) { procrastination = -8; penaltyDetails.push(`Exam in ${daysUntilExam} days! Intensify prep`); }
@@ -288,10 +342,9 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       else if (daysUntilExam < 30 && baseScore < 80) { procrastination = -3; penaltyDetails.push('Final month! Maximum intensity'); }
     }
 
-    // Critical Subjects Weak — only if user has completed at least 10% of some subject
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
-    if (hasAnyProgress && weightedCoverage > 0.05) {
+    if (hasAnyProgress && blendedCoverage > 0.05) {
       const weak = subjects.filter(s => criticalSubjectIds.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
         const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
@@ -309,7 +362,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       }
     }
 
-    // Mock Deficit — only penalize close to exam, not when user just started
     let mockDeficit = 0;
     if (hasAnyProgress && daysUntilExam < 120) {
       if (daysUntilExam < 90 && mockTests.length < 5) {
@@ -321,7 +373,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       }
     }
 
-    // Inactive — only if user has previously been active
     let inactive = 0;
     if (hasStudyLogs) {
       const lastLog = new Date(studyLogs[studyLogs.length - 1].date);
@@ -330,7 +381,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       else if (daysSinceStudy > 1) { inactive = -2; penaltyDetails.push('Missing study days'); }
     }
 
-    // Accuracy Declining — only with 2+ recent mocks
     let accuracyDrop = 0;
     if (recentMocks.length >= 2) {
       const latestAcc = recentMocks[0].correctAnswers / (recentMocks[0].attemptedQuestions || 1) * 100;
@@ -339,9 +389,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       else if (latestAcc < olderAcc - 5) { accuracyDrop = -1; penaltyDetails.push('Recent accuracy slipping'); }
     }
 
-    // Imbalanced Study — only if user has started studying (>5% overall progress)
     let imbalanced = 0;
-    if (hasAnyProgress && weightedCoverage > 0.1) {
+    if (hasAnyProgress && blendedCoverage > 0.1) {
       const neglected = subjects.filter(sub => {
         if (sub.weightage < 20) return false;
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
@@ -356,18 +405,26 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const totalPenalties = procrastination + criticalWeakPenalty + mockDeficit + inactive + accuracyDrop + imbalanced;
 
-    // FINAL
     const finalScore = Math.max(0, Math.min(100, baseScore + totalBonuses + totalPenalties));
     const { color, label } = getColorAndLabel(finalScore);
 
+    // Sort subject breakdown by gap (biggest gaps first)
+    subjectBreakdown.sort((a, b) => b.gap - a.gap);
+
     // Recommendations
     const recommendations: string[] = [];
-    if (syllabusScore < 20) recommendations.push('Focus on completing Main videos for all subjects');
+    if (!hasAnyProgress) {
+      recommendations.push('Start by going to Subjects tab and marking completed stages');
+    }
+    if (syllabusScore < 20 && hasAnyProgress) recommendations.push('Focus on completing Main videos for all subjects');
     if (revisionScore < 8 && topicsWithMain.length > 0) recommendations.push(`Complete RR1 for ${topicsWithMainCount - rr1} pending topics`);
-    if (mcqScore < 10) recommendations.push('Increase MCQ practice volume');
+    if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
-    if (mockTests.length < 3) recommendations.push('Take your next mock test this week');
-    if (pyqsDone < totalPyqEntries * 0.5) recommendations.push('Complete more PYQ sessions');
+    if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
+    if (pyqsDone < totalPyqEntries * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
+    if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
+      recommendations.push(`Biggest gap: ${subjectBreakdown[0].subjectName} (${subjectBreakdown[0].syllabusPct}% done)`);
+    }
     if (recommendations.length === 0) recommendations.push('Keep up the great work! Stay consistent.');
 
     return {
@@ -400,11 +457,40 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
           total: totalPenalties,
           details: penaltyDetails,
         },
+        subjectBreakdown,
       },
       color,
       label,
       message: getMessage(finalScore),
-      recommendations: recommendations.slice(0, 3),
+      recommendations: recommendations.slice(0, 4),
     };
-  }, [input]);
+  }, [chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData, examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo]);
+
+  // Persist daily score snapshot for trend tracking
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const stored: ReadinessSnapshot[] = JSON.parse(localStorage.getItem('neetpg-readiness-trend') || '[]');
+    const lastEntry = stored[stored.length - 1];
+
+    // Update today's entry or add new one
+    if (lastEntry && lastEntry.date === today) {
+      lastEntry.score = result.score;
+      localStorage.setItem('neetpg-readiness-trend', JSON.stringify(stored));
+    } else {
+      stored.push({ date: today, score: result.score });
+      // Keep last 90 days
+      const trimmed = stored.slice(-90);
+      localStorage.setItem('neetpg-readiness-trend', JSON.stringify(trimmed));
+    }
+  }, [result.score]);
+
+  return result;
+}
+
+export function getReadinessTrend(): ReadinessSnapshot[] {
+  try {
+    return JSON.parse(localStorage.getItem('neetpg-readiness-trend') || '[]');
+  } catch {
+    return [];
+  }
 }
