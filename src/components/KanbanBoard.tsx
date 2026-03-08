@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, ArrowUpDown } from 'lucide-react';
+import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, Pencil } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings, Chapter } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
