@@ -560,7 +560,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
             return years.map(year => (
               <button
                 key={year}
-                onClick={() => setPyqYears(prev => prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year].sort((a, b) => b - a))}
+                onClick={() => { const newYears = pyqYears.includes(year) ? pyqYears.filter(y => y !== year) : [...pyqYears, year].sort((a, b) => b - a); setPyqYears(newYears); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, pyqExam, newYears, pyqSessions), 0); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   pyqYears.includes(year) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
                 }`}
