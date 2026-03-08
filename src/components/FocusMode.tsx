@@ -59,6 +59,7 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
       setSessionCount(0);
       setTotalStudyTime(0);
       setCompletedTasks(new Set());
+      setSkippedTasks(new Set());
     } else {
       document.body.style.overflow = '';
     }
