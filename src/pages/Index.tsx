@@ -47,8 +47,12 @@ const Index = () => {
   const [tasks, setTasks] = useLocalStorage<Task[]>('neetpg-tasks', mockTasks);
   const [subjects, setSubjects] = useLocalStorage<Subject[]>('neetpg-subjects', initialSubjects);
   const [chapters, setChapters] = useLocalStorage<Chapter[]>('neetpg-chapters', defaultChapters);
-  const [stats, setStats] = useLocalStorage<UserStats>('neetpg-stats', mockStats);
-  const [mockTests, setMockTests] = useLocalStorage<MockTest[]>('neetpg-mocktests', sampleMockTests);
+  const [stats, setStats] = useLocalStorage<UserStats>('neetpg-stats', {
+    totalXP: 0, level: 1, currentStreak: 0, longestStreak: 0,
+    totalStudyHours: 0, todayStudyMinutes: 0, averageAccuracy: 0,
+    topicsCompleted: 0, subjectsCompleted: 0,
+  });
+  const [mockTests, setMockTests] = useLocalStorage<MockTest[]>('neetpg-mocktests', []);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
   const [mockModalMode, setMockModalMode] = useState<MockModalMode>('mock');
