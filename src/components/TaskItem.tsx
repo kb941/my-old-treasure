@@ -34,6 +34,7 @@ interface TaskItemProps {
   onTimerComplete?: (taskId: string, duration: number) => void;
   onDone?: (taskId: string, elapsedMinutes: number, confidence?: number) => void;
   onDelete?: (taskId: string) => void;
+  onEdit?: (task: Task) => void;
   onStartFocus?: (taskId: string) => void;
   showTimer?: boolean;
   isDraggable?: boolean;
