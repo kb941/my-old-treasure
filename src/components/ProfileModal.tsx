@@ -85,7 +85,7 @@ export function ProfileModal({
   srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus
 }: ProfileModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [newExamDate, setNewExamDate] = useState(examDate.toISOString().split('T')[0]);
+  const [newExamDate, setNewExamDate] = useState<Date>(examDate);
   const [newExamName, setNewExamName] = useState(examName);
   const [newTargetScore, setNewTargetScore] = useState(targetScore);
   const [newTargetRank, setNewTargetRank] = useState(targetRank);
