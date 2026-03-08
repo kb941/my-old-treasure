@@ -111,6 +111,9 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const hasAnyProgress = allTopics.some(t => t.completedStages.length > 0);
     const hasStudyLogs = studyLogs.length > 0;
 
+    // Critical subjects used across all scoring
+    const CRITICAL_SUBJECT_IDS = ['medicine', 'pharmacology', 'microbiology', 'pathology', 'surgery', 'obgyn', 'psm'];
+
     // ===== 1. SYLLABUS COVERAGE (35%) =====
     // Only main-video, rr-video, btr-video count for syllabus score.
     // Weights by identity, based on which are enabled:
@@ -197,8 +200,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     // ===== 2. REVISION QUALITY (20%) — weightage-based per subject =====
     const now = new Date();
-    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
 
     let weightedRevision = 0;
     let hasRevisionData = false;
@@ -223,17 +224,19 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
         (rr3 / subMainCount) * 0.25
       );
 
-      // Overdue penalty for this subject
+      // Overdue penalty: only if revision overdue by 14+ days from nextRevisionDate
       let subOverduePenalty = 0;
-      const overdueTopics = subWithMain.filter(t =>
-        t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
-      ).length;
-      subOverduePenalty = (overdueTopics / subMainCount) * 0.15;
+      const overdueBy14d = subWithMain.filter(t => {
+        if (!t.nextRevisionDate) return false;
+        const revDate = new Date(t.nextRevisionDate);
+        const daysPast = Math.ceil((now.getTime() - revDate.getTime()) / (1000 * 60 * 60 * 24));
+        return daysPast >= 14;
+      }).length;
+      subOverduePenalty = (overdueBy14d / subMainCount) * 0.15;
 
-      // Extra penalty for critical subjects
-      if (criticalSubjectIds.includes(sub.id)) {
-        const critOverdue = overdueTopics;
-        subOverduePenalty += (critOverdue / subMainCount) * 0.1;
+      // Extra penalty for critical subjects (Medicine, Pharma, Micro, Patho, Surgery, OBG, PSM)
+      if (CRITICAL_SUBJECT_IDS.includes(sub.id)) {
+        subOverduePenalty += (overdueBy14d / subMainCount) * 0.1;
       }
 
       weightedRevision += Math.max(0, subRevision - subOverduePenalty) * weight;
@@ -247,6 +250,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let hasAccuracyData = false;
     let hasMcqData = false;
 
+    let accuracyTrackedSubjects = 0;
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
       const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
@@ -259,17 +263,27 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       // Accuracy from mock test subject scores
       const subScores = mockTests.flatMap(m => m.subjectScores).filter(s => s.subjectId === sub.id);
       if (subScores.length > 0) {
+        accuracyTrackedSubjects++;
         hasAccuracyData = true;
         const avgAcc = subScores.reduce((s, sc) => s + sc.accuracy, 0) / subScores.length;
         weightedAccuracy += (avgAcc / 100) * weight;
       }
     });
-    if (!hasAccuracyData) weightedAccuracy = (stats.averageAccuracy || 0) / 100;
 
-    const volumeProgress = weightedMcqVolume * 50;
-    const accuracyTarget = 0.75;
-    const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
-    const mcqScore = !hasMcqData ? 0 : (volumeProgress + accuracyScore) * 20 / 100;
+    // If accuracy is tracked for less than half the subjects, ignore accuracy and use 100% volume
+    const hasEnoughAccuracy = hasAccuracyData && accuracyTrackedSubjects >= subjects.length * 0.5;
+    let mcqScore = 0;
+    if (hasMcqData) {
+      if (hasEnoughAccuracy) {
+        const volumeProgress = weightedMcqVolume * 50;
+        const accuracyTarget = 0.75;
+        const accuracyScore = Math.min((weightedAccuracy / accuracyTarget) * 50, 50);
+        mcqScore = (volumeProgress + accuracyScore) * 20 / 100;
+      } else {
+        // Volume only
+        mcqScore = weightedMcqVolume * 20;
+      }
+    }
 
     // ===== 4. PYQ COMPLETION (15%) =====
     // Priority: year/paper-based → 100% if available; chapter-based → 100% if no paper data
@@ -309,23 +323,36 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       }
     });
 
+    // Check if enough PYQ sessions have accuracy data
+    const pyqEntriesWithAccuracy = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
+    const pyqDoneEntries = pyqSubjectEntries.filter(e => e.done).length;
+    const hasEnoughPyqAccuracy = pyqDoneEntries > 0 && pyqEntriesWithAccuracy >= pyqDoneEntries * 0.5;
+
     let pyqScore = 0;
     if (hasPaperPyqData) {
-      // Year-based: 70% volume + 30% accuracy
-      const volumeComponent = weightedPaperPyq * 70;
-      const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
-      pyqScore = (volumeComponent + accComponent) * 15 / 100;
+      if (hasEnoughPyqAccuracy) {
+        // Year-based: 70% volume + 30% accuracy
+        const volumeComponent = weightedPaperPyq * 70;
+        const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
+        pyqScore = (volumeComponent + accComponent) * 15 / 100;
+      } else {
+        // Volume only (not enough accuracy data)
+        pyqScore = weightedPaperPyq * 15;
+      }
     } else if (hasChapterPyqData) {
-      // Chapter-based only: 100% volume
       pyqScore = weightedChapterPyq * 15;
     }
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
+    // Use recent 60 days OR last 3 mocks, whichever gives more data
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
-    const recentMocks = mockTests
+    const mocksIn60d = mockTests
       .filter(m => new Date(m.date) > sixtyDaysAgo)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const last3Mocks = [...mockTests]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, Math.max(3, mockTests.filter(m => new Date(m.date) > sixtyDaysAgo).length));
+      .slice(0, 3);
+    const recentMocks = mocksIn60d.length >= last3Mocks.length ? mocksIn60d : last3Mocks;
 
     let mockScore = 0;
     if (recentMocks.length > 0) {
@@ -386,7 +413,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     else if (overallAccPct >= 80) { accuracyBonus = 2; bonusDetails.push('Strong Accuracy: 80%+ 📈'); }
 
     let balancedBonus = 0;
-    const criticalSubNames = ['medicine', 'surgery', 'obg', 'pediatrics', 'pathology', 'pharmacology', 'anatomy', 'physiology'];
+    const criticalSubNames = CRITICAL_SUBJECT_IDS;
     const weakCritical = subjects.filter(s => {
       if (!criticalSubNames.includes(s.id)) return false;
       const subTopics = allTopics.filter(t => t.subjectId === s.id);
@@ -413,17 +440,26 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     // ===== PENALTIES (gated behind meaningful activity) =====
     const penaltyDetails: string[] = [];
 
+    // Procrastination = exam near but not studying (based on recent activity, not score)
     let procrastination = 0;
-    if (hasAnyProgress) {
-      if (daysUntilExam < 90 && baseScore < 60) { procrastination = -8; penaltyDetails.push(`Exam in ${daysUntilExam} days! Intensify prep`); }
-      else if (daysUntilExam < 60 && baseScore < 70) { procrastination = -5; penaltyDetails.push(`${daysUntilExam} days left! Focus urgently`); }
-      else if (daysUntilExam < 30 && baseScore < 80) { procrastination = -3; penaltyDetails.push('Final month! Maximum intensity'); }
+    if (hasAnyProgress && hasStudyLogs) {
+      const recentStudyDays = studyLogs.filter(l => {
+        const d = new Date(l.date);
+        return d > new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      }).length;
+      const studyingRecently = recentStudyDays >= 5; // at least 5 of last 14 days
+
+      if (!studyingRecently) {
+        if (daysUntilExam < 30) { procrastination = -8; penaltyDetails.push(`Exam in ${daysUntilExam} days but barely studying!`); }
+        else if (daysUntilExam < 60) { procrastination = -5; penaltyDetails.push(`${daysUntilExam} days left but low recent activity`); }
+        else if (daysUntilExam < 90) { procrastination = -3; penaltyDetails.push('Exam approaching — increase study frequency'); }
+      }
     }
 
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
     if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
-      const weak = subjects.filter(s => criticalSubjectIds.includes(s.id)).filter(sub => {
+      const weak = subjects.filter(s => CRITICAL_SUBJECT_IDS.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
         const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
         return subTopics.length > 0 && (done / subTopics.length) < 0.5;
@@ -455,8 +491,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     if (hasStudyLogs) {
       const lastLog = new Date(studyLogs[studyLogs.length - 1].date);
       const daysSinceStudy = Math.ceil((now.getTime() - lastLog.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSinceStudy > 3) { inactive = -4; penaltyDetails.push(`${daysSinceStudy} days since last study`); }
-      else if (daysSinceStudy > 1) { inactive = -2; penaltyDetails.push('Missing study days'); }
+      if (daysSinceStudy >= 7) { inactive = -6; penaltyDetails.push(`${daysSinceStudy} days inactive! Resume immediately`); }
+      else if (daysSinceStudy >= 3) { inactive = -3; penaltyDetails.push(`${daysSinceStudy} days since last study`); }
     }
 
     let accuracyDrop = 0;
