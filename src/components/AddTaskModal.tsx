@@ -175,18 +175,32 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
 
   const handleSubmit = () => {
     if (!title.trim()) return;
-    onAdd({
-      title: title.trim(),
-      type,
-      subjectId: subjectId || undefined,
-      chapterId: chapterId || undefined,
-      topicId: topicId || undefined,
-      duration,
-      completed: false,
-      column: defaultColumn,
-      priority,
-      notes: notes.trim() || undefined,
-    });
+    if (isEditMode && editTask && onEdit) {
+      onEdit({
+        ...editTask,
+        title: title.trim(),
+        type,
+        subjectId: subjectId || undefined,
+        chapterId: chapterId || undefined,
+        topicId: topicId || undefined,
+        duration,
+        priority,
+        notes: notes.trim() || undefined,
+      });
+    } else {
+      onAdd({
+        title: title.trim(),
+        type,
+        subjectId: subjectId || undefined,
+        chapterId: chapterId || undefined,
+        topicId: topicId || undefined,
+        duration,
+        completed: false,
+        column: defaultColumn,
+        priority,
+        notes: notes.trim() || undefined,
+      });
+    }
     onClose();
   };
 
