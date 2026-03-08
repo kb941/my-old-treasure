@@ -598,6 +598,16 @@ const Index = () => {
             <PYQTracker subjects={subjects} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} />
           )}
 
+          {activeTab === 'analytics' && (
+            <AnalyticsTab
+              mockTests={mockTests} markingScheme={markingScheme} stats={stats}
+              chapters={chapters} studyLogs={studyLogs} mcqLogs={mcqLogs}
+              readinessResult={readinessResult} subjects={subjects}
+              contentTypes={contentTypes} pyqAchievements={pyqAchievements}
+              onViewAchievements={() => setActiveTab('achievements' as Tab)}
+            />
+          )}
+
           {activeTab === 'profile' && (
             <ProfileTab
               examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
