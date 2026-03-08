@@ -61,9 +61,20 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
   const subjectListRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
-  // Reset everything on close
+  // Populate fields when editing, reset on close
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && editTask) {
+      setTitle(editTask.title);
+      setType(editTask.type);
+      setSubjectId(editTask.subjectId || '');
+      setChapterId(editTask.chapterId || '');
+      setTopicId(editTask.topicId || '');
+      setDuration(editTask.duration);
+      setPriority(editTask.priority);
+      setNotes(editTask.notes || '');
+      if (editTask.subjectId) setExpandedSubject(editTask.subjectId);
+      if (editTask.chapterId) setExpandedChapter(editTask.chapterId);
+    } else if (!isOpen) {
       setTitle('');
       setType('study');
       resetSelections();
@@ -73,7 +84,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
       setTestSource('');
       setPyqFullMock(false);
     }
-  }, [isOpen]);
+  }, [isOpen, editTask]);
 
   const resetSelections = useCallback(() => {
     setSubjectId('');
