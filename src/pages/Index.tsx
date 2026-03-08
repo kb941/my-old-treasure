@@ -382,6 +382,14 @@ const Index = () => {
               </h1>
             </div>
             <div className="flex items-center gap-1.5">
+              <NotificationPanel
+                reminders={reminders}
+                achievements={pyqAchievements}
+                streakDays={stats.currentStreak}
+                tasks={tasks}
+                onCompleteRevision={handleCompleteRevision}
+                onNavigateToRevision={() => setActiveTab('revision')}
+              />
               <ThemeToggle />
               <Button variant="ghost" size="icon" onClick={() => setIsProfileOpen(true)} className="h-9 w-9">
                 <User className="w-4 h-4" />
