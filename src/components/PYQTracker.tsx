@@ -20,7 +20,7 @@ interface ExamConfig {
   sessions: string[];
 }
 
-const YEARS = Array.from({ length: 10 }, (_, i) => 2025 - i);
+const DEFAULT_YEARS = Array.from({ length: 10 }, (_, i) => 2025 - i);
 
 export const EXAM_CONFIGS: ExamConfig[] = [
   { name: 'NEET PG', sessions: YEARS.map(y => `${y}`) },
