@@ -323,14 +323,23 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       }
     });
 
+    // Check if enough PYQ sessions have accuracy data
+    const pyqEntriesWithAccuracy = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
+    const pyqDoneEntries = pyqSubjectEntries.filter(e => e.done).length;
+    const hasEnoughPyqAccuracy = pyqDoneEntries > 0 && pyqEntriesWithAccuracy >= pyqDoneEntries * 0.5;
+
     let pyqScore = 0;
     if (hasPaperPyqData) {
-      // Year-based: 70% volume + 30% accuracy
-      const volumeComponent = weightedPaperPyq * 70;
-      const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
-      pyqScore = (volumeComponent + accComponent) * 15 / 100;
+      if (hasEnoughPyqAccuracy) {
+        // Year-based: 70% volume + 30% accuracy
+        const volumeComponent = weightedPaperPyq * 70;
+        const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
+        pyqScore = (volumeComponent + accComponent) * 15 / 100;
+      } else {
+        // Volume only (not enough accuracy data)
+        pyqScore = weightedPaperPyq * 15;
+      }
     } else if (hasChapterPyqData) {
-      // Chapter-based only: 100% volume
       pyqScore = weightedChapterPyq * 15;
     }
 
