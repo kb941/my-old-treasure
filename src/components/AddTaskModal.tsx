@@ -626,7 +626,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <span className="text-xs font-medium">Full PYQ Mock</span>
             </button>
 
-            {pyqFullMock && renderPyqExamMode()}
+            {pyqFullMock && renderPyqExamMode(false)}
 
             {!pyqFullMock && (
               <>
