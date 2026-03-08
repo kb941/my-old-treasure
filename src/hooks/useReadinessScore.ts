@@ -413,7 +413,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     else if (overallAccPct >= 80) { accuracyBonus = 2; bonusDetails.push('Strong Accuracy: 80%+ 📈'); }
 
     let balancedBonus = 0;
-    const criticalSubNames = ['medicine', 'surgery', 'obg', 'pediatrics', 'pathology', 'pharmacology', 'anatomy', 'physiology'];
+    const criticalSubNames = CRITICAL_SUBJECT_IDS;
     const weakCritical = subjects.filter(s => {
       if (!criticalSubNames.includes(s.id)) return false;
       const subTopics = allTopics.filter(t => t.subjectId === s.id);
