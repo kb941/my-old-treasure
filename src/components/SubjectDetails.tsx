@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronRight, Plus, X, Check, Trash2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { Subject, Chapter, Topic, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, SpacedRepetitionSettings } from '@/types';
+import { Subject, Chapter, Topic, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, SpacedRepetitionSettings, getScheduleForConfidence } from '@/types';
+import { addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
