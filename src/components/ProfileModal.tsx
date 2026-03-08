@@ -238,20 +238,54 @@ export function ProfileModal({
                       <Calendar className="w-4 h-4 text-primary" />
                       Exam Details
                     </h3>
-                    <div className="grid grid-cols-1 gap-4 mb-4">
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Exam Name</label>
-                        <Input value={newExamName} onChange={(e) => setNewExamName(e.target.value)} placeholder="e.g. NEET PG, USMLE, FMGE..." />
+                    <div className="mb-4">
+                      <label className="text-sm text-muted-foreground mb-1.5 block">Exam</label>
+                      <div className="flex gap-2">
+                        {EXAM_OPTIONS.map(exam => (
+                          <button
+                            key={exam}
+                            onClick={() => handleExamChange(exam)}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all border-2 ${
+                              newExamName === exam
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border text-muted-foreground hover:border-primary/50'
+                            }`}
+                          >
+                            {exam}
+                          </button>
+                        ))}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Exam Date</label>
-                        <Input type="date" value={newExamDate} onChange={(e) => setNewExamDate(e.target.value)} />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-10",
+                                !newExamDate && "text-muted-foreground"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {newExamDate ? format(newExamDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={newExamDate}
+                              onSelect={(date) => date && setNewExamDate(date)}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Target Score</label>
-                        <Input type="number" value={newTargetScore} onChange={(e) => setNewTargetScore(Number(e.target.value))} min={0} max={800} />
+                        <Input type="number" value={newTargetScore} onChange={(e) => setNewTargetScore(Number(e.target.value))} min={0} max={localMarkingScheme.totalMarks} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
