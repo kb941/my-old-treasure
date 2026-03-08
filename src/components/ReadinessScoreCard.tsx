@@ -414,13 +414,13 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
       <div className="bg-secondary/30 rounded-lg p-3">
         <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2">🧮 How It's Calculated</h4>
         <div className="space-y-1 text-[10px] text-muted-foreground">
-          <p>• <strong>Syllabus (35%)</strong> — 70% Main video + 30% any stage completion, weighted by subject importance</p>
-          <p>• <strong>Revision (20%)</strong> — RR1×40% + RR2×35% + RR3×25%, minus overdue topic penalties</p>
-          <p>• <strong>MCQ (20%)</strong> — Volume vs goal (50%) + weighted accuracy vs 75% target (50%)</p>
-          <p>• <strong>PYQ (15%)</strong> — Sessions done (60%) + accuracy vs 80% target (40%) + year coverage</p>
-          <p>• <strong>Mocks (10%)</strong> — Avg score (70%) + trend (30%) + consistency bonus</p>
+          <p>• <strong>Syllabus (35%)</strong> — Main×50% + RR×30% + BTR×20% (adjusts if fewer types enabled), weighted by subject importance</p>
+          <p>• <strong>Revision (20%)</strong> — RR1×40% + RR2×35% + RR3×25%, weighted by subject. Overdue penalty only if 14+ days past revision date; extra penalty for critical subjects (Medicine, Pharma, Micro, Patho, Surgery, OBG, PSM)</p>
+          <p>• <strong>MCQ (20%)</strong> — Volume only if accuracy not tracked for most subjects; otherwise Vol×50% + Accuracy×50%, all weighted by subject</p>
+          <p>• <strong>PYQ (15%)</strong> — Year-based priority (vol + accuracy if tracked) OR chapter-based fallback. Volume only if &lt;50% sessions have accuracy data</p>
+          <p>• <strong>Mocks (10%)</strong> — Recent 60 days or last 3 mocks (whichever more). Avg score×70% + Trend×20% + Consistency×10%</p>
           <p className="pt-1">• <strong>Bonuses (+15 max)</strong> — Early bird, streak ≥14d, accuracy ≥80%, balanced prep, weekly momentum</p>
-          <p>• <strong>Penalties (-20 max)</strong> — Only after meaningful activity: procrastination near exam, weak critical subjects, mock deficit, inactivity ≥3d, accuracy decline, imbalanced study</p>
+          <p>• <strong>Penalties</strong> — Procrastination (exam near + not studying), critical subjects weak (Medicine/Pharma/Micro/Patho/Surgery/OBG/PSM), mock deficit, inactivity (3d: -3, 7d: -6), accuracy decline, imbalanced study</p>
         </div>
       </div>
 
