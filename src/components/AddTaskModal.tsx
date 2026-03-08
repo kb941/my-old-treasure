@@ -36,7 +36,8 @@ const typeLabels: Record<Task['type'], string> = {
   study: 'Study', revision: 'Revise', mcq: 'MCQs', pyq: 'PYQs', test: 'Test', mock: 'Mock Test',
 };
 
-export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: AddTaskModalProps) {
+export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, defaultColumn, chapters = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: AddTaskModalProps) {
+  const isEditMode = !!editTask;
   const [title, setTitle] = useState('');
   const [type, setType] = useState<Task['type']>('study');
   const [subjectId, setSubjectId] = useState('');
