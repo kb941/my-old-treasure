@@ -105,7 +105,7 @@ export function PYQSummaryCard({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-export function PYQTracker({ subjects }: PYQTrackerProps) {
+export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps) {
   const defaults = useMemo(() => generateDefaults(subjects), [subjects]);
   const [pyqData, setPyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', defaults);
   const [selectedExam, setSelectedExam] = useState<string>('NEET PG');
