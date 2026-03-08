@@ -853,7 +853,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
             </ScrollArea>
 
             {/* Submit */}
-            <div className="p-4 border-t border-border shrink-0">
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-border shrink-0">
               <Button
                 onClick={handleSubmit}
                 className="w-full h-12 text-base gradient-primary text-primary-foreground"
