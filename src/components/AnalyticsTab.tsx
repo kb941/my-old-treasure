@@ -21,6 +21,8 @@ const tabs: { key: InsightsTab; label: string; icon: typeof BarChart3 }[] = [
   { key: 'pyq', label: 'PYQ', icon: FileText },
 ];
 
+type TimePeriod = 'week' | 'month';
+
 interface AnalyticsTabProps {
   mockTests: MockTest[];
   markingScheme: MarkingScheme;
@@ -40,6 +42,7 @@ export function AnalyticsTab({
   readinessResult, subjects, contentTypes, pyqAchievements, onViewAchievements,
 }: AnalyticsTabProps) {
   const [activeInsight, setActiveInsight] = useState<InsightsTab>('overview');
+  const [period, setPeriod] = useState<TimePeriod>('week');
 
   return (
     <div className="space-y-3">
@@ -52,14 +55,14 @@ export function AnalyticsTab({
             <button
               key={tab.key}
               onClick={() => setActiveInsight(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1 px-1.5 py-2 rounded-lg text-[11px] font-medium transition-all ${
                 isActive
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{tab.label}</span>
             </button>
           );
         })}
@@ -77,8 +80,25 @@ export function AnalyticsTab({
           <>
             <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
             <ReadinessScoreCard result={readinessResult} compact />
-            <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
-            <McqWeeklyChart mcqLogs={mcqLogs} />
+
+            {/* Period toggle */}
+            <div className="flex gap-1 bg-muted/50 rounded-lg p-0.5 w-fit">
+              <button
+                onClick={() => setPeriod('week')}
+                className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  period === 'week' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+                }`}
+              >This Week</button>
+              <button
+                onClick={() => setPeriod('month')}
+                className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  period === 'month' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
+                }`}
+              >This Month</button>
+            </div>
+
+            <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} period={period} />
+            <McqWeeklyChart mcqLogs={mcqLogs} period={period} />
             <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={onViewAchievements} />
           </>
         )}

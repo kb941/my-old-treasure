@@ -72,10 +72,13 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
           revisionSession: topic.revisionSession, totalSessions: schedule.length,
         });
 
+        // Only generate future sessions for the next 60 days to avoid lag
         if (!isOverdue || isDueToday) {
+          const maxFutureDate = addDays(today, 60);
           let futureDate = new Date(topic.nextRevisionDate);
           for (let i = topic.revisionSession + 1; i < schedule.length; i++) {
             futureDate = addDays(futureDate, schedule[i].daysAfterPrevious);
+            if (isAfter(futureDate, maxFutureDate)) break;
             items.push({
               topicId: topic.id, topicName: topic.name, subjectId: topic.subjectId,
               chapterId: chapter.id, chapterName: chapter.name, dueDate: futureDate,

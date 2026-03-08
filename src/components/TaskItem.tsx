@@ -173,7 +173,7 @@ export function TaskItem({
       exit={{ opacity: 0, y: 8 }}
       className={cn(
         "rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
-        priorityColors[task.priority],
+        typeBorderColors[task.type] || 'border-l-primary',
         accent.bg,
         task.completed && "opacity-50",
         isDraggable && "cursor-grab active:cursor-grabbing"
