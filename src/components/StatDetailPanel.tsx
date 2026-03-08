@@ -1,8 +1,7 @@
-import { motion } from 'framer-motion';
-import { Zap, Flame, Clock, Target, Trophy, Star, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, Flame, Clock, Target, Star, X } from 'lucide-react';
 import { UserStats, StudyLog, Subject } from '@/types';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 type StatType = 'xp' | 'streak' | 'study' | 'accuracy';
 
@@ -224,32 +223,53 @@ export function StatDetailPanel({ stat, stats, studyLogs, subjects, onClose }: S
   const Icon = config.icon;
 
   return (
-    <Dialog open={!!stat} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[380px] rounded-2xl p-0 overflow-hidden border-border gap-0">
-        {/* Header */}
-        <div className={`${config.gradient} px-5 py-4 flex items-center gap-3`}>
-          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <Icon className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div>
-            <DialogTitle className="text-primary-foreground text-base">{config.title}</DialogTitle>
-            <DialogDescription className="text-primary-foreground/70 text-xs">
-              {stat === 'xp' && `Level ${stats.level} • ${stats.totalXP} XP`}
-              {stat === 'streak' && `${stats.currentStreak} day streak`}
-              {stat === 'study' && `${Math.floor(stats.todayStudyMinutes / 60)}h ${stats.todayStudyMinutes % 60}m today`}
-              {stat === 'accuracy' && `${stats.averageAccuracy}% overall`}
-            </DialogDescription>
-          </div>
-        </div>
+    <AnimatePresence>
+      {stat && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[420px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
+          >
+            {/* Gradient Header */}
+            <div className={`sticky top-0 z-10 ${config.gradient} px-5 py-4 flex items-center justify-between rounded-t-2xl`}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Icon className="w-4.5 h-4.5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="text-primary-foreground text-base font-semibold">{config.title}</h2>
+                  <p className="text-primary-foreground/70 text-xs">
+                    {stat === 'xp' && `Level ${stats.level} • ${stats.totalXP} XP`}
+                    {stat === 'streak' && `${stats.currentStreak} day streak`}
+                    {stat === 'study' && `${Math.floor(stats.todayStudyMinutes / 60)}h ${stats.todayStudyMinutes % 60}m today`}
+                    {stat === 'accuracy' && `${stats.averageAccuracy}% overall`}
+                  </p>
+                </div>
+              </div>
+              <button onClick={onClose} className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+                <X className="w-4 h-4 text-primary-foreground" />
+              </button>
+            </div>
 
-        {/* Body */}
-        <div className="p-5">
-          {stat === 'xp' && <XPPanel stats={stats} />}
-          {stat === 'streak' && <StreakPanel stats={stats} />}
-          {stat === 'study' && <StudyPanel stats={stats} studyLogs={studyLogs} />}
-          {stat === 'accuracy' && <AccuracyPanel stats={stats} subjects={subjects} />}
-        </div>
-      </DialogContent>
-    </Dialog>
+            {/* Body */}
+            <div className="p-5">
+              {stat === 'xp' && <XPPanel stats={stats} />}
+              {stat === 'streak' && <StreakPanel stats={stats} />}
+              {stat === 'study' && <StudyPanel stats={stats} studyLogs={studyLogs} />}
+              {stat === 'accuracy' && <AccuracyPanel stats={stats} subjects={subjects} />}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
