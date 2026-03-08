@@ -13,7 +13,7 @@ import { AchievementBadge } from '@/components/AchievementBadge';
 import { AchievementsDetailView } from '@/components/AchievementsDetailView';
 import { QuickLogModal, LogData } from '@/components/QuickLogModal';
 import { MockTestModal, MockModalMode } from '@/components/MockTestModal';
-import { Profile/components/ProfileModal';
+import { ProfileData } from '@/components/ProfileModal';
 import { FocusMode } from '@/components/FocusMode';
 import { PYQTracker, PYQSummaryCard, PYQEntry, EXAM_CONFIGS } from '@/components/PYQTracker';
 import { RevisionHub } from '@/components/RevisionHub';
