@@ -301,8 +301,10 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
 
       <AddTaskModal
         isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={() => { setAddModalOpen(false); setEditingTask(null); }}
         onAdd={addTask}
+        onEdit={editTask}
+        editTask={editingTask}
         defaultColumn={addToColumn}
         chapters={chapters}
       />
