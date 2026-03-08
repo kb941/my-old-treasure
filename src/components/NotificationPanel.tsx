@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Check } from 'lucide-react';
+import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Lightbulb, Target } from 'lucide-react';
 import { RevisionReminder, Task, Achievement } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface Notification {
   id: string;
-  type: 'revision' | 'achievement' | 'streak' | 'reminder';
+  type: 'revision' | 'achievement' | 'streak' | 'reminder' | 'tip';
   title: string;
   description: string;
   time?: Date;
@@ -25,6 +25,17 @@ interface NotificationPanelProps {
   onCompleteRevision: (topicId: string) => void;
   onNavigateToRevision: () => void;
 }
+
+// Daily study tips that rotate
+const DAILY_TIPS = [
+  { title: '💡 Active recall > passive reading', desc: 'Test yourself on what you studied today — it boosts retention by 50%' },
+  { title: '📊 Track your weak subjects', desc: 'Spend extra time on subjects where your accuracy is below 60%' },
+  { title: '⏰ Spaced repetition works', desc: 'Revise topics at increasing intervals: 1d, 3d, 7d, 14d, 30d' },
+  { title: '🎯 Quality over quantity', desc: 'Deeply understanding 50 MCQs beats rushing through 200' },
+  { title: '📝 Make an error log', desc: 'Write down every wrong answer and review it weekly — patterns emerge' },
+  { title: '🧠 Interleave your subjects', desc: 'Switch between subjects during study — it improves long-term retention' },
+  { title: '😴 Sleep consolidates memory', desc: '7-8 hours of sleep after studying helps cement new knowledge' },
+];
 
 export function NotificationBell({ count, onClick }: { count: number; onClick: () => void }) {
   return (
@@ -83,6 +94,18 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
       }
     });
 
+    // Tomorrow's revisions
+    reminders.filter(r => r.isDueTomorrow).forEach(r => {
+      items.push({
+        id: `rev-tmrw-${r.topicId}`,
+        type: 'reminder',
+        title: `Tomorrow: ${r.topicName}`,
+        description: `${r.sessionName} due tomorrow`,
+        icon: Clock,
+        color: 'text-blue-500',
+      });
+    });
+
     // Recent achievements
     achievements.filter(a => a.unlockedAt).forEach(a => {
       const unlocked = new Date(a.unlockedAt!);
@@ -111,6 +134,31 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
         color: 'text-orange-500',
       });
     }
+
+    // Incomplete tasks reminder
+    const incompleteTodayTasks = tasks.filter(t => t.column === 'today' && !t.completed).length;
+    if (incompleteTodayTasks > 0) {
+      items.push({
+        id: 'tasks-pending',
+        type: 'reminder',
+        title: `${incompleteTodayTasks} task${incompleteTodayTasks > 1 ? 's' : ''} pending today`,
+        description: 'Complete your daily tasks to maintain your streak',
+        icon: Target,
+        color: 'text-primary',
+      });
+    }
+
+    // Daily study tip (rotates based on day of year)
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    const tip = DAILY_TIPS[dayOfYear % DAILY_TIPS.length];
+    items.push({
+      id: `tip-${dayOfYear}`,
+      type: 'tip',
+      title: tip.title,
+      description: tip.desc,
+      icon: Lightbulb,
+      color: 'text-primary',
+    });
 
     return items.filter(n => !dismissed.has(n.id));
   }, [reminders, achievements, streakDays, tasks, dismissed, onCompleteRevision, onNavigateToRevision]);
@@ -182,6 +230,7 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
                               "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
                               notif.type === 'revision' ? 'bg-destructive/10' :
                               notif.type === 'achievement' ? 'bg-amber-500/10' :
+                              notif.type === 'tip' ? 'bg-primary/10' :
                               'bg-primary/10'
                             )}>
                               <Icon className={cn("w-4 h-4", notif.color)} />

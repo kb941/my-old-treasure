@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, BookOpen, BarChart3, FileText, User, Orbit, RotateCcw, Bell } from 'lucide-react';
+import { ProfileTab } from '@/components/ProfileTab';
 import { AnalyticsTab } from '@/components/AnalyticsTab';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
@@ -12,11 +13,11 @@ import { AchievementBadge } from '@/components/AchievementBadge';
 import { AchievementsDetailView } from '@/components/AchievementsDetailView';
 import { QuickLogModal, LogData } from '@/components/QuickLogModal';
 import { MockTestModal, MockModalMode } from '@/components/MockTestModal';
-import { ProfileModal, ProfileData } from '@/components/ProfileModal';
+import { ProfileData } from '@/components/ProfileModal';
 import { FocusMode } from '@/components/FocusMode';
 import { PYQTracker, PYQSummaryCard, PYQEntry, EXAM_CONFIGS } from '@/components/PYQTracker';
 import { RevisionHub } from '@/components/RevisionHub';
-import { ThemeToggle } from '@/components/ThemeToggle';
+// ThemeToggle moved into ProfileTab
 import { BottomNav, Tab } from '@/components/BottomNav';
 import { initialSubjects, mockTasks, mockStats, achievements, sampleMockTests } from '@/data/subjects';
 import { defaultChapters } from '@/data/syllabusChapters';
@@ -52,7 +53,7 @@ const Index = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isMockModalOpen, setIsMockModalOpen] = useState(false);
   const [mockModalMode, setMockModalMode] = useState<MockModalMode>('mock');
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  // Profile is now a tab, no modal needed
   const [examDate, setExamDate] = useLocalStorage<Date>('neetpg-examdate', new Date('2027-03-15'));
   const [examName, setExamName] = useLocalStorage<string>('neetpg-examname', 'NEET PG');
   const [targetScore, setTargetScore] = useLocalStorage<number>('neetpg-target', 650);
@@ -375,6 +376,7 @@ const Index = () => {
     { id: 'subjects' as Tab, label: 'Subjects' },
     { id: 'revision' as Tab, label: 'Revision' },
     { id: 'analytics' as Tab, label: 'Insights' },
+    { id: 'profile' as Tab, label: 'Profile' },
   ];
 
   return (
@@ -398,10 +400,6 @@ const Index = () => {
                 onCompleteRevision={handleCompleteRevision}
                 onNavigateToRevision={() => setActiveTab('revision')}
               />
-              <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={() => setIsProfileOpen(true)} className="h-9 w-9">
-                <User className="w-4 h-4" />
-              </Button>
               <Button variant="outline" size="sm" onClick={() => { setMockModalMode('mock'); setIsMockModalOpen(true); }} className="hidden sm:flex h-8 text-xs">
                 <FileText className="w-3.5 h-3.5 mr-1.5" /> Mock
               </Button>
@@ -599,13 +597,15 @@ const Index = () => {
             <PYQTracker subjects={subjects} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} />
           )}
 
-          {activeTab === 'analytics' && (
-            <AnalyticsTab
-              mockTests={mockTests} markingScheme={markingScheme} stats={stats}
-              chapters={chapters} studyLogs={studyLogs} mcqLogs={mcqLogs}
-              readinessResult={readinessResult} subjects={subjects}
-              contentTypes={contentTypes} pyqAchievements={pyqAchievements}
-              onViewAchievements={() => setActiveTab('achievements' as Tab)}
+          {activeTab === 'profile' && (
+            <ProfileTab
+              examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
+              pomodoroSettings={pomodoroSettings} srSettings={srSettings}
+              contentTypes={contentTypes} breakDuration={breakDuration}
+              markingScheme={markingScheme} onSave={handleSaveProfile}
+              onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
+              pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
+              mcqGoalPerSubject={mcqGoalPerSubject}
             />
           )}
 
@@ -622,16 +622,6 @@ const Index = () => {
       {/* Modals */}
       <QuickLogModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} onLog={handleLog} onOpenMockModal={() => { setMockModalMode('mock'); setIsMockModalOpen(true); }} onOpenTestModal={() => { setMockModalMode('test'); setIsMockModalOpen(true); }} onOpenPyqMockModal={() => { setMockModalMode('pyq-mock'); setIsMockModalOpen(true); }} chapters={chapters} contentTypes={contentTypes} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} examName={examName} />
       <MockTestModal isOpen={isMockModalOpen} onClose={() => setIsMockModalOpen(false)} onLog={handleLogMockTest} mode={mockModalMode} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} />
-      <ProfileModal
-        isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
-        examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
-        pomodoroSettings={pomodoroSettings} srSettings={srSettings}
-        contentTypes={contentTypes} breakDuration={breakDuration}
-        markingScheme={markingScheme} onSave={handleSaveProfile}
-        onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
-        pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
-        mcqGoalPerSubject={mcqGoalPerSubject}
-      />
       <FocusMode
         isOpen={isFocusMode} onClose={() => { setIsFocusMode(false); setFocusTaskId(null); }}
         tasks={(() => {

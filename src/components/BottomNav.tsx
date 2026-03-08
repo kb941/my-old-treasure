@@ -1,7 +1,7 @@
-import { Calendar, BookOpen, RotateCcw, BarChart3 } from 'lucide-react';
+import { Calendar, BookOpen, RotateCcw, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type Tab = 'today' | 'subjects' | 'revision' | 'pyqs' | 'analytics';
+export type Tab = 'today' | 'subjects' | 'revision' | 'pyqs' | 'analytics' | 'profile';
 
 interface BottomNavProps {
   activeTab: Tab;
@@ -13,12 +13,13 @@ const tabs = [
   { id: 'subjects' as Tab, icon: BookOpen, label: 'Subjects' },
   { id: 'revision' as Tab, icon: RotateCcw, label: 'Revision' },
   { id: 'analytics' as Tab, icon: BarChart3, label: 'Insights' },
+  { id: 'profile' as Tab, icon: User, label: 'Profile' },
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass border-t border-border safe-area-bottom">
-      <div className="flex items-center justify-around py-1.5 px-2">
+      <div className="flex items-center justify-around py-1.5 px-1">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -27,7 +28,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all min-w-[60px]",
+                "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all min-w-[52px]",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
