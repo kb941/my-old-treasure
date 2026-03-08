@@ -868,14 +868,3 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
     </AnimatePresence>
   );
 }
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Add Task
-              </Button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-}
