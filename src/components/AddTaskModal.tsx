@@ -724,14 +724,14 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[60]"
           />
           <motion.div
             initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-card rounded-t-2xl md:rounded-2xl shadow-card-hover border border-border z-50 max-h-[90vh] flex flex-col"
+            className="fixed inset-x-0 bottom-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-card rounded-t-2xl md:rounded-2xl shadow-card-hover border border-border z-[60] max-h-[90vh] flex flex-col"
           >
             {/* Drag Handle - Mobile */}
             <div className="md:hidden flex justify-center pt-3">
@@ -853,7 +853,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
             </ScrollArea>
 
             {/* Submit */}
-            <div className="p-4 border-t border-border shrink-0">
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-border shrink-0">
               <Button
                 onClick={handleSubmit}
                 className="w-full h-12 text-base gradient-primary text-primary-foreground"
