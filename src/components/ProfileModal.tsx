@@ -226,18 +226,18 @@ export function ProfileModal({
                       <Target className="w-4 h-4 text-primary" />
                       Targets
                     </h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Study Hours/Day</label>
-                        <Input type="number" value={dailyStudyTarget} onChange={(e) => setDailyStudyTarget(Number(e.target.value))} min={1} max={16} />
+                        <label className="text-xs text-muted-foreground mb-1 block">Study Hours/Day</label>
+                        <Input type="number" value={dailyStudyTarget} onChange={(e) => setDailyStudyTarget(Number(e.target.value))} min={1} max={16} className="h-9" />
                       </div>
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Mocks/Month</label>
-                        <Input type="number" value={weeklyMockTarget} onChange={(e) => setWeeklyMockTarget(Number(e.target.value))} min={0} max={30} />
+                        <label className="text-xs text-muted-foreground mb-1 block">Mocks/Month</label>
+                        <Input type="number" value={weeklyMockTarget} onChange={(e) => setWeeklyMockTarget(Number(e.target.value))} min={0} max={30} className="h-9" />
                       </div>
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">MCQs/Topic</label>
-                        <Input type="number" value={localMcqGoal} onChange={(e) => setLocalMcqGoal(Number(e.target.value))} min={10} max={500} step={10} />
+                        <label className="text-xs text-muted-foreground mb-1 block">MCQs/Topic Goal</label>
+                        <Input type="number" value={localMcqGoal} onChange={(e) => setLocalMcqGoal(Number(e.target.value))} min={10} max={500} step={10} className="h-9" />
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">MCQs/Topic: goal of {localMcqGoal} questions per topic to mark MCQs as done.</p>
