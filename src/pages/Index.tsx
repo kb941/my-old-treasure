@@ -620,7 +620,7 @@ const Index = () => {
         pomodoroSettings={pomodoroSettings} srSettings={srSettings}
         contentTypes={contentTypes} breakDuration={breakDuration}
         markingScheme={markingScheme} onSave={handleSaveProfile}
-        onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus}
+        onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
         pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
         mcqGoalPerSubject={mcqGoalPerSubject}
       />
