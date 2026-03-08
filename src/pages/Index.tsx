@@ -540,7 +540,7 @@ const Index = () => {
           )}
 
           {activeTab === 'pyqs' && (
-            <PYQTracker subjects={subjects} />
+            <PYQTracker subjects={subjects} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} />
           )}
 
           {activeTab === 'analytics' && (

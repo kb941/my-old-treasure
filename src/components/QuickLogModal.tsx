@@ -638,11 +638,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                               <div className="flex flex-wrap gap-1.5">
                                 {(() => {
                                   const allExams = ['NEET PG', 'INICET', 'FMGE', 'All'];
-                                  const filtered = examName
-                                    ? allExams.filter(e => e === 'All' || examName.toUpperCase().includes(e.replace(' ', '')) || e.toUpperCase().includes(examName.toUpperCase()))
-                                    : allExams;
-                                  const exams = filtered.length > 1 ? filtered : allExams;
-                                  return exams.map(exam => (
+                                  return allExams.map(exam => (
                                     <button
                                       key={exam}
                                       onClick={() => { setPyqExam(exam); setPyqSessions([]); }}

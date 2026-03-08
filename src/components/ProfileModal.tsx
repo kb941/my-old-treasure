@@ -226,18 +226,18 @@ export function ProfileModal({
                       <Target className="w-4 h-4 text-primary" />
                       Targets
                     </h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Study Hours/Day</label>
-                        <Input type="number" value={dailyStudyTarget} onChange={(e) => setDailyStudyTarget(Number(e.target.value))} min={1} max={16} />
+                        <label className="text-xs text-muted-foreground mb-1 block">Study Hours/Day</label>
+                        <Input type="number" value={dailyStudyTarget} onChange={(e) => setDailyStudyTarget(Number(e.target.value))} min={1} max={16} className="h-9" />
                       </div>
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Mocks/Month</label>
-                        <Input type="number" value={weeklyMockTarget} onChange={(e) => setWeeklyMockTarget(Number(e.target.value))} min={0} max={30} />
+                        <label className="text-xs text-muted-foreground mb-1 block">Mocks/Month</label>
+                        <Input type="number" value={weeklyMockTarget} onChange={(e) => setWeeklyMockTarget(Number(e.target.value))} min={0} max={30} className="h-9" />
                       </div>
                       <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">MCQs/Topic</label>
-                        <Input type="number" value={localMcqGoal} onChange={(e) => setLocalMcqGoal(Number(e.target.value))} min={10} max={500} step={10} />
+                        <label className="text-xs text-muted-foreground mb-1 block">MCQs/Topic Goal</label>
+                        <Input type="number" value={localMcqGoal} onChange={(e) => setLocalMcqGoal(Number(e.target.value))} min={10} max={500} step={10} className="h-9" />
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">MCQs/Topic: goal of {localMcqGoal} questions per topic to mark MCQs as done.</p>
@@ -249,9 +249,25 @@ export function ProfileModal({
                       <Hash className="w-4 h-4 text-primary" />
                       Marking Scheme
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Set marks per answer to calculate predicted scores from mock tests.
-                    </p>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {[
+                        { label: 'NEET PG', correct: 4, incorrect: -1, unanswered: 0, total: 200 },
+                        { label: 'INICET', correct: 1, incorrect: -1/3, unanswered: 0, total: 200 },
+                        { label: 'FMGE', correct: 1, incorrect: 0, unanswered: 0, total: 300 },
+                      ].map(preset => (
+                        <button
+                          key={preset.label}
+                          onClick={() => setLocalMarkingScheme({ correctMarks: preset.correct, incorrectMarks: preset.incorrect, unansweredMarks: preset.unanswered })}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                            localMarkingScheme.correctMarks === preset.correct && localMarkingScheme.incorrectMarks === preset.incorrect
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/50'
+                          }`}
+                        >
+                          {preset.label} (+{preset.correct}/{preset.incorrect === 0 ? '0' : preset.incorrect < -0.5 ? preset.incorrect : `-${Math.abs(preset.incorrect).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}`})
+                        </button>
+                      ))}
+                    </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Correct (+)</label>

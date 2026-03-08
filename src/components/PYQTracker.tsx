@@ -20,12 +20,12 @@ interface ExamConfig {
   sessions: string[];
 }
 
-const YEARS = Array.from({ length: 10 }, (_, i) => 2025 - i);
+const DEFAULT_YEARS = Array.from({ length: 10 }, (_, i) => 2025 - i);
 
 export const EXAM_CONFIGS: ExamConfig[] = [
-  { name: 'NEET PG', sessions: YEARS.map(y => `${y}`) },
-  { name: 'INICET', sessions: YEARS.flatMap(y => [`May ${y}`, `Nov ${y}`]) },
-  { name: 'FMGE', sessions: YEARS.flatMap(y => [`June ${y}`, `Dec ${y}`]) },
+  { name: 'NEET PG', sessions: DEFAULT_YEARS.map(y => `${y}`) },
+  { name: 'INICET', sessions: DEFAULT_YEARS.flatMap(y => [`May ${y}`, `Nov ${y}`]) },
+  { name: 'FMGE', sessions: DEFAULT_YEARS.flatMap(y => [`June ${y}`, `Dec ${y}`]) },
 ];
 
 function generateDefaults(subjects: Subject[]): PYQEntry[] {
@@ -48,6 +48,8 @@ function extractYear(session: string): number {
 
 interface PYQTrackerProps {
   subjects: Subject[];
+  pyqYearFrom?: number;
+  pyqYearTo?: number;
 }
 
 // Summary card for subjects tab — navigates to PYQs tab
@@ -103,7 +105,13 @@ export function PYQSummaryCard({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-export function PYQTracker({ subjects }: PYQTrackerProps) {
+export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps) {
+  const YEARS = useMemo(() => {
+    const from = pyqYearFrom || 2016;
+    const to = pyqYearTo || 2025;
+    return Array.from({ length: to - from + 1 }, (_, i) => to - i);
+  }, [pyqYearFrom, pyqYearTo]);
+
   const defaults = useMemo(() => generateDefaults(subjects), [subjects]);
   const [pyqData, setPyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', defaults);
   const [selectedExam, setSelectedExam] = useState<string>('NEET PG');
