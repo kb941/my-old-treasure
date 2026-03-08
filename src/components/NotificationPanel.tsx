@@ -39,13 +39,13 @@ const DAILY_TIPS = [
 
 export function NotificationBell({ count, onClick }: { count: number; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
-      <Bell className="w-4.5 h-4.5 text-muted-foreground" />
+    <button onClick={onClick} className="relative p-2 rounded-xl hover:bg-secondary/80 transition-colors">
+      <Bell className="w-[18px] h-[18px] text-foreground/70" />
       {count > 0 && (
         <motion.span
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center"
+          className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center px-0.5"
         >
           {count > 9 ? '9+' : count}
         </motion.span>
