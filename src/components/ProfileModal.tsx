@@ -119,9 +119,17 @@ export function ProfileModal({
   );
   const [newCustomType, setNewCustomType] = useState('');
 
+  const handleExamChange = useCallback((exam: string) => {
+    setNewExamName(exam);
+    const ms = EXAM_MARKING[exam];
+    if (ms) setLocalMarkingScheme({ ...ms });
+    const w = EXAM_WEIGHTAGES[exam];
+    if (w) setWeightages(prev => ({ ...prev, ...w }));
+  }, []);
+
   const handleSave = () => {
     onSave({
-      examDate: new Date(newExamDate),
+      examDate: newExamDate,
       examName: newExamName,
       targetScore: newTargetScore,
       targetRank: newTargetRank,
