@@ -115,6 +115,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 onStartFocus={onStartFocus}
                 showTimer={columnId === 'today'}
                 isDraggable={true}
+                isEditMode={true}
                 pomodoroSettings={pomodoroSettings}
               />
             </Reorder.Item>
