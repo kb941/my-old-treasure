@@ -400,7 +400,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
         
         <div className="flex-1 text-left min-w-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm truncate">{subject.name}</h3>
             <span className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gradient-to-r text-white shrink-0",
@@ -408,6 +408,12 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
             )}>
               {subject.weightage}Q
             </span>
+            {(() => {
+              const info = examName ? EXAM_WEIGHTAGES[examName]?.[subject.id] : null;
+              return info?.range ? (
+                <span className="text-[10px] text-muted-foreground shrink-0">({info.range[0]}–{info.range[1]})</span>
+              ) : null;
+            })()}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px] text-muted-foreground">
