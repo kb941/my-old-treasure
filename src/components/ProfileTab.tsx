@@ -70,7 +70,7 @@ interface ProfileTabProps {
 }
 
 export function ProfileTab(props: ProfileTabProps) {
-  const { subjects, onSave, onResetAll, onResetSyllabus, onClearSampleData } = props;
+  const { subjects, onSave, onResetAll, onResetSyllabus, onClearSampleData, onRecalculateReadinessFromStages } = props;
   const navigate = useNavigate();
 
   // Initialize/reset local state from props
