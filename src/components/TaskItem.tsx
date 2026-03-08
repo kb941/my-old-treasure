@@ -14,10 +14,14 @@ const typeIcons: Record<string, typeof BookOpen> = {
   test: FileText,
 };
 
-const priorityColors = {
-  high: 'border-l-destructive',
-  medium: 'border-l-primary',
-  low: 'border-l-muted-foreground',
+// Type-based left border colors
+const typeBorderColors: Record<string, string> = {
+  study: 'border-l-blue-500',
+  revision: 'border-l-violet-500',
+  mcq: 'border-l-amber-500',
+  mock: 'border-l-emerald-500',
+  pyq: 'border-l-rose-500',
+  test: 'border-l-teal-500',
 };
 
 // Type-based color accents for the task card
@@ -169,7 +173,7 @@ export function TaskItem({
       exit={{ opacity: 0, y: 8 }}
       className={cn(
         "rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
-        priorityColors[task.priority],
+        typeBorderColors[task.type] || 'border-l-primary',
         accent.bg,
         task.completed && "opacity-50",
         isDraggable && "cursor-grab active:cursor-grabbing"
