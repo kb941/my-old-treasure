@@ -145,37 +145,54 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
     );
   };
 
+  const applyStageToggleToTopic = (topic: Topic, stageId: string, shouldHaveStage: boolean): Topic => {
+    const stages = topic.completedStages || [];
+    const alreadyHasStage = stages.includes(stageId);
+
+    if (shouldHaveStage && alreadyHasStage) return topic;
+    if (!shouldHaveStage && !alreadyHasStage) return topic;
+
+    const isScorableStage = ['main-video', 'rr-video', 'btr-video'].includes(stageId);
+    const updatedStages = shouldHaveStage
+      ? [...stages, stageId]
+      : stages.filter(s => s !== stageId);
+
+    const updates: Partial<Topic> = { completedStages: updatedStages };
+
+    if (stageId === 'mcqs') {
+      updates.questionsSolved = shouldHaveStage
+        ? Math.max(topic.questionsSolved, topic.targetQuestions)
+        : Math.max(0, topic.questionsSolved - topic.targetQuestions);
+    }
+
+    if (stageId === 'pyqs') {
+      updates.pyqDone = shouldHaveStage;
+    }
+
+    if (shouldHaveStage && isScorableStage && topic.confidence === 0) {
+      updates.confidence = 3;
+      updates.lastStudied = new Date();
+      const sched = getScheduleForConfidence(3, srSettings);
+      if (sched[0]) {
+        updates.nextRevisionDate = addDays(new Date(), sched[0].daysAfterPrevious);
+        updates.revisionSession = 0;
+      }
+    }
+
+    return { ...topic, ...updates };
+  };
+
   const markChapterStage = (chapterId: string, stageId: string) => {
     const chapter = subjectChapters.find(c => c.id === chapterId);
     const allHaveStage = chapter && chapter.topics.length > 0 && chapter.topics.every(t => (t.completedStages || []).includes(stageId));
-    const isScorableStage = ['main-video', 'rr-video', 'btr-video'].includes(stageId);
-    
+
     onChaptersChange(
       subject.id,
       subjectChapters.map(c =>
         c.id === chapterId
           ? {
               ...c,
-              topics: c.topics.map(t => {
-                const stages = t.completedStages || [];
-                if (allHaveStage) {
-                  // Remove stage from all
-                  return { ...t, completedStages: stages.filter(s => s !== stageId) };
-                }
-                if (stages.includes(stageId)) return t;
-                const updates: Partial<typeof t> = { completedStages: [...stages, stageId] };
-                // Auto-set confidence + SR on first scorable stage
-                if (isScorableStage && t.confidence === 0) {
-                  updates.confidence = 3;
-                  updates.lastStudied = new Date();
-                  const sched = getScheduleForConfidence(3, srSettings);
-                  if (sched[0]) {
-                    updates.nextRevisionDate = addDays(new Date(), sched[0].daysAfterPrevious);
-                    updates.revisionSession = 0;
-                  }
-                }
-                return { ...t, ...updates };
-              })
+              topics: c.topics.map(t => applyStageToggleToTopic(t, stageId, !allHaveStage)),
             }
           : c
       )
@@ -185,31 +202,12 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
   const markSubjectStage = (stageId: string) => {
     const allTopicsInSubject = subjectChapters.flatMap(c => c.topics);
     const allHaveStage = allTopicsInSubject.length > 0 && allTopicsInSubject.every(t => (t.completedStages || []).includes(stageId));
-    const isScorableStage = ['main-video', 'rr-video', 'btr-video'].includes(stageId);
-    
+
     onChaptersChange(
       subject.id,
       subjectChapters.map(c => ({
         ...c,
-        topics: c.topics.map(t => {
-          const stages = t.completedStages || [];
-          if (allHaveStage) {
-            // Remove stage from all
-            return { ...t, completedStages: stages.filter(s => s !== stageId) };
-          }
-          if (stages.includes(stageId)) return t;
-          const updates: Partial<typeof t> = { completedStages: [...stages, stageId] };
-          if (isScorableStage && t.confidence === 0) {
-            updates.confidence = 3;
-            updates.lastStudied = new Date();
-            const sched = getScheduleForConfidence(3, srSettings);
-            if (sched[0]) {
-              updates.nextRevisionDate = addDays(new Date(), sched[0].daysAfterPrevious);
-              updates.revisionSession = 0;
-            }
-          }
-          return { ...t, ...updates };
-        })
+        topics: c.topics.map(t => applyStageToggleToTopic(t, stageId, !allHaveStage)),
       }))
     );
   };

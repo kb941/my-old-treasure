@@ -162,8 +162,14 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       const withMain = subTopics.filter(t => t.completedStages.includes('main-video')).length;
       const withAny = subTopics.filter(t => t.completedStages.length > 0).length;
       const withRR1 = subTopics.filter(t => t.revisionSession >= 1).length;
-      const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
-      const mcqGoal = mcqGoalPerSubject * subTopics.length;
+      const mcqsDone = subTopics.reduce((s, t) => {
+        const hasMcqStage = t.completedStages.includes('mcqs');
+        const normalizedSolved = hasMcqStage
+          ? Math.max(t.questionsSolved, t.targetQuestions)
+          : t.questionsSolved;
+        return s + normalizedSolved;
+      }, 0);
+      const mcqGoal = subTopics.reduce((s, t) => s + t.targetQuestions, 0) || (mcqGoalPerSubject * subTopics.length) || 1;
 
       // Calculate weighted coverage using only scorable stages
       let subCoverage = 0;
@@ -253,10 +259,14 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let accuracyTrackedSubjects = 0;
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-      const mcqsDone = subTopics.reduce((s, t) => s + t.questionsSolved, 0);
-      // Use actual topic targetQuestions sum instead of mcqGoalPerSubject * count
-      // This ensures MCQ checkbox toggles (which add targetQuestions) properly count
-      const mcqGoalForSub = subTopics.reduce((s, t) => s + t.targetQuestions, 0) || 1;
+      const mcqsDone = subTopics.reduce((s, t) => {
+        const hasMcqStage = t.completedStages.includes('mcqs');
+        const normalizedSolved = hasMcqStage
+          ? Math.max(t.questionsSolved, t.targetQuestions)
+          : t.questionsSolved;
+        return s + normalizedSolved;
+      }, 0);
+      const mcqGoalForSub = subTopics.reduce((s, t) => s + t.targetQuestions, 0) || (mcqGoalPerSubject * subTopics.length) || 1;
       const weight = sub.weightage / totalWeightage;
 
       if (mcqsDone > 0) hasMcqData = true;
@@ -297,7 +307,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
       if (subTopics.length === 0) return;
-      const pyqDoneCount = subTopics.filter(t => t.pyqDone).length;
+      const pyqDoneCount = subTopics.filter(t => t.pyqDone || t.completedStages.includes('pyqs')).length;
       if (pyqDoneCount > 0) hasChapterPyqData = true;
       const weight = sub.weightage / totalWeightage;
       weightedChapterPyq += (pyqDoneCount / subTopics.length) * weight;
