@@ -205,36 +205,29 @@ export function TaskItem({
               )}
 
               <div className="flex items-center gap-1 mt-2">
-                {!isTimerRunning && onStartFocus ? (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onStartFocus(task.id); }}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium bg-primary/10 text-primary hover:bg-primary/15 transition-colors"
-                  >
-                    <Play className="w-3 h-3" />Start
-                  </button>
-                ) : (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setIsTimerRunning(!isTimerRunning); }}
-                    className={cn(
-                      "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
-                      isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
-                    )}
-                  >
-                    {isTimerRunning ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Start</>}
-                  </button>
-                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsTimerRunning(!isTimerRunning); }}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
+                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
+                  )}
+                >
+                  {isTimerRunning ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Start</>}
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDone(); }}
                   className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/15 transition-colors"
                 >
                   <CheckCircle2 className="w-3 h-3" />Done
                 </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); resetTimer(); }}
-                  className="p-1.5 rounded-md bg-secondary hover:bg-secondary/80 transition-colors"
-                >
-                  <RotateCcw className="w-3 h-3 text-muted-foreground" />
-                </button>
+                {isTimerRunning && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); resetTimer(); }}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium bg-secondary text-muted-foreground hover:bg-secondary/80 transition-colors"
+                  >
+                    <SkipForward className="w-3 h-3" />Skip
+                  </button>
+                )}
               </div>
 
               {showConfidencePicker && (
