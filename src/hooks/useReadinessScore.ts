@@ -299,8 +299,20 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     // ===== 4. PYQ COMPLETION (15%) =====
-    // Priority: year/paper-based → 100% if available; chapter-based → 100% if no paper data
-    // If both exist, use year-based only.
+    // Count scoped exam/year paper PYQs and chapter-level PYQs; use the better score.
+
+    const parseYear = (session: string) => {
+      const match = session.match(/(\d{4})/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    const scopedPyqEntries = pyqData.filter(e => {
+      if (e.subjectId === 'all') return false;
+      if (e.exam !== examName) return false;
+      const year = parseYear(e.session);
+      if (!year) return true;
+      return year >= pyqYearFrom && year <= pyqYearTo;
+    });
 
     // Dimension A: Chapter-wise PYQs (topic.pyqDone) — weightage-based
     let weightedChapterPyq = 0;
@@ -318,11 +330,10 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let weightedPaperPyq = 0;
     let weightedPyqAccuracy = 0;
     let hasPaperPyqData = false;
-    const pyqSubjectEntries = pyqData.filter(e => e.subjectId !== 'all');
-    const pyqsDone = pyqSubjectEntries.filter(e => e.done).length;
+    const pyqsDone = scopedPyqEntries.filter(e => e.done).length;
 
     subjects.forEach(sub => {
-      const subEntries = pyqSubjectEntries.filter(e => e.subjectId === sub.id);
+      const subEntries = scopedPyqEntries.filter(e => e.subjectId === sub.id);
       if (subEntries.length === 0) return;
       const done = subEntries.filter(e => e.done).length;
       if (done > 0) hasPaperPyqData = true;
@@ -337,23 +348,32 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     });
 
     // Check if enough PYQ sessions have accuracy data
-    const pyqEntriesWithAccuracy = pyqSubjectEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
-    const pyqDoneEntries = pyqSubjectEntries.filter(e => e.done).length;
+    const pyqEntriesWithAccuracy = scopedPyqEntries.filter(e => e.done && e.totalQuestions && e.totalQuestions > 0).length;
+    const pyqDoneEntries = scopedPyqEntries.filter(e => e.done).length;
     const hasEnoughPyqAccuracy = pyqDoneEntries > 0 && pyqEntriesWithAccuracy >= pyqDoneEntries * 0.5;
 
-    let pyqScore = 0;
+    const chapterPyqScore = hasChapterPyqData ? weightedChapterPyq * 15 : 0;
+
+    let paperPyqScore = 0;
     if (hasPaperPyqData) {
       if (hasEnoughPyqAccuracy) {
         // Year-based: 70% volume + 30% accuracy
         const volumeComponent = weightedPaperPyq * 70;
         const accComponent = Math.min((weightedPyqAccuracy / 0.8) * 30, 30);
-        pyqScore = (volumeComponent + accComponent) * 15 / 100;
+        paperPyqScore = (volumeComponent + accComponent) * 15 / 100;
       } else {
         // Volume only (not enough accuracy data)
-        pyqScore = weightedPaperPyq * 15;
+        paperPyqScore = weightedPaperPyq * 15;
       }
+    }
+
+    let pyqScore = 0;
+    if (hasPaperPyqData && hasChapterPyqData) {
+      pyqScore = Math.max(paperPyqScore, chapterPyqScore);
+    } else if (hasPaperPyqData) {
+      pyqScore = paperPyqScore;
     } else if (hasChapterPyqData) {
-      pyqScore = weightedChapterPyq * 15;
+      pyqScore = chapterPyqScore;
     }
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
