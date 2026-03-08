@@ -52,7 +52,7 @@ const categoryColors: Record<string, string> = {
   'Short Subjects': 'from-amber-500 to-orange-500',
 };
 
-export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded }: SubjectDetailsProps) {
+export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName }: SubjectDetailsProps) {
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const [isExpanded, setIsExpanded] = useState(forceExpanded || false);
 
