@@ -420,7 +420,8 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
           <p>• <strong>PYQ (15%)</strong> — Year-based priority (vol + accuracy if tracked) OR chapter-based fallback. Volume only if &lt;50% sessions have accuracy data</p>
           <p>• <strong>Mocks (10%)</strong> — Recent 60 days or last 3 mocks (whichever more). Avg score×70% + Trend×20% + Consistency×10%</p>
           <p className="pt-1">• <strong>Bonuses (+15 max)</strong> — Early bird, streak ≥14d, accuracy ≥80%, balanced prep, weekly momentum</p>
-          <p>• <strong>Penalties</strong> — Procrastination (exam near + not studying), critical subjects weak (Medicine/Pharma/Micro/Patho/Surgery/OBG/PSM), mock deficit, inactivity (3d: -3, 7d: -6), accuracy decline, imbalanced study</p>
+          <p>• <strong>Penalties</strong> — Procrastination (exam near + not studying), critical subjects weak (Medicine/Pharma/Micro/Patho/Surgery/OBG/PSM), mock deficit, inactivity (3d: -1, 7d: -3), accuracy decline, imbalanced study</p>
+          <p className="pt-1">• <strong>Spaced Repetition</strong> — Confidence auto-set to 3★ on first completion. After Final review, 90-day Maintenance cycle repeats. 1★ schedule includes 60-day Final interval.</p>
         </div>
       </div>
 
