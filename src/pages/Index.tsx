@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, BookOpen, BarChart3, FileText, User, Orbit, RotateCcw, Bell } from 'lucide-react';
+import { ProfileTab } from '@/components/ProfileTab';
 import { AnalyticsTab } from '@/components/AnalyticsTab';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Button } from '@/components/ui/button';
