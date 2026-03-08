@@ -472,19 +472,23 @@ const Index = () => {
                 onClose={() => setExpandedStat(null)}
               />
               {hasReminders && (
-                <RevisionReminders
-                  reminders={reminders}
-                  tasks={tasks}
-                  onComplete={handleCompleteRevision}
-                  onAddToTask={(reminder) => {
-                    handleAddRevisionTask({
-                      title: `Revise: ${reminder.topicName} (${reminder.sessionName})`,
-                      type: 'revision', subjectId: reminder.subjectId, topicId: reminder.topicId,
-                      chapterId: reminder.chapterId, duration: 30, completed: false,
-                      column: 'today', priority: reminder.isOverdue ? 'high' : 'medium',
-                    });
-                  }}
-                />
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => setActiveTab('revision')}
+                  className="flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5 cursor-pointer hover:bg-amber-500/15 transition-colors active:scale-[0.98]"
+                >
+                  <Bell className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-medium">
+                      {reminders.filter(r => r.isOverdue).length > 0
+                        ? `${reminders.filter(r => r.isOverdue).length} overdue revision${reminders.filter(r => r.isOverdue).length > 1 ? 's' : ''}`
+                        : `${reminders.length} revision${reminders.length > 1 ? 's' : ''} due`
+                      }
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">View →</span>
+                </motion.div>
               )}
               <KanbanBoard
                 tasks={tasks} onTasksChange={setTasks} onToggleTask={handleToggleTask}
