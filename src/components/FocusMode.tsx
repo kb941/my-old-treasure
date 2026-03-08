@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Pause, RotateCcw, Coffee, CheckCircle2, SkipForward, BookOpen, Brain, FileText, Clock, Star, Gamepad2 } from 'lucide-react';
+import { X, Play, Pause, Coffee, CheckCircle2, SkipForward, BookOpen, Brain, FileText, Clock, Star, Gamepad2 } from 'lucide-react';
 import { Task, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
