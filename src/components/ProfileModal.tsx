@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,40 @@ import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+// Exam-specific weightages (avg questions per subject)
+const EXAM_WEIGHTAGES: Record<string, Record<string, number>> = {
+  'NEET PG': {
+    anatomy: 8, physiology: 9, biochemistry: 11, pathology: 14, pharmacology: 15,
+    microbiology: 13, forensic: 8, medicine: 19, surgery: 19, obg: 20,
+    pediatrics: 9, psychiatry: 5, dermatology: 5, radiology: 6, anesthesia: 4,
+    orthopedics: 6, ophthalmology: 7, ent: 6, psm: 16,
+  },
+  'INICET': {
+    anatomy: 12, physiology: 12, biochemistry: 10, pathology: 18, pharmacology: 17,
+    microbiology: 15, forensic: 8, medicine: 19, surgery: 16, obg: 16,
+    pediatrics: 8, psychiatry: 4, dermatology: 6, radiology: 4, anesthesia: 4,
+    orthopedics: 7, ophthalmology: 7, ent: 5, psm: 12,
+  },
+  'FMGE': {
+    anatomy: 17, physiology: 17, biochemistry: 17, pathology: 13, pharmacology: 13,
+    microbiology: 13, forensic: 10, medicine: 33, surgery: 32, obg: 30,
+    pediatrics: 15, psychiatry: 5, dermatology: 5, radiology: 5, anesthesia: 5,
+    orthopedics: 5, ophthalmology: 15, ent: 15, psm: 30,
+  },
+};
+
+const EXAM_MARKING: Record<string, MarkingScheme> = {
+  'NEET PG': { correctMarks: 4, incorrectMarks: -1, unansweredMarks: 0, totalMarks: 800 },
+  'INICET': { correctMarks: 1, incorrectMarks: -1/3, unansweredMarks: 0, totalMarks: 200 },
+  'FMGE': { correctMarks: 1, incorrectMarks: 0, unansweredMarks: 0, totalMarks: 300 },
+};
+
+const EXAM_OPTIONS = ['NEET PG', 'INICET', 'FMGE'];
 
 interface ProfileModalProps {
   isOpen: boolean;
