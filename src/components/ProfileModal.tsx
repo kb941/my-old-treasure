@@ -68,6 +68,7 @@ interface ProfileModalProps {
   onSave: (data: ProfileData) => void;
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
+  onClearSampleData?: () => void;
 }
 
 export interface ProfileData {
