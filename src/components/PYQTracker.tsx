@@ -345,9 +345,9 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                           }`}
                         >
                           {/* Subject row - tap to toggle */}
-                          <button
+                          <div
                             onClick={() => toggleEntry(selectedExam, session, entry.subjectId)}
-                            className="w-full flex items-center gap-2.5 px-3 py-2"
+                            className="w-full flex items-center gap-2.5 px-3 py-2 cursor-pointer"
                           >
                             <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
                               entry.done ? 'bg-primary border-primary' : 'border-muted-foreground/25 hover:border-primary/50'
@@ -366,7 +366,7 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
                                 {accuracy}%
                               </span>
                             )}
-                          </button>
+                          </div>
 
                           {/* Score entry row - slides open when done */}
                           {entry.done && (
