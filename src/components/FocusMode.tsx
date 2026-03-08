@@ -33,10 +33,11 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
   const [showConfidence, setShowConfidence] = useState(false);
   const [selectedConfidence, setSelectedConfidence] = useState(3);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [skippedTasks, setSkippedTasks] = useState<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id));
-  const currentTask = incompleteTasks[currentTaskIndex] || null;
+  const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id) && !skippedTasks.has(t.id));
+  const currentTask = incompleteTasks[0] || null;
 
   const getPhaseDuration = (p: TimerPhase) => {
     switch (p) {
