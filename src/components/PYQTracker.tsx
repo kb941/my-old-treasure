@@ -48,6 +48,8 @@ function extractYear(session: string): number {
 
 interface PYQTrackerProps {
   subjects: Subject[];
+  pyqYearFrom?: number;
+  pyqYearTo?: number;
 }
 
 // Summary card for subjects tab — navigates to PYQs tab
