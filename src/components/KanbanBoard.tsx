@@ -251,8 +251,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
           onClick={() => setReorderMode(!reorderMode)}
           className={cn("h-8 text-xs", reorderMode && "gradient-primary text-primary-foreground")}
         >
-          <ArrowUpDown className="w-3.5 h-3.5 mr-1.5" />
-          {reorderMode ? 'Done Reordering' : 'Reorder Tasks'}
+          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+          {reorderMode ? 'Done Editing' : 'Edit Tasks'}
         </Button>
       </div>
 

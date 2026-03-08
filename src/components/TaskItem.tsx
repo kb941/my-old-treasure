@@ -261,25 +261,32 @@ export function TaskItem({
 
         {/* Actions */}
         <div className="flex flex-col gap-0.5">
-          {onEdit && (
-            <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1 hover:bg-secondary rounded transition-colors">
-              <Pencil className="w-3 h-3 text-muted-foreground" />
-            </button>
-          )}
-          {canMoveLeft && (
-            <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }} className="p-1 hover:bg-secondary rounded transition-colors">
-              <ArrowLeft className="w-3 h-3 text-muted-foreground" />
-            </button>
-          )}
-          {canMoveRight && (
-            <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'right'); }} className="p-1 hover:bg-secondary rounded transition-colors">
-              <ArrowRight className="w-3 h-3 text-muted-foreground" />
-            </button>
-          )}
-          {onDelete && (
-            <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-1 hover:bg-destructive/10 rounded transition-colors">
-              <Trash2 className="w-3 h-3 text-muted-foreground hover:text-destructive" />
-            </button>
+          {isEditMode ? (
+            <>
+              {onEdit && (
+                <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 hover:bg-secondary rounded transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              )}
+              {onDelete && (
+                <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-1.5 hover:bg-destructive/10 rounded transition-colors">
+                  <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {canMoveLeft && (
+                <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }} className="p-1 hover:bg-secondary rounded transition-colors">
+                  <ArrowLeft className="w-3 h-3 text-muted-foreground" />
+                </button>
+              )}
+              {canMoveRight && (
+                <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'right'); }} className="p-1 hover:bg-secondary rounded transition-colors">
+                  <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
