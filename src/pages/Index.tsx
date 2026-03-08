@@ -386,10 +386,9 @@ const Index = () => {
         <div className="container py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-bold tracking-tight flex items-center gap-1">
-                <span className="text-primary font-extrabold">P</span><span className="text-foreground">lan</span>
-                <span className="text-primary/60 font-light">OS</span>
-                <span className="text-[10px] font-normal text-muted-foreground ml-1 bg-secondary px-1.5 py-0.5 rounded">{examName}</span>
+              <h1 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                <span><span className="text-primary">Plan</span><span className="text-foreground">OS</span></span>
+                <span className="text-xs font-normal text-muted-foreground">{examName}</span>
               </h1>
             </div>
             <div className="flex items-center gap-1.5">
