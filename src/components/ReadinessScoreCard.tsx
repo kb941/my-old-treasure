@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X } from 'lucide-react';
-import { ReadinessResult } from '@/hooks/useReadinessScore';
+import { ChevronDown, ChevronUp, BookOpen, RotateCcw, FileQuestion, FileText, GraduationCap, Sparkles, AlertTriangle, Lightbulb, X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ReadinessResult, getReadinessTrend, SubjectReadiness } from '@/hooks/useReadinessScore';
 
 interface ReadinessScoreCardProps {
   result: ReadinessResult;
   compact?: boolean;
 }
 
-const baseItems = (breakdown: ReadinessResult['breakdown']) => [
+const getBaseItems = (breakdown: ReadinessResult['breakdown']) => [
   { icon: BookOpen, label: 'Syllabus Coverage', value: breakdown.base.syllabus, max: 35, color: 'text-blue-500' },
   { icon: RotateCcw, label: 'Revision Quality', value: breakdown.base.revision, max: 20, color: 'text-violet-500' },
   { icon: FileQuestion, label: 'MCQ Practice', value: breakdown.base.mcq, max: 20, color: 'text-amber-500' },
@@ -16,12 +16,60 @@ const baseItems = (breakdown: ReadinessResult['breakdown']) => [
   { icon: GraduationCap, label: 'Mock Performance', value: breakdown.base.mocks, max: 10, color: 'text-primary' },
 ];
 
+// Mini sparkline SVG
+function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 4) - 2;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <svg width={width} height={height} className="inline-block">
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+      {/* Dot on last point */}
+      {data.length > 0 && (() => {
+        const lastX = width;
+        const lastY = height - ((data[data.length - 1] - min) / range) * (height - 4) - 2;
+        return <circle cx={lastX} cy={lastY} r="2" fill={color} />;
+      })()}
+    </svg>
+  );
+}
+
+function TrendBadge({ trend }: { trend: number[] }) {
+  if (trend.length < 2) return null;
+  const diff = trend[trend.length - 1] - trend[0];
+  const icon = diff > 1 ? TrendingUp : diff < -1 ? TrendingDown : Minus;
+  const Icon = icon;
+  const colorCls = diff > 1 ? 'text-emerald-500' : diff < -1 ? 'text-destructive' : 'text-muted-foreground';
+  const label = diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[9px] font-medium ${colorCls}`}>
+      <Icon className="w-2.5 h-2.5" />
+      {label}
+    </span>
+  );
+}
+
 export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCardProps) {
   const [showDetail, setShowDetail] = useState(false);
-  const { score, breakdown, color, label, message, recommendations } = result;
-  const items = baseItems(breakdown);
+  const { score, breakdown, color, label, message } = result;
+  const items = getBaseItems(breakdown);
 
-  // === COMPACT WIDGET (for Today tab) ===
+  const trendData = useMemo(() => getReadinessTrend().map(t => t.score), [score]);
+
   if (compact) {
     return (
       <>
@@ -32,7 +80,6 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
           className="bg-card rounded-xl p-3 border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
-            {/* Mini circular gauge */}
             <div className="relative flex-shrink-0">
               <svg className="w-12 h-12 transform -rotate-90">
                 <circle cx="24" cy="24" r="20" stroke="hsl(var(--secondary))" strokeWidth="4" fill="none" />
@@ -60,27 +107,28 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 >
                   {label}
                 </span>
+                <TrendBadge trend={trendData} />
               </div>
-              {/* Mini progress bars */}
               <div className="flex gap-1">
                 {items.map(item => {
                   const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
                   return (
-                    <div key={item.label} className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }}
-                      />
+                    <div key={item.label} className="flex-1 h-1 bg-secondary rounded-full overflow-hidden" title={`${item.label}: ${item.value}/${item.max}`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
                     </div>
                   );
                 })}
               </div>
-              <p className="text-[9px] text-muted-foreground mt-1 truncate">Tap for full breakdown</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[9px] text-muted-foreground">Tap for breakdown</p>
+                {trendData.length >= 2 && (
+                  <Sparkline data={trendData.slice(-14)} color={color} width={50} height={14} />
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Full-screen detail modal */}
         <AnimatePresence>
           {showDetail && (
             <motion.div
@@ -95,7 +143,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 30 }}
                 onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-3 top-8 bottom-8 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[480px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
+                className="absolute inset-x-3 top-6 bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
               >
                 <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
                   <h2 className="font-semibold text-base">🎯 Exam Readiness Breakdown</h2>
@@ -104,7 +152,7 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                   </button>
                 </div>
                 <div className="p-5">
-                  <FullBreakdown result={result} />
+                  <FullBreakdown result={result} trendData={trendData} />
                 </div>
               </motion.div>
             </motion.div>
@@ -114,14 +162,13 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
     );
   }
 
-  // === FULL CARD (for Analytics tab) ===
-  return <FullCard result={result} />;
+  return <FullCard result={result} trendData={trendData} />;
 }
 
-function FullCard({ result }: { result: ReadinessResult }) {
+function FullCard({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
   const [expanded, setExpanded] = useState(false);
   const { score, breakdown, color, label, message } = result;
-  const items = baseItems(breakdown);
+  const items = getBaseItems(breakdown);
 
   return (
     <motion.div
@@ -131,11 +178,11 @@ function FullCard({ result }: { result: ReadinessResult }) {
     >
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-base">🎯 Exam Readiness</h3>
-          <span
-            className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-            style={{ background: `${color}20`, color }}
-          >
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-base">🎯 Exam Readiness</h3>
+            <TrendBadge trend={trendData} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: `${color}20`, color }}>
             {label}
           </span>
         </div>
@@ -144,10 +191,7 @@ function FullCard({ result }: { result: ReadinessResult }) {
           <div className="relative flex-shrink-0">
             <svg className="w-32 h-32 transform -rotate-90">
               <circle cx="64" cy="64" r="56" stroke="hsl(var(--secondary))" strokeWidth="8" fill="none" />
-              <motion.circle
-                cx="64" cy="64" r="56"
-                stroke={color}
-                strokeWidth="8" fill="none" strokeLinecap="round"
+              <motion.circle cx="64" cy="64" r="56" stroke={color} strokeWidth="8" fill="none" strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 56}
                 initial={{ strokeDashoffset: 2 * Math.PI * 56 }}
                 animate={{ strokeDashoffset: 2 * Math.PI * 56 * (1 - score / 100) }}
@@ -168,30 +212,26 @@ function FullCard({ result }: { result: ReadinessResult }) {
                   <item.icon className={`w-3 h-3 flex-shrink-0 ${item.color}`} />
                   <div className="flex-1 min-w-0">
                     <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(pct, 100)}%` }}
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: color }}
-                      />
+                        className="h-full rounded-full" style={{ backgroundColor: color }} />
                     </div>
                   </div>
-                  <span className="text-[9px] text-muted-foreground w-10 text-right flex-shrink-0">
-                    {item.value}/{item.max}
-                  </span>
+                  <span className="text-[9px] text-muted-foreground w-10 text-right flex-shrink-0">{item.value}/{item.max}</span>
                 </div>
               );
             })}
+            {trendData.length >= 2 && (
+              <div className="pt-1">
+                <Sparkline data={trendData.slice(-30)} color={color} width={120} height={20} />
+              </div>
+            )}
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">{message}</p>
 
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:underline"
-        >
+        <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:underline">
           {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           {expanded ? 'Hide details' : 'View full breakdown'}
         </button>
@@ -199,15 +239,10 @@ function FullCard({ result }: { result: ReadinessResult }) {
 
       <AnimatePresence>
         {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }} className="overflow-hidden">
             <div className="px-5 pb-5 border-t border-border pt-4">
-              <FullBreakdown result={result} />
+              <FullBreakdown result={result} trendData={trendData} />
             </div>
           </motion.div>
         )}
@@ -216,21 +251,64 @@ function FullCard({ result }: { result: ReadinessResult }) {
   );
 }
 
-function FullBreakdown({ result }: { result: ReadinessResult }) {
+function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadiness[]; color: string }) {
+  const [showAll, setShowAll] = useState(false);
+  // Show top 5 gaps by default
+  const displayed = showAll ? subjects : subjects.slice(0, 5);
+
+  return (
+    <div>
+      <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
+        📋 Subject-wise Breakdown
+      </h4>
+      <div className="space-y-2">
+        {displayed.map(sub => (
+          <div key={sub.subjectId} className="flex items-center gap-2">
+            <div className="w-20 text-[10px] font-medium truncate" title={sub.subjectName}>
+              {sub.subjectName}
+            </div>
+            <div className="flex-1">
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(sub.syllabusPct, 100)}%` }}
+                  transition={{ duration: 0.5 }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: sub.syllabusPct > 60 ? 'hsl(var(--success))' : sub.syllabusPct > 30 ? color : 'hsl(var(--destructive))' }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 text-[9px] text-muted-foreground flex-shrink-0">
+              <span title="Syllabus progress">{sub.syllabusPct}%</span>
+              <span title="Weight" className="text-foreground/40">w{sub.weightage}</span>
+              {sub.gap > 0.5 && (
+                <span className="text-destructive font-medium" title="Points gap">-{sub.gap}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {subjects.length > 5 && (
+        <button onClick={() => setShowAll(!showAll)} className="text-[10px] text-primary mt-2 hover:underline">
+          {showAll ? 'Show less' : `Show all ${subjects.length} subjects`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
   const { score, breakdown, color, recommendations } = result;
-  const items = baseItems(breakdown);
+  const items = getBaseItems(breakdown);
 
   return (
     <div className="space-y-5">
-      {/* Score summary at top of breakdown */}
-      <div className="flex items-center justify-center">
+      {/* Score gauge */}
+      <div className="flex items-center justify-center gap-6">
         <div className="relative">
           <svg className="w-28 h-28 transform -rotate-90">
             <circle cx="56" cy="56" r="48" stroke="hsl(var(--secondary))" strokeWidth="7" fill="none" />
-            <motion.circle
-              cx="56" cy="56" r="48"
-              stroke={color}
-              strokeWidth="7" fill="none" strokeLinecap="round"
+            <motion.circle cx="56" cy="56" r="48" stroke={color} strokeWidth="7" fill="none" strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 48}
               initial={{ strokeDashoffset: 2 * Math.PI * 48 }}
               animate={{ strokeDashoffset: 2 * Math.PI * 48 * (1 - score / 100) }}
@@ -242,6 +320,13 @@ function FullBreakdown({ result }: { result: ReadinessResult }) {
             <span className="text-[9px] text-muted-foreground">Readiness</span>
           </div>
         </div>
+        {trendData.length >= 2 && (
+          <div className="text-center">
+            <Sparkline data={trendData.slice(-30)} color={color} width={100} height={32} />
+            <p className="text-[9px] text-muted-foreground mt-1">Last {Math.min(trendData.length, 30)} days</p>
+            <TrendBadge trend={trendData.slice(-7)} />
+          </div>
+        )}
       </div>
 
       {/* Base Score Details */}
@@ -249,7 +334,7 @@ function FullBreakdown({ result }: { result: ReadinessResult }) {
         <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2.5">
           📊 Base Score: {breakdown.base.total} / 100 pts
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {items.map(item => {
             const pct = item.max > 0 ? Math.round((item.value / item.max) * 100) : 0;
             return (
@@ -262,19 +347,20 @@ function FullBreakdown({ result }: { result: ReadinessResult }) {
                   <span className="text-muted-foreground">{item.value} / {item.max} ({pct}%)</span>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(pct, 100)}%` }}
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
+                    className="h-full rounded-full" style={{ backgroundColor: color }} />
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Subject Breakdown */}
+      {breakdown.subjectBreakdown.length > 0 && (
+        <SubjectBreakdownSection subjects={breakdown.subjectBreakdown} color={color} />
+      )}
 
       {/* Bonuses */}
       {breakdown.bonuses.total > 0 && (
@@ -321,19 +407,17 @@ function FullBreakdown({ result }: { result: ReadinessResult }) {
         </p>
       </div>
 
-      {/* Formula Reference */}
+      {/* Formula */}
       <div className="bg-secondary/30 rounded-lg p-3">
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
-          🧮 How It's Calculated
-        </h4>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2">🧮 How It's Calculated</h4>
         <div className="space-y-1 text-[10px] text-muted-foreground">
-          <p>• <strong>Syllabus (35%)</strong> — Weighted Main video completion across subjects</p>
-          <p>• <strong>Revision (20%)</strong> — Spaced repetition cycles (RR1×40% + RR2×35% + RR3×25%) minus overdue penalties</p>
+          <p>• <strong>Syllabus (35%)</strong> — 70% Main video + 30% any stage completion, weighted by subject importance</p>
+          <p>• <strong>Revision (20%)</strong> — RR1×40% + RR2×35% + RR3×25%, minus overdue topic penalties</p>
           <p>• <strong>MCQ (20%)</strong> — Volume vs goal (50%) + weighted accuracy vs 75% target (50%)</p>
           <p>• <strong>PYQ (15%)</strong> — Sessions done (60%) + accuracy vs 80% target (40%) + year coverage</p>
           <p>• <strong>Mocks (10%)</strong> — Avg score (70%) + trend (30%) + consistency bonus</p>
-          <p className="pt-1">• <strong>Bonuses (+15 max)</strong> — Early bird, streak, accuracy elite, balanced prep, momentum</p>
-          <p>• <strong>Penalties (-20 max)</strong> — Only apply after you start studying. Procrastination, weak critical subjects, mock deficit, inactivity</p>
+          <p className="pt-1">• <strong>Bonuses (+15 max)</strong> — Early bird, streak ≥14d, accuracy ≥80%, balanced prep, weekly momentum</p>
+          <p>• <strong>Penalties (-20 max)</strong> — Only after meaningful activity: procrastination near exam, weak critical subjects, mock deficit, inactivity ≥3d, accuracy decline, imbalanced study</p>
         </div>
       </div>
 
@@ -342,13 +426,11 @@ function FullBreakdown({ result }: { result: ReadinessResult }) {
         <div>
           <h4 className="text-[11px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
             <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-            Top Recommendations
+            Recommendations
           </h4>
           <div className="space-y-1.5">
             {recommendations.map((r, i) => (
-              <p key={i} className="text-[11px] text-foreground/80">
-                {i + 1}. {r}
-              </p>
+              <p key={i} className="text-[11px] text-foreground/80">{i + 1}. {r}</p>
             ))}
           </div>
         </div>
