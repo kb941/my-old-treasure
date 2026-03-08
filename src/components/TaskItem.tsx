@@ -4,11 +4,13 @@ import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
 
-const typeIcons = {
+const typeIcons: Record<string, typeof BookOpen> = {
   study: BookOpen,
   revision: Brain,
   mcq: FileText,
   mock: FileText,
+  pyq: FileText,
+  test: FileText,
 };
 
 const priorityColors = {
