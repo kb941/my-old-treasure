@@ -14,7 +14,36 @@ interface SubjectDetailsProps {
   contentTypes?: ContentType[];
   srSettings?: SpacedRepetitionSettings;
   forceExpanded?: boolean;
+  examName?: string;
 }
+
+type WeightageInfo = { avg: number; range?: [number, number] };
+const EXAM_WEIGHTAGES: Record<string, Record<string, WeightageInfo>> = {
+  'NEET PG': {
+    anatomy: { avg: 8, range: [5, 12] }, physiology: { avg: 9, range: [5, 13] }, biochemistry: { avg: 11, range: [8, 15] },
+    pathology: { avg: 14, range: [10, 19] }, pharmacology: { avg: 15, range: [12, 16] }, microbiology: { avg: 13, range: [11, 16] },
+    forensic: { avg: 8, range: [6, 10] }, medicine: { avg: 19, range: [16, 23] }, surgery: { avg: 19, range: [15, 27] },
+    obg: { avg: 20, range: [17, 25] }, pediatrics: { avg: 9, range: [4, 14] }, psychiatry: { avg: 5, range: [2, 7] },
+    dermatology: { avg: 5, range: [4, 7] }, radiology: { avg: 6, range: [2, 8] }, anesthesia: { avg: 4, range: [2, 7] },
+    orthopedics: { avg: 6, range: [4, 8] }, ophthalmology: { avg: 7, range: [6, 8] }, ent: { avg: 6, range: [4, 9] },
+    psm: { avg: 16, range: [12, 17] },
+  },
+  'INICET': {
+    anatomy: { avg: 12, range: [11, 13] }, physiology: { avg: 12, range: [10, 15] }, biochemistry: { avg: 10, range: [9, 13] },
+    pathology: { avg: 18, range: [12, 22] }, pharmacology: { avg: 17, range: [12, 20] }, microbiology: { avg: 15, range: [12, 19] },
+    forensic: { avg: 8, range: [5, 10] }, medicine: { avg: 19, range: [14, 23] }, surgery: { avg: 16, range: [11, 22] },
+    obg: { avg: 16, range: [12, 21] }, pediatrics: { avg: 8, range: [6, 12] }, psychiatry: { avg: 4, range: [3, 7] },
+    dermatology: { avg: 6, range: [4, 7] }, radiology: { avg: 4, range: [3, 6] }, anesthesia: { avg: 4, range: [2, 7] },
+    orthopedics: { avg: 7, range: [6, 10] }, ophthalmology: { avg: 7, range: [4, 11] }, ent: { avg: 5, range: [3, 7] },
+    psm: { avg: 12, range: [8, 18] },
+  },
+  'FMGE': {
+    anatomy: { avg: 17 }, physiology: { avg: 17 }, biochemistry: { avg: 17 }, pathology: { avg: 13 }, pharmacology: { avg: 13 },
+    microbiology: { avg: 13 }, forensic: { avg: 10 }, medicine: { avg: 33 }, surgery: { avg: 32 }, obg: { avg: 30 },
+    pediatrics: { avg: 15 }, psychiatry: { avg: 5 }, dermatology: { avg: 5 }, radiology: { avg: 10 }, anesthesia: { avg: 5 },
+    orthopedics: { avg: 5 }, ophthalmology: { avg: 15 }, ent: { avg: 15 }, psm: { avg: 30 },
+  },
+};
 
 const categoryColors: Record<string, string> = {
   'Pre-clinical': 'from-blue-500 to-cyan-500',
@@ -23,7 +52,7 @@ const categoryColors: Record<string, string> = {
   'Short Subjects': 'from-amber-500 to-orange-500',
 };
 
-export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded }: SubjectDetailsProps) {
+export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName }: SubjectDetailsProps) {
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const [isExpanded, setIsExpanded] = useState(forceExpanded || false);
 
@@ -180,7 +209,10 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
             <div className="flex-1 min-w-0">
               <h1 className="text-base font-bold truncate">{subject.name}</h1>
               <p className="text-xs text-white/80">
-                {subjectChapters.length} ch • {totalTopics} topics • {progress}%
+                {subject.weightage}Q{(() => {
+                  const info = examName ? EXAM_WEIGHTAGES[examName]?.[subject.id] : null;
+                  return info?.range ? ` (${info.range[0]}–${info.range[1]})` : '';
+                })()} • {subjectChapters.length} ch • {totalTopics} topics • {progress}%
               </p>
             </div>
           </div>
@@ -371,7 +403,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
         
         <div className="flex-1 text-left min-w-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm truncate">{subject.name}</h3>
             <span className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gradient-to-r text-white shrink-0",
@@ -379,6 +411,12 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
             )}>
               {subject.weightage}Q
             </span>
+            {(() => {
+              const info = examName ? EXAM_WEIGHTAGES[examName]?.[subject.id] : null;
+              return info?.range ? (
+                <span className="text-[10px] text-muted-foreground shrink-0">({info.range[0]}–{info.range[1]})</span>
+              ) : null;
+            })()}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px] text-muted-foreground">
