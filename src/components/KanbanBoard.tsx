@@ -133,6 +133,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               onToggle={onToggleTask}
               onMove={moveTask}
               onDelete={deleteTask}
+              onEdit={openEditModal}
               onTimerComplete={onTimerComplete}
               onDone={onTaskDone}
               onStartFocus={onStartFocus}
