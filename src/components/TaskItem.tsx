@@ -115,8 +115,21 @@ export function TaskItem({
     setTotalElapsedStudyTime(0);
   };
 
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      startVelocity: 20,
+      gravity: 0.8,
+      scalar: 0.7,
+      origin: { x: 0.5, y: 0.6 },
+      colors: ['#14b8a6', '#6366f1', '#f59e0b', '#22c55e', '#ec4899'],
+    });
+  };
+
   const handleDone = () => {
     setIsTimerRunning(false);
+    fireConfetti();
     if (task.topicId) {
       setShowConfidencePicker(true);
     } else {
