@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, ArrowUpDown } from 'lucide-react';
+import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, Pencil } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings, Chapter } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -115,6 +115,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 onStartFocus={onStartFocus}
                 showTimer={columnId === 'today'}
                 isDraggable={true}
+                isEditMode={true}
                 pomodoroSettings={pomodoroSettings}
               />
             </Reorder.Item>
@@ -132,13 +133,12 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               task={task}
               onToggle={onToggleTask}
               onMove={moveTask}
-              onDelete={deleteTask}
-              onEdit={openEditModal}
               onTimerComplete={onTimerComplete}
               onDone={onTaskDone}
               onStartFocus={onStartFocus}
               showTimer={columnId === 'today'}
               isDraggable={false}
+              isEditMode={false}
               pomodoroSettings={pomodoroSettings}
             />
           ))}
@@ -188,15 +188,15 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
             <h2 className="text-base font-semibold">{columns.find(c => c.id === activeColumn)?.label}</h2>
           </div>
           <div className="flex items-center gap-1.5">
-            {columnTasks.length > 1 && (
+            {columnTasks.length > 0 && (
               <Button
                 variant={reorderMode ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setReorderMode(!reorderMode)}
                 className={cn("h-8 px-2 text-xs", reorderMode && "gradient-primary text-primary-foreground")}
               >
-                <ArrowUpDown className="w-3.5 h-3.5 mr-1" />
-                {reorderMode ? 'Done' : 'Reorder'}
+                <Pencil className="w-3.5 h-3.5 mr-1" />
+                {reorderMode ? 'Done' : 'Edit'}
               </Button>
             )}
             {activeColumn === 'done' && columnTasks.length > 0 && (
@@ -251,8 +251,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
           onClick={() => setReorderMode(!reorderMode)}
           className={cn("h-8 text-xs", reorderMode && "gradient-primary text-primary-foreground")}
         >
-          <ArrowUpDown className="w-3.5 h-3.5 mr-1.5" />
-          {reorderMode ? 'Done Reordering' : 'Reorder Tasks'}
+          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+          {reorderMode ? 'Done Editing' : 'Edit Tasks'}
         </Button>
       </div>
 
