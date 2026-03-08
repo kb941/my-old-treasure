@@ -641,6 +641,7 @@ const Index = () => {
               contentTypes={contentTypes} breakDuration={breakDuration}
               markingScheme={markingScheme} onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
+              onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}
               pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
               mcqGoalPerSubject={mcqGoalPerSubject}
             />
