@@ -622,16 +622,6 @@ const Index = () => {
       {/* Modals */}
       <QuickLogModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} onLog={handleLog} onOpenMockModal={() => { setMockModalMode('mock'); setIsMockModalOpen(true); }} onOpenTestModal={() => { setMockModalMode('test'); setIsMockModalOpen(true); }} onOpenPyqMockModal={() => { setMockModalMode('pyq-mock'); setIsMockModalOpen(true); }} chapters={chapters} contentTypes={contentTypes} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} examName={examName} />
       <MockTestModal isOpen={isMockModalOpen} onClose={() => setIsMockModalOpen(false)} onLog={handleLogMockTest} mode={mockModalMode} pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo} />
-      <ProfileModal
-        isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}
-        examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
-        pomodoroSettings={pomodoroSettings} srSettings={srSettings}
-        contentTypes={contentTypes} breakDuration={breakDuration}
-        markingScheme={markingScheme} onSave={handleSaveProfile}
-        onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
-        pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}
-        mcqGoalPerSubject={mcqGoalPerSubject}
-      />
       <FocusMode
         isOpen={isFocusMode} onClose={() => { setIsFocusMode(false); setFocusTaskId(null); }}
         tasks={(() => {
