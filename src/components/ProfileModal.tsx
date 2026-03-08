@@ -91,7 +91,7 @@ export interface ProfileData {
 
 export function ProfileModal({ 
   isOpen, onClose, examDate, examName, targetScore, targetRank, subjects, pomodoroSettings,
-  srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus
+  srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus, onClearSampleData
 }: ProfileModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [newExamDate, setNewExamDate] = useState<Date>(examDate);
