@@ -265,10 +265,18 @@ const Index = () => {
               if (['extra-videos', 'btr-videos', 'rr-videos', 'main-videos'].includes(topic.status)) updates.status = 'mcqs-in-progress';
             } else if (task.type === 'revision') {
               const schedule = getScheduleForConfidence(topic.confidence, srSettings);
-              const nextSession = Math.min(topic.revisionSession + 1, schedule.length);
-              const nextSchedule = schedule[nextSession - 1];
-              updates.revisionSession = nextSession;
-              updates.nextRevisionDate = nextSchedule ? addDays(new Date(), nextSchedule.daysAfterPrevious) : null;
+              const nextSession = topic.revisionSession + 1;
+              // Handle maintenance session (perpetual cycle)
+              const maintenanceIdx = schedule.findIndex(s => s.name === 'Maintenance');
+              if (maintenanceIdx >= 0 && nextSession >= maintenanceIdx) {
+                const maintenanceSched = schedule[maintenanceIdx];
+                updates.revisionSession = maintenanceIdx;
+                updates.nextRevisionDate = addDays(new Date(), maintenanceSched.daysAfterPrevious);
+              } else {
+                const nextSchedule = schedule[nextSession] || schedule[nextSession - 1];
+                updates.revisionSession = nextSession;
+                updates.nextRevisionDate = nextSchedule ? addDays(new Date(), nextSchedule.daysAfterPrevious) : null;
+              }
               if (topic.status === 'pyq-done' || topic.status === 'mcqs-in-progress') updates.status = 'revision';
             }
             if (!topic.lastStudied && !topic.nextRevisionDate) {
