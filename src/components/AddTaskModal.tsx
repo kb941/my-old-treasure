@@ -422,7 +422,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                           onClick={() => {
                                             const newId = topicId === topic.id ? '' : topic.id;
                                             setTopicId(newId);
-                                            if (newId) setTitle(`${typeLabels[type]} - ${topic.name}`);
+                                            if (newId) updateAutoTitle(undefined, subjectId, chapterId, newId);
                                           }}
                                           className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
                                             topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
