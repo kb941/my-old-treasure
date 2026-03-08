@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,40 @@ import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+// Exam-specific weightages (avg questions per subject)
+const EXAM_WEIGHTAGES: Record<string, Record<string, number>> = {
+  'NEET PG': {
+    anatomy: 8, physiology: 9, biochemistry: 11, pathology: 14, pharmacology: 15,
+    microbiology: 13, forensic: 8, medicine: 19, surgery: 19, obg: 20,
+    pediatrics: 9, psychiatry: 5, dermatology: 5, radiology: 6, anesthesia: 4,
+    orthopedics: 6, ophthalmology: 7, ent: 6, psm: 16,
+  },
+  'INICET': {
+    anatomy: 12, physiology: 12, biochemistry: 10, pathology: 18, pharmacology: 17,
+    microbiology: 15, forensic: 8, medicine: 19, surgery: 16, obg: 16,
+    pediatrics: 8, psychiatry: 4, dermatology: 6, radiology: 4, anesthesia: 4,
+    orthopedics: 7, ophthalmology: 7, ent: 5, psm: 12,
+  },
+  'FMGE': {
+    anatomy: 17, physiology: 17, biochemistry: 17, pathology: 13, pharmacology: 13,
+    microbiology: 13, forensic: 10, medicine: 33, surgery: 32, obg: 30,
+    pediatrics: 15, psychiatry: 5, dermatology: 5, radiology: 5, anesthesia: 5,
+    orthopedics: 5, ophthalmology: 15, ent: 15, psm: 30,
+  },
+};
+
+const EXAM_MARKING: Record<string, MarkingScheme> = {
+  'NEET PG': { correctMarks: 4, incorrectMarks: -1, unansweredMarks: 0, totalMarks: 800 },
+  'INICET': { correctMarks: 1, incorrectMarks: -1/3, unansweredMarks: 0, totalMarks: 200 },
+  'FMGE': { correctMarks: 1, incorrectMarks: 0, unansweredMarks: 0, totalMarks: 300 },
+};
+
+const EXAM_OPTIONS = ['NEET PG', 'INICET', 'FMGE'];
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -51,7 +85,7 @@ export function ProfileModal({
   srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus
 }: ProfileModalProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [newExamDate, setNewExamDate] = useState(examDate.toISOString().split('T')[0]);
+  const [newExamDate, setNewExamDate] = useState<Date>(examDate);
   const [newExamName, setNewExamName] = useState(examName);
   const [newTargetScore, setNewTargetScore] = useState(targetScore);
   const [newTargetRank, setNewTargetRank] = useState(targetRank);
@@ -85,9 +119,17 @@ export function ProfileModal({
   );
   const [newCustomType, setNewCustomType] = useState('');
 
+  const handleExamChange = useCallback((exam: string) => {
+    setNewExamName(exam);
+    const ms = EXAM_MARKING[exam];
+    if (ms) setLocalMarkingScheme({ ...ms });
+    const w = EXAM_WEIGHTAGES[exam];
+    if (w) setWeightages(prev => ({ ...prev, ...w }));
+  }, []);
+
   const handleSave = () => {
     onSave({
-      examDate: new Date(newExamDate),
+      examDate: newExamDate,
       examName: newExamName,
       targetScore: newTargetScore,
       targetRank: newTargetRank,
@@ -196,20 +238,54 @@ export function ProfileModal({
                       <Calendar className="w-4 h-4 text-primary" />
                       Exam Details
                     </h3>
-                    <div className="grid grid-cols-1 gap-4 mb-4">
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Exam Name</label>
-                        <Input value={newExamName} onChange={(e) => setNewExamName(e.target.value)} placeholder="e.g. NEET PG, USMLE, FMGE..." />
+                    <div className="mb-4">
+                      <label className="text-sm text-muted-foreground mb-1.5 block">Exam</label>
+                      <div className="flex gap-2">
+                        {EXAM_OPTIONS.map(exam => (
+                          <button
+                            key={exam}
+                            onClick={() => handleExamChange(exam)}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all border-2 ${
+                              newExamName === exam
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border text-muted-foreground hover:border-primary/50'
+                            }`}
+                          >
+                            {exam}
+                          </button>
+                        ))}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Exam Date</label>
-                        <Input type="date" value={newExamDate} onChange={(e) => setNewExamDate(e.target.value)} />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-10",
+                                !newExamDate && "text-muted-foreground"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {newExamDate ? format(newExamDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={newExamDate}
+                              onSelect={(date) => date && setNewExamDate(date)}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Target Score</label>
-                        <Input type="number" value={newTargetScore} onChange={(e) => setNewTargetScore(Number(e.target.value))} min={0} max={800} />
+                        <Input type="number" value={newTargetScore} onChange={(e) => setNewTargetScore(Number(e.target.value))} min={0} max={localMarkingScheme.totalMarks} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -248,26 +324,8 @@ export function ProfileModal({
                     <h3 className="font-semibold flex items-center gap-2">
                       <Hash className="w-4 h-4 text-primary" />
                       Marking Scheme
+                      <span className="text-xs text-muted-foreground font-normal ml-auto">Auto-set by exam</span>
                     </h3>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {[
-                        { label: 'NEET PG', correct: 4, incorrect: -1, unanswered: 0, total: 800 },
-                        { label: 'INICET', correct: 1, incorrect: -1/3, unanswered: 0, total: 200 },
-                        { label: 'FMGE', correct: 1, incorrect: 0, unanswered: 0, total: 300 },
-                      ].map(preset => (
-                        <button
-                          key={preset.label}
-                          onClick={() => setLocalMarkingScheme({ correctMarks: preset.correct, incorrectMarks: preset.incorrect, unansweredMarks: preset.unanswered, totalMarks: preset.total })}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
-                            localMarkingScheme.correctMarks === preset.correct && localMarkingScheme.incorrectMarks === preset.incorrect
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-border text-muted-foreground hover:border-primary/50'
-                          }`}
-                        >
-                          {preset.label} (+{preset.correct}/{preset.incorrect === 0 ? '0' : preset.incorrect < -0.5 ? preset.incorrect : `-${Math.abs(preset.incorrect).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}`})
-                        </button>
-                      ))}
-                    </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div>
                         <label className="text-sm text-muted-foreground mb-1 block">Correct (+)</label>
