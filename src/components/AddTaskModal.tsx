@@ -548,7 +548,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               return years.flatMap(y => [`June ${y}`, `Dec ${y}`]).map(session => (
                 <button
                   key={session}
-                  onClick={() => setPyqSessions(prev => prev.includes(session) ? prev.filter(s => s !== session) : [...prev, session])}
+                  onClick={() => { const newSessions = pyqSessions.includes(session) ? pyqSessions.filter(s => s !== session) : [...pyqSessions, session]; setPyqSessions(newSessions); setTimeout(() => updateAutoTitle(undefined, subjectId, '', '', '', pyqFullMock, pyqExam, pyqYears, newSessions), 0); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     pyqSessions.includes(session) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
                   }`}
