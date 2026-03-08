@@ -97,6 +97,11 @@ const Index = () => {
   const { reminders, hasReminders } = useRevisionReminders(chapters);
   const [pyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', []);
 
+  const readinessResult = useReadinessScore({
+    chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData,
+    examDate, mcqGoalPerSubject, markingScheme, pyqYearFrom, pyqYearTo,
+  });
+
   // Build achievements including PYQ milestones
   const pyqAchievements = useMemo((): Achievement[] => {
     const base = [...achievements];
