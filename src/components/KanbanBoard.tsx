@@ -68,6 +68,16 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
     onTasksChange(tasks.filter(t => t.id !== taskId));
   };
 
+  const editTask = (updatedTask: Task) => {
+    onTasksChange(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+  };
+
+  const openEditModal = (task: Task) => {
+    setEditingTask(task);
+    setAddToColumn(task.column);
+    setAddModalOpen(true);
+  };
+
   const clearDone = () => {
     onTasksChange(tasks.filter(t => t.column !== 'done'));
   };
