@@ -241,7 +241,10 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
             <Target className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground">Predicted Score</span>
           </div>
-          <p className="text-2xl f{markingScheme.totalMarks || 800}-bold text-gradient-primaryont-bold text-gradient-primary">{prediction.predictedScore}/ont-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}{cardClass} onClick={() => setExpandedCard('marks')}>
+          <p className="text-2xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}</p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className={cardClass} onClick={() => setExpandedCard('marks')}>
           <div className="flex items-center gap-2 mb-2">
             <Hash className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground">Predicted Marks</span>
