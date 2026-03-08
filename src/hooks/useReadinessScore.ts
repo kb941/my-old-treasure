@@ -111,6 +111,9 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     const hasAnyProgress = allTopics.some(t => t.completedStages.length > 0);
     const hasStudyLogs = studyLogs.length > 0;
 
+    // Critical subjects used across all scoring
+    const CRITICAL_SUBJECT_IDS = ['medicine', 'pharmacology', 'microbiology', 'pathology', 'surgery', 'obgyn', 'psm'];
+
     // ===== 1. SYLLABUS COVERAGE (35%) =====
     // Only main-video, rr-video, btr-video count for syllabus score.
     // Weights by identity, based on which are enabled:
