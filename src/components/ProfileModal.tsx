@@ -12,24 +12,32 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 // Exam-specific weightages (avg questions per subject)
-const EXAM_WEIGHTAGES: Record<string, Record<string, number>> = {
+// { avg, range: [min, max] }
+type WeightageInfo = { avg: number; range?: [number, number] };
+const EXAM_WEIGHTAGES: Record<string, Record<string, WeightageInfo>> = {
   'NEET PG': {
-    anatomy: 8, physiology: 9, biochemistry: 11, pathology: 14, pharmacology: 15,
-    microbiology: 13, forensic: 8, medicine: 19, surgery: 19, obg: 20,
-    pediatrics: 9, psychiatry: 5, dermatology: 5, radiology: 6, anesthesia: 4,
-    orthopedics: 6, ophthalmology: 7, ent: 6, psm: 16,
+    anatomy: { avg: 8, range: [5, 12] }, physiology: { avg: 9, range: [5, 13] }, biochemistry: { avg: 11, range: [8, 15] },
+    pathology: { avg: 14, range: [10, 19] }, pharmacology: { avg: 15, range: [12, 16] }, microbiology: { avg: 13, range: [11, 16] },
+    forensic: { avg: 8, range: [6, 10] }, medicine: { avg: 19, range: [16, 23] }, surgery: { avg: 19, range: [15, 27] },
+    obg: { avg: 20, range: [17, 25] }, pediatrics: { avg: 9, range: [4, 14] }, psychiatry: { avg: 5, range: [2, 7] },
+    dermatology: { avg: 5, range: [4, 7] }, radiology: { avg: 6, range: [2, 8] }, anesthesia: { avg: 4, range: [2, 7] },
+    orthopedics: { avg: 6, range: [4, 8] }, ophthalmology: { avg: 7, range: [6, 8] }, ent: { avg: 6, range: [4, 9] },
+    psm: { avg: 16, range: [12, 17] },
   },
   'INICET': {
-    anatomy: 12, physiology: 12, biochemistry: 10, pathology: 18, pharmacology: 17,
-    microbiology: 15, forensic: 8, medicine: 19, surgery: 16, obg: 16,
-    pediatrics: 8, psychiatry: 4, dermatology: 6, radiology: 4, anesthesia: 4,
-    orthopedics: 7, ophthalmology: 7, ent: 5, psm: 12,
+    anatomy: { avg: 12, range: [11, 13] }, physiology: { avg: 12, range: [10, 15] }, biochemistry: { avg: 10, range: [9, 13] },
+    pathology: { avg: 18, range: [12, 22] }, pharmacology: { avg: 17, range: [12, 20] }, microbiology: { avg: 15, range: [12, 19] },
+    forensic: { avg: 8, range: [5, 10] }, medicine: { avg: 19, range: [14, 23] }, surgery: { avg: 16, range: [11, 22] },
+    obg: { avg: 16, range: [12, 21] }, pediatrics: { avg: 8, range: [6, 12] }, psychiatry: { avg: 4, range: [3, 7] },
+    dermatology: { avg: 6, range: [4, 7] }, radiology: { avg: 4, range: [3, 6] }, anesthesia: { avg: 4, range: [2, 7] },
+    orthopedics: { avg: 7, range: [6, 10] }, ophthalmology: { avg: 7, range: [4, 11] }, ent: { avg: 5, range: [3, 7] },
+    psm: { avg: 12, range: [8, 18] },
   },
   'FMGE': {
-    anatomy: 17, physiology: 17, biochemistry: 17, pathology: 13, pharmacology: 13,
-    microbiology: 13, forensic: 10, medicine: 33, surgery: 32, obg: 30,
-    pediatrics: 15, psychiatry: 5, dermatology: 5, radiology: 5, anesthesia: 5,
-    orthopedics: 5, ophthalmology: 15, ent: 15, psm: 30,
+    anatomy: { avg: 17 }, physiology: { avg: 17 }, biochemistry: { avg: 17 }, pathology: { avg: 13 }, pharmacology: { avg: 13 },
+    microbiology: { avg: 13 }, forensic: { avg: 10 }, medicine: { avg: 33 }, surgery: { avg: 32 }, obg: { avg: 30 },
+    pediatrics: { avg: 15 }, psychiatry: { avg: 5 }, dermatology: { avg: 5 }, radiology: { avg: 10 }, anesthesia: { avg: 5 },
+    orthopedics: { avg: 5 }, ophthalmology: { avg: 15 }, ent: { avg: 15 }, psm: { avg: 30 },
   },
 };
 
