@@ -568,7 +568,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
-    if (pyqsDone < scopedPyqntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
+    if (pyqsDone < scopedPyqEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
     if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
       recommendations.push(`Biggest gap: ${subjectBreakdown[0].subjectName} (${subjectBreakdown[0].syllabusPct}% done)`);
     }
