@@ -105,6 +105,7 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
 
   const handleDone = () => {
     setIsRunning(false);
+    confetti({ particleCount: 60, spread: 70, startVelocity: 20, gravity: 0.8, scalar: 0.7, origin: { x: 0.5, y: 0.5 }, colors: ['#14b8a6', '#6366f1', '#f59e0b', '#22c55e', '#ec4899'] });
     if (currentTask?.topicId) {
       setShowConfidence(true);
     } else {
