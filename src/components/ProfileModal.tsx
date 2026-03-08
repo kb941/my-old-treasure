@@ -1,0 +1,578 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
+interface ProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  examDate: Date;
+  examName: string;
+  targetScore: number;
+  targetRank: number;
+  subjects: Subject[];
+  pomodoroSettings: PomodoroSettings;
+  srSettings: SpacedRepetitionSettings;
+  contentTypes: ContentType[];
+  breakDuration: number;
+  markingScheme: MarkingScheme;
+  pyqYearFrom: number;
+  pyqYearTo: number;
+  mcqGoalPerSubject: number;
+  onSave: (data: ProfileData) => void;
+  onResetAll?: () => void;
+  onResetSyllabus?: () => void;
+}
+
+export interface ProfileData {
+  examDate: Date;
+  examName?: string;
+  targetScore: number;
+  targetRank?: number;
+  subjectWeightages: Record<string, number>;
+  dailyStudyTarget: number;
+  weeklyMockTarget: number;
+  pomodoroSettings: PomodoroSettings;
+  srSettings: SpacedRepetitionSettings;
+  contentTypes: ContentType[];
+  breakDuration: number;
+  markingScheme: MarkingScheme;
+  pyqYearFrom?: number;
+  pyqYearTo?: number;
+  mcqGoalPerSubject?: number;
+}
+
+export function ProfileModal({ 
+  isOpen, onClose, examDate, examName, targetScore, targetRank, subjects, pomodoroSettings,
+  srSettings, contentTypes, breakDuration, markingScheme, pyqYearFrom, pyqYearTo, mcqGoalPerSubject, onSave, onResetAll, onResetSyllabus
+}: ProfileModalProps) {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [newExamDate, setNewExamDate] = useState(examDate.toISOString().split('T')[0]);
+  const [newExamName, setNewExamName] = useState(examName);
+  const [newTargetScore, setNewTargetScore] = useState(targetScore);
+  const [newTargetRank, setNewTargetRank] = useState(targetRank);
+  const [dailyStudyTarget, setDailyStudyTarget] = useState(6);
+  const [weeklyMockTarget, setWeeklyMockTarget] = useState(2);
+  const [weightages, setWeightages] = useState<Record<string, number>>(
+    Object.fromEntries(subjects.map(s => [s.id, s.weightage]))
+  );
+  const [studyDuration, setStudyDuration] = useState(pomodoroSettings.studyDuration);
+  const [shortBreakDuration, setShortBreakDuration] = useState(pomodoroSettings.shortBreakDuration);
+  const [longBreakDuration, setLongBreakDuration] = useState(pomodoroSettings.longBreakDuration);
+  const [sessionsBeforeLongBreak, setSessionsBeforeLongBreak] = useState(pomodoroSettings.sessionsBeforeLongBreak);
+  const [breakDurationSetting, setBreakDurationSetting] = useState(breakDuration);
+  const [localMarkingScheme, setLocalMarkingScheme] = useState<MarkingScheme>({ ...markingScheme });
+  const [localPyqYearFrom, setLocalPyqYearFrom] = useState(pyqYearFrom);
+  const [localPyqYearTo, setLocalPyqYearTo] = useState(pyqYearTo);
+  const [localMcqGoal, setLocalMcqGoal] = useState(mcqGoalPerSubject);
+  const PYQ_YEARS = Array.from({ length: 15 }, (_, i) => 2025 - i);
+
+  const [srSchedules, setSrSchedules] = useState(() => {
+    const s = srSettings.schedules;
+    const result: Record<number, typeof s[1]> = {};
+    for (let i = 1; i <= 5; i++) {
+      result[i] = (s[i] || DEFAULT_SR_SCHEDULES[i] || []).map(x => ({ ...x }));
+    }
+    return result;
+  });
+
+  const [localContentTypes, setLocalContentTypes] = useState<ContentType[]>(() =>
+    contentTypes.map(ct => ({ ...ct }))
+  );
+  const [newCustomType, setNewCustomType] = useState('');
+
+  const handleSave = () => {
+    onSave({
+      examDate: new Date(newExamDate),
+      examName: newExamName,
+      targetScore: newTargetScore,
+      targetRank: newTargetRank,
+      subjectWeightages: weightages,
+      dailyStudyTarget,
+      weeklyMockTarget,
+      pomodoroSettings: { studyDuration, shortBreakDuration, longBreakDuration, sessionsBeforeLongBreak },
+      srSettings: { schedules: srSchedules },
+      contentTypes: localContentTypes,
+      breakDuration: breakDurationSetting,
+      markingScheme: localMarkingScheme,
+      pyqYearFrom: localPyqYearFrom,
+      pyqYearTo: localPyqYearTo,
+      mcqGoalPerSubject: localMcqGoal,
+    });
+    onClose();
+  };
+
+  const updateSrDay = (tier: number, sessionIdx: number, days: number) => {
+    setSrSchedules(prev => {
+      const newSchedules = { ...prev };
+      newSchedules[tier] = prev[tier].map((s, i) =>
+        i === sessionIdx ? { ...s, daysAfterPrevious: Math.max(1, days) } : s
+      );
+      return newSchedules;
+    });
+  };
+
+  const resetSrDefaults = () => {
+    const result: Record<number, typeof DEFAULT_SR_SCHEDULES[1]> = {};
+    for (let i = 1; i <= 5; i++) {
+      result[i] = DEFAULT_SR_SCHEDULES[i].map(x => ({ ...x }));
+    }
+    setSrSchedules(result);
+  };
+
+  const toggleContentType = (id: string) => {
+    setLocalContentTypes(prev => prev.map(ct =>
+      ct.id === id && !ct.compulsory ? { ...ct, enabled: !ct.enabled } : ct
+    ));
+  };
+
+  const addCustomContentType = () => {
+    if (!newCustomType.trim()) return;
+    const id = `custom-${Date.now()}`;
+    setLocalContentTypes(prev => [
+      ...prev,
+      { id, label: newCustomType.trim(), shortLabel: newCustomType.trim().slice(0, 4), compulsory: false, enabled: true }
+    ]);
+    setNewCustomType('');
+  };
+
+  const removeContentType = (id: string) => {
+    setLocalContentTypes(prev => prev.filter(ct => ct.id !== id || ct.compulsory));
+  };
+
+  const updateWeightage = (subjectId: string, value: number) => {
+    setWeightages(prev => ({ ...prev, [subjectId]: value }));
+  };
+
+  const totalWeightage = Object.values(weightages).reduce((sum, w) => sum + w, 0);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed inset-4 md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:inset-auto md:w-full md:max-w-lg md:max-h-[85vh] bg-card rounded-2xl shadow-card-hover border border-border flex flex-col z-50"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold">Profile & Settings</h2>
+              </div>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Tabbed Content */}
+            <Tabs defaultValue="general" className="flex-1 flex flex-col overflow-hidden">
+              <TabsList className="mx-4 mt-3 grid grid-cols-4 shrink-0">
+                <TabsTrigger value="general" className="text-xs">General</TabsTrigger>
+                <TabsTrigger value="timer" className="text-xs">Timer</TabsTrigger>
+                <TabsTrigger value="revision" className="text-xs">Revision</TabsTrigger>
+                <TabsTrigger value="subjects" className="text-xs">Subjects</TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="flex-1 overflow-auto">
+                {/* === General Tab === */}
+                <TabsContent value="general" className="p-4 space-y-6 mt-0">
+                  {/* Exam Details */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      Exam Details
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4 mb-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Exam Name</label>
+                        <Input value={newExamName} onChange={(e) => setNewExamName(e.target.value)} placeholder="e.g. NEET PG, USMLE, FMGE..." />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Exam Date</label>
+                        <Input type="date" value={newExamDate} onChange={(e) => setNewExamDate(e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Target Score</label>
+                        <Input type="number" value={newTargetScore} onChange={(e) => setNewTargetScore(Number(e.target.value))} min={0} max={800} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Target Rank</label>
+                        <Input type="number" value={newTargetRank} onChange={(e) => setNewTargetRank(Number(e.target.value))} min={1} max={100000} placeholder="e.g. 5000" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daily Targets */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      Targets
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Study Hours/Day</label>
+                        <Input type="number" value={dailyStudyTarget} onChange={(e) => setDailyStudyTarget(Number(e.target.value))} min={1} max={16} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Mocks/Month</label>
+                        <Input type="number" value={weeklyMockTarget} onChange={(e) => setWeeklyMockTarget(Number(e.target.value))} min={0} max={30} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">MCQs/Topic</label>
+                        <Input type="number" value={localMcqGoal} onChange={(e) => setLocalMcqGoal(Number(e.target.value))} min={10} max={500} step={10} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">MCQs/Topic: goal of {localMcqGoal} questions per topic to mark MCQs as done.</p>
+                  </div>
+
+                  {/* Marking Scheme */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Hash className="w-4 h-4 text-primary" />
+                      Marking Scheme
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Set marks per answer to calculate predicted scores from mock tests.
+                    </p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Correct (+)</label>
+                        <Input
+                          type="number"
+                          value={localMarkingScheme.correctMarks}
+                          onChange={(e) => setLocalMarkingScheme(prev => ({ ...prev, correctMarks: Number(e.target.value) }))}
+                          min={0} max={10} step={0.5}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Incorrect (−)</label>
+                        <Input
+                          type="number"
+                          value={localMarkingScheme.incorrectMarks}
+                          onChange={(e) => setLocalMarkingScheme(prev => ({ ...prev, incorrectMarks: Number(e.target.value) }))}
+                          min={-10} max={0} step={0.5}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Unanswered</label>
+                        <Input
+                          type="number"
+                          value={localMarkingScheme.unansweredMarks}
+                          onChange={(e) => setLocalMarkingScheme(prev => ({ ...prev, unansweredMarks: Number(e.target.value) }))}
+                          min={-5} max={0} step={0.5}
+                        />
+                      </div>
+                    </div>
+                    <div className="p-3 bg-secondary/30 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        Example: 150 correct, 40 wrong, 10 skipped → <span className="text-primary font-semibold">
+                        {150 * localMarkingScheme.correctMarks + 40 * localMarkingScheme.incorrectMarks + 10 * localMarkingScheme.unansweredMarks} marks
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* PYQ Year Range */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      PYQ Year Range
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Select which years of PYQs you want to track and complete.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">From Year</label>
+                        <select
+                          value={localPyqYearFrom}
+                          onChange={(e) => setLocalPyqYearFrom(Number(e.target.value))}
+                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {PYQ_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">To Year</label>
+                        <select
+                          value={localPyqYearTo}
+                          onChange={(e) => setLocalPyqYearTo(Number(e.target.value))}
+                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {PYQ_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content Types */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Video className="w-4 h-4 text-primary" />
+                      Content Types
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Choose which stages to track per topic. MCQs & PYQs are compulsory.
+                    </p>
+                    <div className="space-y-2">
+                      {localContentTypes.map(ct => (
+                        <div key={ct.id} className="flex items-center gap-3 bg-secondary/30 rounded-lg p-2">
+                          <button
+                            onClick={() => toggleContentType(ct.id)}
+                            disabled={ct.compulsory}
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                              ct.enabled ? 'bg-primary border-primary' : 'border-muted-foreground/30'
+                            } ${ct.compulsory ? 'opacity-70 cursor-not-allowed' : ''}`}
+                          >
+                            {ct.enabled && <span className="text-primary-foreground text-xs">✓</span>}
+                          </button>
+                          <span className="flex-1 text-sm">{ct.label}</span>
+                          {ct.compulsory && <span className="text-xs text-muted-foreground">Required</span>}
+                          {!ct.compulsory && !DEFAULT_CONTENT_TYPES.find(d => d.id === ct.id) && (
+                            <button onClick={() => removeContentType(ct.id)} className="p-1 hover:bg-destructive/10 rounded">
+                              <Trash2 className="w-3 h-3 text-destructive" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={newCustomType}
+                        onChange={(e) => setNewCustomType(e.target.value)}
+                        placeholder="Add custom type..."
+                        className="h-8 text-sm"
+                        onKeyDown={(e) => e.key === 'Enter' && addCustomContentType()}
+                      />
+                      <Button size="sm" variant="outline" onClick={addCustomContentType} className="h-8">
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Reset Syllabus Data */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <RotateCcw className="w-4 h-4 text-primary" />
+                      Syllabus Data
+                    </h3>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => onResetSyllabus?.()}
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset to Default Syllabus
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Restores all subjects, chapters and topics to the original NEET PG syllabus. Your progress will be reset.
+                    </p>
+                  </div>
+
+                  {/* Reset All Data */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <h3 className="font-semibold flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="w-4 h-4" />
+                      Danger Zone
+                    </h3>
+                    {!showResetConfirm ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
+                        onClick={() => setShowResetConfirm(true)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Reset All Data
+                      </Button>
+                    ) : (
+                      <div className="p-3 bg-destructive/10 rounded-xl space-y-3">
+                        <p className="text-sm text-destructive font-medium">
+                          This will permanently delete all your study data, tasks, mock tests, and settings. This cannot be undone.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => setShowResetConfirm(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              onResetAll?.();
+                              setShowResetConfirm(false);
+                              onClose();
+                            }}
+                          >
+                            Yes, Reset Everything
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                {/* === Timer Tab === */}
+                <TabsContent value="timer" className="p-4 space-y-6 mt-0">
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Timer className="w-4 h-4 text-primary" />
+                      Pomodoro Timer
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Study (min)</label>
+                        <Input type="number" value={studyDuration} onChange={(e) => setStudyDuration(Number(e.target.value))} min={5} max={90} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Short Break (min)</label>
+                        <Input type="number" value={shortBreakDuration} onChange={(e) => setShortBreakDuration(Number(e.target.value))} min={1} max={30} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Long Break (min)</label>
+                        <Input type="number" value={longBreakDuration} onChange={(e) => setLongBreakDuration(Number(e.target.value))} min={5} max={60} />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Sessions for Long Break</label>
+                        <Input type="number" value={sessionsBeforeLongBreak} onChange={(e) => setSessionsBeforeLongBreak(Number(e.target.value))} min={2} max={8} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg">
+                      <Coffee className="w-4 h-4 text-amber-500" />
+                      <p className="text-xs text-muted-foreground">
+                        After {sessionsBeforeLongBreak} sessions ({studyDuration * sessionsBeforeLongBreak}min), take a {longBreakDuration}min break
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Coffee className="w-4 h-4 text-primary" />
+                      Focus Mode Break
+                    </h3>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1 block">Default Break Duration (min)</label>
+                      <Input type="number" value={breakDurationSetting} onChange={(e) => setBreakDurationSetting(Number(e.target.value))} min={1} max={60} />
+                      <p className="text-xs text-muted-foreground mt-1">Used when taking a break in Focus Mode 🎮</p>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* === Revision Tab === */}
+                <TabsContent value="revision" className="p-4 space-y-6 mt-0">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <RotateCcw className="w-4 h-4 text-primary" />
+                        Spaced Repetition
+                      </h3>
+                      <Button variant="ghost" size="sm" onClick={resetSrDefaults} className="text-xs">
+                        Reset Defaults
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Configure revision intervals (in days) based on topic confidence level.
+                    </p>
+
+                    {([1, 2, 3, 4, 5] as const).map(tier => (
+                      <div key={tier} className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} className={`w-3 h-3 ${s <= tier ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'}`} />
+                            ))}
+                          </div>
+                          <span className="text-sm font-medium">{tier} Star{tier > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {(srSchedules[tier] || []).map((session, idx) => (
+                            <div key={idx} className="flex items-center gap-1 bg-secondary/30 rounded-lg px-2 py-1">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">{session.name}:</span>
+                              <Input
+                                type="number"
+                                value={session.daysAfterPrevious}
+                                onChange={(e) => updateSrDay(tier, idx, Number(e.target.value))}
+                                className="w-12 h-6 text-center text-xs p-0"
+                                min={1} max={120}
+                              />
+                              <span className="text-xs text-muted-foreground">d</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                {/* === Subjects Tab === */}
+                <TabsContent value="subjects" className="p-4 space-y-4 mt-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      Subject Weightages
+                    </h3>
+                    <span className={`text-sm font-medium ${totalWeightage === 200 ? 'text-green-500' : 'text-amber-500'}`}>
+                      Total: {totalWeightage}/200
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {['Pre-clinical', 'Para-clinical', 'Clinical', 'Short Subjects'].map(category => (
+                      <div key={category} className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">{category}</p>
+                        {subjects
+                          .filter(s => s.category === category)
+                          .map(subject => (
+                            <div key={subject.id} className="flex items-center gap-3 bg-secondary/30 rounded-lg p-2">
+                              <span className="flex-1 text-sm truncate">{subject.name}</span>
+                              <Input
+                                type="number"
+                                value={weightages[subject.id] || 0}
+                                onChange={(e) => updateWeightage(subject.id, Number(e.target.value))}
+                                className="w-16 h-8 text-center text-sm"
+                                min={0} max={50}
+                              />
+                              <span className="text-xs text-muted-foreground w-4">Q</span>
+                            </div>
+                          ))}
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              </ScrollArea>
+            </Tabs>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-border shrink-0">
+              <Button onClick={handleSave} className="w-full gradient-primary text-primary-foreground">
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
