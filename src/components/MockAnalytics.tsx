@@ -96,9 +96,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
           {expandedCard === 'score' && (
             <>
               <div className="text-center py-2">
-                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}0 && (
-                <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
+                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}    <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={scoreData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
@@ -239,7 +237,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
             <Target className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground">Predicted Score</span>
           </div>
-          <p className="text-2xl f{markingScheme.totalMarks || 800}-bold text-gradient-primaryont-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}pacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className={cardClass} onClick={() => setExpandedCard('marks')}>
+          <p className="text-2xl f{markingScheme.totalMarks || 800}-bold text-gradient-primaryont-bold text-gradient-primary">{prediction.predictedScore}/ont-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}{cardClass} onClick={() => setExpandedCard('marks')}>
           <div className="flex items-center gap-2 mb-2">
             <Hash className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground">Predicted Marks</span>
@@ -335,8 +333,7 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
                   <p className="text-xs text-muted-foreground">{test.source} • {new Date(test.date).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  {markingScheme.totalMarks || 800}className="font-bold text-gradient-primary">{test.score}/800</p>
-                  <p className="text-xs text-muted-foreground">{Math.round((test.correctAnswers / test.attemptedQuestions) * 100)}%</p>
+                  {markingScheme.totalMarks || 800}className="font-bold text-gradient-primary">{test.score}/<p className="font-bold text-gradient-primary">{test.score}/{markingScheme.totalMarks || 800}ectAnswers / test.attemptedQuestions) * 100)}%</p>
                 </div>
               </div>
             ))}
