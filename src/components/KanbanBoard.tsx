@@ -83,6 +83,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   };
 
   const openAddModal = (column: TaskColumn) => {
+    setEditingTask(null);
     setAddToColumn(column);
     setAddModalOpen(true);
   };
