@@ -422,7 +422,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                           onClick={() => {
                                             const newId = topicId === topic.id ? '' : topic.id;
                                             setTopicId(newId);
-                                            if (newId) updateAutoTitle(undefined, subjectId, chapterId, newId);
+                                            if (newId) updateAutoTitle(undefined, subjectId, chapterId, newIdd, newId);
                                           }}
                                           className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
                                             topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
@@ -468,7 +468,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                 setSubjectId(item.subjectId);
                 setChapterId(item.chapterId);
                 setTopicId(item.topicId);
-                setTitle(`${typeLabels[type]} - ${item.topicName}`);
+        updateAutoTitle(undefined, item.subjectId, item.chapterId, item.topicIdicName}`);
               }}
               className={`w-full p-2 rounded-lg text-left text-xs transition-all ${
                 topicId === item.topicId ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
