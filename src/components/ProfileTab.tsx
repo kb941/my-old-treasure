@@ -242,6 +242,52 @@ export function ProfileTab(props: ProfileTabProps) {
     navigate('/login');
   };
 
+  const handleExportData = () => {
+    try {
+      const allData: Record<string, any> = {};
+      
+      // Export all localStorage keys related to the app
+      const keys = [
+        'neetpg-tasks', 'neetpg-subjects', 'neetpg-chapters', 'neetpg-stats',
+        'neetpg-mocktests', 'neetpg-examdate', 'neetpg-examname', 'neetpg-target',
+        'neetpg-target-rank', 'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types',
+        'neetpg-break-duration', 'neetpg-marking-scheme', 'neetpg-study-logs',
+        'neetpg-mcq-logs', 'neetpg-pyq-year-from', 'neetpg-pyq-year-to',
+        'neetpg-mcq-goal', 'planos-pyq-tracker-v2', 'readiness-snapshots',
+        'theme', 'planos-user'
+      ];
+
+      keys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value !== null) {
+          allData[key] = value;
+        }
+      });
+
+      const dataStr = JSON.stringify(allData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `planos-backup-${format(new Date(), 'yyyy-MM-dd-HHmm')}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Data exported successfully!',
+        description: 'Your backup file has been downloaded.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Could not export data. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Profile Header */}
