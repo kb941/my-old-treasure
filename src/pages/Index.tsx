@@ -423,6 +423,7 @@ const Index = () => {
         >
           {activeTab === 'today' && (
             <div className="space-y-4">
+              <ReadinessScoreCard result={readinessResult} compact />
               <StatsBar stats={stats} onStatClick={(stat) => {
                 setExpandedStat(prev => prev === stat ? null : stat);
               }} />
