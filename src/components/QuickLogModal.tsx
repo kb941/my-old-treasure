@@ -62,6 +62,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
   const [questionsCorrect, setQuestionsCorrect] = useState(35);
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [topicSearch, setTopicSearch] = useState('');
   const [pyqYears, setPyqYears] = useState<number[]>([2024]);
   const [pyqExam, setPyqExam] = useState('NEET PG');
   const [pyqMode, setPyqMode] = useState<'chapter' | 'exam'>('chapter');
