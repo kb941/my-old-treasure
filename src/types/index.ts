@@ -60,7 +60,7 @@ export type TaskColumn = 'backlog' | 'week' | 'today' | 'done';
 export interface Task {
   id: string;
   title: string;
-  type: 'study' | 'revision' | 'mcq' | 'mock';
+  type: 'study' | 'revision' | 'mcq' | 'mock' | 'pyq' | 'test';
   subjectId?: string;
   topicId?: string;
   chapterId?: string;
@@ -82,7 +82,7 @@ export interface StudySession {
   id: string;
   date: Date;
   duration: number;
-  type: 'study' | 'revision' | 'mcq' | 'mock';
+  type: 'study' | 'revision' | 'mcq' | 'mock' | 'pyq' | 'test';
   subjectId?: string;
   topicId?: string;
   chapterId?: string;

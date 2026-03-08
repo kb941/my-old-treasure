@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, ChevronDown, ChevronRight, Minus } from 'lucide-react';
+import { X, Plus, ChevronDown, ChevronRight, Minus, Search, BookOpen, Brain, FileText, ClipboardList, Beaker } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,7 +16,20 @@ interface AddTaskModalProps {
   chapters?: Chapter[];
 }
 
-const durationPresets = [15, 30, 45, 60, 90];
+const durationPresets = [15, 30, 45, 60, 90, 120];
+
+const taskTypes = [
+  { value: 'study' as const, label: 'Study', icon: BookOpen },
+  { value: 'revision' as const, label: 'Revision', icon: Brain },
+  { value: 'mcq' as const, label: 'MCQs', icon: FileText },
+  { value: 'pyq' as const, label: 'PYQs', icon: FileText },
+  { value: 'test' as const, label: 'Test', icon: ClipboardList },
+  { value: 'mock' as const, label: 'Mock', icon: Beaker },
+];
+
+const typeLabels: Record<Task['type'], string> = {
+  study: 'Study', revision: 'Revise', mcq: 'MCQs', pyq: 'PYQs', test: 'Test', mock: 'Mock Test',
+};
 
 export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters = [] }: AddTaskModalProps) {
   const [title, setTitle] = useState('');
@@ -28,13 +41,54 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
   const [priority, setPriority] = useState<Task['priority']>('medium');
   const [notes, setNotes] = useState('');
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Reset everything on close/open
+  useEffect(() => {
+    if (!isOpen) {
+      setTitle('');
+      setType('study');
+      setSubjectId('');
+      setChapterId('');
+      setTopicId('');
+      setDuration(30);
+      setPriority('medium');
+      setNotes('');
+      setExpandedSubject(null);
+      setExpandedChapter(null);
+      setSearchQuery('');
+    }
+  }, [isOpen]);
 
   const selectedSubjectChapters = chapters.filter(c => c.subjectId === subjectId);
   const selectedChapter = selectedSubjectChapters.find(c => c.id === chapterId);
 
+  // Search results across all subjects/chapters/topics
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase();
+    const results: { subjectId: string; subjectName: string; chapterId: string; chapterName: string; topicId?: string; topicName?: string }[] = [];
+
+    chapters.forEach(ch => {
+      const subjectName = initialSubjects.find(s => s.id === ch.subjectId)?.name || '';
+      // Check chapter name match
+      if (ch.name.toLowerCase().includes(q)) {
+        results.push({ subjectId: ch.subjectId, subjectName, chapterId: ch.id, chapterName: ch.name });
+      }
+      // Check topics
+      ch.topics.forEach(t => {
+        if (t.name.toLowerCase().includes(q)) {
+          results.push({ subjectId: ch.subjectId, subjectName, chapterId: ch.id, chapterName: ch.name, topicId: t.id, topicName: t.name });
+        }
+      });
+    });
+    return results.slice(0, 20);
+  }, [searchQuery, chapters]);
+
   const handleSubmit = () => {
     if (!title.trim()) return;
-    
+
     onAdd({
       title: title.trim(),
       type,
@@ -48,35 +102,13 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
       notes: notes.trim() || undefined,
     });
 
-    // Reset form
-    setTitle('');
-    setType('study');
-    setSubjectId('');
-    setChapterId('');
-    setTopicId('');
-    setDuration(30);
-    setPriority('medium');
-    setNotes('');
     onClose();
   };
 
-  // Auto-generate title based on selection
-  const autoTitle = () => {
-    const parts: string[] = [];
-    const typeLabels = { study: 'Study', revision: 'Revise', mcq: 'MCQs', mock: 'Mock Test' };
-    parts.push(typeLabels[type]);
-    
-    if (topicId && selectedChapter) {
-      const topic = selectedChapter.topics.find(t => t.id === topicId);
-      if (topic) parts.push(topic.name);
-    } else if (chapterId && selectedChapter) {
-      parts.push(selectedChapter.name);
-    } else if (subjectId) {
-      const sub = initialSubjects.find(s => s.id === subjectId);
-      if (sub) parts.push(sub.name);
-    }
-    
-    return parts.join(' - ');
+  const autoFillTitle = (subName?: string, topName?: string) => {
+    const label = typeLabels[type];
+    if (topName) setTitle(`${label} - ${topName}`);
+    else if (subName) setTitle(`${label} - ${subName}`);
   };
 
   const handleSubjectSelect = (id: string) => {
@@ -87,16 +119,40 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
       setChapterId('');
       setTopicId('');
       setExpandedSubject(id);
-      // Auto-fill title
+      setExpandedChapter(null);
       const sub = initialSubjects.find(s => s.id === id);
-      const typeLabels = { study: 'Study', revision: 'Revise', mcq: 'MCQs', mock: 'Mock Test' };
-      if (sub && !title) setTitle(`${typeLabels[type]} - ${sub.name}`);
+      if (sub && !title) autoFillTitle(sub.name);
     }
   };
 
-  const adjustDuration = (delta: number) => {
-    setDuration(prev => Math.max(5, prev + delta));
+  const handleSearchResultClick = (result: NonNullable<typeof searchResults>[0]) => {
+    setSubjectId(result.subjectId);
+    setChapterId(result.chapterId);
+    if (result.topicId) {
+      setTopicId(result.topicId);
+      autoFillTitle(undefined, result.topicName);
+    } else {
+      setTopicId('');
+      autoFillTitle(result.chapterName);
+    }
+    setSearchQuery('');
+    setExpandedSubject(result.subjectId);
+    setExpandedChapter(result.chapterId);
   };
+
+  const adjustDuration = (delta: number) => setDuration(prev => Math.max(5, prev + delta));
+
+  const getSelectionLabel = () => {
+    if (topicId && selectedChapter) {
+      const topic = selectedChapter.topics.find(t => t.id === topicId);
+      return topic?.name;
+    }
+    if (chapterId) return selectedChapter?.name;
+    if (subjectId) return initialSubjects.find(s => s.id === subjectId)?.name;
+    return null;
+  };
+
+  const selectionLabel = getSelectionLabel();
 
   return (
     <AnimatePresence>
@@ -138,29 +194,31 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., Complete CNS Videos"
-                    autoFocus
                   />
                 </div>
 
                 {/* Type Selection */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Type</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { value: 'study', label: 'Study' },
-                      { value: 'revision', label: 'Revision' },
-                      { value: 'mcq', label: 'MCQs' },
-                      { value: 'mock', label: 'Mock' },
-                    ].map(({ value, label }) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {taskTypes.map(({ value, label, icon: Icon }) => (
                       <button
                         key={value}
-                        onClick={() => setType(value as Task['type'])}
-                        className={`p-2.5 rounded-lg text-sm font-medium transition-all ${
-                          type === value 
-                            ? 'bg-primary text-primary-foreground' 
+                        onClick={() => {
+                          setType(value);
+                          // Update title prefix if auto-generated
+                          if (title && Object.values(typeLabels).some(l => title.startsWith(l + ' - '))) {
+                            const suffix = title.split(' - ').slice(1).join(' - ');
+                            if (suffix) setTitle(`${typeLabels[value]} - ${suffix}`);
+                          }
+                        }}
+                        className={`p-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
+                          type === value
+                            ? 'bg-primary text-primary-foreground'
                             : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
                         }`}
                       >
+                        <Icon className="w-3.5 h-3.5" />
                         {label}
                       </button>
                     ))}
@@ -180,7 +238,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                         key={value}
                         onClick={() => setPriority(value as Task['priority'])}
                         className={`p-2.5 rounded-lg text-sm font-medium border transition-all ${
-                          priority === value 
+                          priority === value
                             ? color
                             : 'bg-secondary/50 hover:bg-secondary text-muted-foreground border-transparent'
                         }`}
@@ -223,73 +281,146 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                   </div>
                 </div>
 
-                {/* Subject Selection */}
+                {/* Subject/Chapter/Topic Selection with Search */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Subject (Optional)</label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {initialSubjects.map(s => (
-                      <div key={s.id} className="rounded-lg overflow-hidden border border-border">
-                        <button
-                          onClick={() => handleSubjectSelect(s.id)}
-                          className={`w-full p-3 flex items-center justify-between text-left text-sm transition-all ${
-                            subjectId === s.id
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-secondary/30 hover:bg-secondary/50'
-                          }`}
-                        >
-                          <span className="font-medium">{s.name}</span>
-                          {selectedSubjectChapters.length > 0 && subjectId === s.id && (
-                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedSubject === s.id ? '' : '-rotate-90'}`} />
-                          )}
-                        </button>
-                        
-                        {/* Chapter/Topic Selection */}
-                        {expandedSubject === s.id && selectedSubjectChapters.length > 0 && (
-                          <div className="bg-background/50 border-t border-border p-2 space-y-1">
-                            {selectedSubjectChapters.map(chapter => (
-                              <div key={chapter.id}>
-                                <button
-                                  onClick={() => {
-                                    setChapterId(chapterId === chapter.id ? '' : chapter.id);
-                                    setTopicId('');
-                                  }}
-                                  className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
-                                    chapterId === chapter.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
-                                  }`}
-                                >
-                                  <ChevronRight className={`w-3 h-3 transition-transform ${chapterId === chapter.id ? 'rotate-90' : ''}`} />
-                                  <span>{chapter.name}</span>
-                                </button>
-                                
-                                {chapterId === chapter.id && chapter.topics.length > 0 && (
-                                  <div className="ml-5 pl-2 border-l border-border space-y-1 mt-1">
-                                    {chapter.topics.map(topic => (
-                                      <button
-                                        key={topic.id}
-                                        onClick={() => {
-                                          const newTopicId = topicId === topic.id ? '' : topic.id;
-                                          setTopicId(newTopicId);
-                                          if (newTopicId) {
-                                            const typeLabels = { study: 'Study', revision: 'Revise', mcq: 'MCQs', mock: 'Mock Test' };
-                                            setTitle(`${typeLabels[type]} - ${topic.name}`);
-                                          }
-                                        }}
-                                        className={`w-full p-1.5 rounded text-xs text-left ${
-                                          topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
-                                        }`}
-                                      >
-                                        {topic.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  <label className="text-sm font-medium mb-2 block">Subject / Topic (Optional)</label>
+
+                  {/* Search bar */}
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search topics, chapters..."
+                      className="pl-9 h-9 text-sm"
+                    />
                   </div>
+
+                  {/* Search Results */}
+                  {searchResults && searchResults.length > 0 && (
+                    <div className="mb-2 border border-border rounded-lg max-h-40 overflow-y-auto">
+                      {searchResults.map((r, i) => (
+                        <button
+                          key={`${r.chapterId}-${r.topicId || 'ch'}-${i}`}
+                          onClick={() => handleSearchResultClick(r)}
+                          className="w-full p-2 text-left text-xs hover:bg-secondary/50 transition-all border-b border-border last:border-b-0"
+                        >
+                          <span className="font-medium text-foreground">{r.topicName || r.chapterName}</span>
+                          <span className="text-muted-foreground ml-1">
+                            • {r.subjectName}{r.topicName ? ` › ${r.chapterName}` : ''}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {searchResults && searchResults.length === 0 && (
+                    <p className="text-xs text-muted-foreground mb-2 text-center py-2">No results found</p>
+                  )}
+
+                  {/* Selection indicator */}
+                  {selectionLabel && (
+                    <div className="mb-2 p-2 bg-primary/10 rounded-lg text-sm flex items-center justify-between">
+                      <span>
+                        <span className="text-muted-foreground">Selected: </span>
+                        <span className="font-medium text-primary">{selectionLabel}</span>
+                      </span>
+                      <button onClick={() => { setSubjectId(''); setChapterId(''); setTopicId(''); setExpandedSubject(null); setExpandedChapter(null); }} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+                    </div>
+                  )}
+
+                  {/* Subject list (hidden when searching) */}
+                  {!searchQuery && (
+                    <div className="space-y-1 max-h-48 overflow-y-auto rounded-lg border border-border">
+                      {initialSubjects.map(s => {
+                        const subjectChapters = chapters.filter(c => c.subjectId === s.id);
+                        const isSelected = subjectId === s.id;
+                        const isExpanded = expandedSubject === s.id;
+
+                        return (
+                          <div key={s.id} className="overflow-hidden">
+                            <button
+                              onClick={() => handleSubjectSelect(s.id)}
+                              className={`w-full p-3 flex items-center justify-between text-left text-sm transition-all ${
+                                isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                              }`}
+                            >
+                              <span className="font-medium">{s.name}</span>
+                              {subjectChapters.length > 0 && (
+                                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                              )}
+                            </button>
+                            <AnimatePresence>
+                              {isExpanded && subjectChapters.length > 0 && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden bg-secondary/20"
+                                >
+                                  <div className="pl-4 py-1">
+                                    {subjectChapters.map(chapter => {
+                                      const isChapterSelected = chapterId === chapter.id;
+                                      const isChapterExpanded = expandedChapter === chapter.id;
+                                      return (
+                                        <div key={chapter.id}>
+                                          <button
+                                            onClick={() => {
+                                              const newId = isChapterSelected ? '' : chapter.id;
+                                              setChapterId(newId);
+                                              setTopicId('');
+                                              setExpandedChapter(isChapterSelected ? null : chapter.id);
+                                              if (newId && !title) autoFillTitle(chapter.name);
+                                            }}
+                                            className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
+                                              isChapterSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                                            }`}
+                                          >
+                                            <ChevronRight className={`w-3 h-3 transition-transform ${isChapterExpanded ? 'rotate-90' : ''}`} />
+                                            <span>{chapter.name}</span>
+                                            <span className="text-xs text-muted-foreground ml-auto">
+                                              {chapter.topics.length}
+                                            </span>
+                                          </button>
+                                          <AnimatePresence>
+                                            {isChapterExpanded && chapter.topics.length > 0 && (
+                                              <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden ml-4 pl-2 border-l border-border"
+                                              >
+                                                {chapter.topics.map(topic => (
+                                                  <button
+                                                    key={topic.id}
+                                                    onClick={() => {
+                                                      const newId = topicId === topic.id ? '' : topic.id;
+                                                      setTopicId(newId);
+                                                      if (newId) {
+                                                        setTitle(`${typeLabels[type]} - ${topic.name}`);
+                                                      }
+                                                    }}
+                                                    className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
+                                                      topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                                                    }`}
+                                                  >
+                                                    {topic.name}
+                                                  </button>
+                                                ))}
+                                              </motion.div>
+                                            )}
+                                          </AnimatePresence>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Notes */}
@@ -307,8 +438,8 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
 
             {/* Submit */}
             <div className="p-4 border-t border-border shrink-0">
-              <Button 
-                onClick={handleSubmit} 
+              <Button
+                onClick={handleSubmit}
                 className="w-full h-12 text-base gradient-primary text-primary-foreground"
                 disabled={!title.trim()}
               >
