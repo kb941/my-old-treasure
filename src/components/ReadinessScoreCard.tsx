@@ -281,8 +281,11 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
             <div className="flex gap-2 text-[9px] text-muted-foreground flex-shrink-0">
               <span title="Syllabus progress">{sub.syllabusPct}%</span>
               <span title="Weight" className="text-foreground/40">w{sub.weightage}</span>
-              {sub.gap > 0.5 && (
-                <span className="text-destructive font-medium" title="Points gap">-{sub.gap}</span>
+              {sub.syllabusPct > 0 && sub.gap > 0.5 && (
+                <span className="text-amber-500 font-medium" title="Points to gain">+{sub.gap.toFixed(1)}</span>
+              )}
+              {sub.syllabusPct === 0 && (
+                <span className="text-muted-foreground/60 font-medium text-[8px]">Not started</span>
               )}
             </div>
           </div>
