@@ -196,7 +196,8 @@ export const DEFAULT_SR_SCHEDULES: Record<number, SpacedRepetitionSession[]> = {
     { sessionNumber: 4, name: '4th Review', daysAfterPrevious: 7 },
     { sessionNumber: 5, name: '5th Review', daysAfterPrevious: 14 },
     { sessionNumber: 6, name: '6th Review', daysAfterPrevious: 21 },
-    { sessionNumber: 7, name: 'Final', daysAfterPrevious: 30 },
+    { sessionNumber: 7, name: '7th Review', daysAfterPrevious: 30 },
+    { sessionNumber: 8, name: 'Final', daysAfterPrevious: 60 },
   ],
   2: [
     { sessionNumber: 1, name: '1st Review', daysAfterPrevious: 1 },
