@@ -495,7 +495,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       recommendations.push('Start by going to Subjects tab and marking completed stages');
     }
     if (syllabusScore < 20 && hasAnyProgress) recommendations.push('Focus on completing Main videos for all subjects');
-    if (revisionScore < 8 && topicsWithMain.length > 0) recommendations.push(`Complete RR1 for ${topicsWithMainCount - rr1} pending topics`);
+    if (revisionScore < 8 && hasAnyProgress) recommendations.push('Complete more revision cycles across subjects');
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
     if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
