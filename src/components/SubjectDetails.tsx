@@ -209,7 +209,10 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
             <div className="flex-1 min-w-0">
               <h1 className="text-base font-bold truncate">{subject.name}</h1>
               <p className="text-xs text-white/80">
-                {subjectChapters.length} ch • {totalTopics} topics • {progress}%
+                {subject.weightage}Q{(() => {
+                  const info = examName ? EXAM_WEIGHTAGES[examName]?.[subject.id] : null;
+                  return info?.range ? ` (${info.range[0]}–${info.range[1]})` : '';
+                })()} • {subjectChapters.length} ch • {totalTopics} topics • {progress}%
               </p>
             </div>
           </div>
