@@ -182,14 +182,32 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
   };
 
   const markSubjectStage = (stageId: string) => {
+    const allTopicsInSubject = subjectChapters.flatMap(c => c.topics);
+    const allHaveStage = allTopicsInSubject.length > 0 && allTopicsInSubject.every(t => (t.completedStages || []).includes(stageId));
+    const isScorableStage = ['main-video', 'rr-video', 'btr-video'].includes(stageId);
+    
     onChaptersChange(
       subject.id,
       subjectChapters.map(c => ({
         ...c,
         topics: c.topics.map(t => {
           const stages = t.completedStages || [];
+          if (allHaveStage) {
+            // Remove stage from all
+            return { ...t, completedStages: stages.filter(s => s !== stageId) };
+          }
           if (stages.includes(stageId)) return t;
-          return { ...t, completedStages: [...stages, stageId] };
+          const updates: Partial<typeof t> = { completedStages: [...stages, stageId] };
+          if (isScorableStage && t.confidence === 0) {
+            updates.confidence = 3;
+            updates.lastStudied = new Date();
+            const sched = getScheduleForConfidence(3, srSettings);
+            if (sched[0]) {
+              updates.nextRevisionDate = addDays(new Date(), sched[0].daysAfterPrevious);
+              updates.revisionSession = 0;
+            }
+          }
+          return { ...t, ...updates };
         })
       }))
     );
