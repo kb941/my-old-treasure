@@ -96,11 +96,15 @@ export function MockAnalytics({ mockTests, markingScheme = DEFAULT_MARKING_SCHEM
           {expandedCard === 'score' && (
             <>
               <div className="text-center py-2">
-                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}    <ResponsiveContainer width="100%" height="100%">
+                <p className="text-4xl font-bold text-gradient-primary">{prediction.predictedScore}/{markingScheme.totalMarks || 800}</p>
+              </div>
+              {scoreData.length > 0 && (
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={scoreData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} domain={[0, 800]} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} domain={[0, markingScheme.totalMarks || 800]} />
                       <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
                       <Line type="monotone" dataKey="score" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: 'hsl(var(--primary))', r: 3 }} />
                     </LineChart>
