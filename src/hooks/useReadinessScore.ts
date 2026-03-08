@@ -200,8 +200,6 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     // ===== 2. REVISION QUALITY (20%) — weightage-based per subject =====
     const now = new Date();
-    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    const criticalSubjectIds = ['medicine', 'surgery', 'obg', 'pediatrics'];
 
     let weightedRevision = 0;
     let hasRevisionData = false;
@@ -226,17 +224,19 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
         (rr3 / subMainCount) * 0.25
       );
 
-      // Overdue penalty for this subject
+      // Overdue penalty: only if revision overdue by 14+ days from nextRevisionDate
       let subOverduePenalty = 0;
-      const overdueTopics = subWithMain.filter(t =>
-        t.lastStudied && new Date(t.lastStudied) < fourteenDaysAgo
-      ).length;
-      subOverduePenalty = (overdueTopics / subMainCount) * 0.15;
+      const overdueBy14d = subWithMain.filter(t => {
+        if (!t.nextRevisionDate) return false;
+        const revDate = new Date(t.nextRevisionDate);
+        const daysPast = Math.ceil((now.getTime() - revDate.getTime()) / (1000 * 60 * 60 * 24));
+        return daysPast >= 14;
+      }).length;
+      subOverduePenalty = (overdueBy14d / subMainCount) * 0.15;
 
-      // Extra penalty for critical subjects
-      if (criticalSubjectIds.includes(sub.id)) {
-        const critOverdue = overdueTopics;
-        subOverduePenalty += (critOverdue / subMainCount) * 0.1;
+      // Extra penalty for critical subjects (Medicine, Pharma, Micro, Patho, Surgery, OBG, PSM)
+      if (CRITICAL_SUBJECT_IDS.includes(sub.id)) {
+        subOverduePenalty += (overdueBy14d / subMainCount) * 0.1;
       }
 
       weightedRevision += Math.max(0, subRevision - subOverduePenalty) * weight;
