@@ -205,11 +205,11 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     const syllabusScore = weightedSyllabusCoverage * 35;
 
-    // ===== 2. REVISION QUALITY (20%) — weightage-based per subject =====
+    // ===== 2. REVISION QUALITY (20%) — normalized among started-main topics =====
     const now = new Date();
 
     let weightedRevision = 0;
-    let hasRevisionData = false;
+    let revisionEligibleWeight = 0;
 
     subjects.forEach(sub => {
       const subTopics = allTopics.filter(t => t.subjectId === sub.id);
@@ -218,12 +218,11 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
       const weight = sub.weightage / totalWeightage;
       const subMainCount = subWithMain.length;
+      revisionEligibleWeight += weight;
 
       const rr1 = subWithMain.filter(t => t.revisionSession >= 1).length;
       const rr2 = subWithMain.filter(t => t.revisionSession >= 2).length;
       const rr3 = subWithMain.filter(t => t.revisionSession >= 3).length;
-
-      if (rr1 > 0) hasRevisionData = true;
 
       const subRevision = (
         (rr1 / subMainCount) * 0.4 +
@@ -249,7 +248,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       weightedRevision += Math.max(0, subRevision - subOverduePenalty) * weight;
     });
 
-    const revisionScore = weightedRevision * 20;
+    const normalizedRevision = revisionEligibleWeight > 0 ? (weightedRevision / revisionEligibleWeight) : 0;
+    const revisionScore = normalizedRevision * 20;
 
     // ===== 3. MCQ PRACTICE (20%) — weightage-based per subject =====
     let weightedMcqVolume = 0;
