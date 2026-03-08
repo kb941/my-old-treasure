@@ -489,23 +489,24 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
   // PYQ exam mode fields
   const renderPyqExamMode = (showSubject = true) => (
     <>
-      {/* Subject pills */}
-      <div>
-        <label className="text-sm font-medium mb-2 block">Subject</label>
-        <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-          {initialSubjects.map(s => (
-            <button
-              key={s.id}
-              onClick={() => { setSubjectId(s.id); updateAutoTitle(undefined, s.id); }}
-              className={`px-2.5 py-1 rounded-full text-xs transition-all ${
-                subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
-              }`}
-            >
-              {s.name}
-            </button>
-          ))}
+      {showSubject && (
+        <div>
+          <label className="text-sm font-medium mb-2 block">Subject</label>
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+            {initialSubjects.map(s => (
+              <button
+                key={s.id}
+                onClick={() => { setSubjectId(s.id); updateAutoTitle(undefined, s.id); }}
+                className={`px-2.5 py-1 rounded-full text-xs transition-all ${
+                  subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
+                }`}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       {/* Exam */}
       <div>
         <label className="text-xs text-muted-foreground mb-1.5 block">Exam</label>
