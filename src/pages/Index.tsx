@@ -588,30 +588,34 @@ const Index = () => {
           )}
 
           {activeTab === 'analytics' && (
-            <div className="space-y-4">
-              {/* Readiness Score - prominent */}
-              <ReadinessScoreCard result={readinessResult} />
+            <div className="space-y-3">
+              {/* Predictions — always visible at top */}
+              <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
 
-              {/* Weekly Overview + MCQ Chart side by side on desktop */}
-              <div className="grid lg:grid-cols-2 gap-4">
+              {/* Readiness Score — compact */}
+              <ReadinessScoreCard result={readinessResult} compact />
+
+              {/* Weekly + MCQ compact row */}
+              <div className="grid grid-cols-2 gap-3">
                 <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
                 <McqWeeklyChart mcqLogs={mcqLogs} />
               </div>
 
-              {/* Achievements Badge Panel */}
+              {/* Collapsible sections */}
+              <InsightsSection title="Content Progress" defaultOpen={false}>
+                <ContentProgressDashboard chapters={chapters} contentTypes={contentTypes} />
+              </InsightsSection>
+
+              <InsightsSection title="Study Patterns" defaultOpen={false}>
+                <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
+              </InsightsSection>
+
+              <InsightsSection title="PYQ Analysis" defaultOpen={false}>
+                <PYQAccuracyTrends subjects={subjects} />
+              </InsightsSection>
+
+              {/* Achievements */}
               <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={() => setActiveTab('achievements' as Tab)} />
-
-              {/* Predictions */}
-              <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
-
-              {/* Content Progress */}
-              <ContentProgressDashboard chapters={chapters} contentTypes={contentTypes} />
-              
-              {/* Advanced Analytics */}
-              <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
-
-              {/* PYQ Accuracy Trends */}
-              <PYQAccuracyTrends subjects={subjects} />
             </div>
           )}
 
