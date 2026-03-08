@@ -106,6 +106,12 @@ export function PYQSummaryCard({ onNavigate }: { onNavigate: () => void }) {
 }
 
 export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps) {
+  const YEARS = useMemo(() => {
+    const from = pyqYearFrom || 2016;
+    const to = pyqYearTo || 2025;
+    return Array.from({ length: to - from + 1 }, (_, i) => to - i);
+  }, [pyqYearFrom, pyqYearTo]);
+
   const defaults = useMemo(() => generateDefaults(subjects), [subjects]);
   const [pyqData, setPyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', defaults);
   const [selectedExam, setSelectedExam] = useState<string>('NEET PG');
