@@ -36,12 +36,12 @@ const phases: Phase[] = [
     gradient: 'from-emerald-500 to-teal-500',
     borderColor: 'border-emerald-500/30',
     bgColor: 'bg-gradient-to-br from-emerald-500/10 to-teal-500/5',
-    message: 'The hardest part is starting — and you\'ve done that. Focus on building daily habits first, the scores will follow.',
+    message: 'Every expert was once a beginner. Your only job right now is to show up daily — even 1 hour counts.',
     tips: [
-      { icon: Clock, text: 'Build a daily 2-hour study habit before increasing hours', color: 'text-emerald-500' },
-      { icon: BookOpen, text: 'Pick ONE high-yield subject (Anatomy/Physiology) and finish its videos first', color: 'text-blue-500' },
-      { icon: Target, text: 'Solve 20-30 MCQs daily from what you\'ve studied — active recall beats passive reading', color: 'text-amber-500' },
-      { icon: Flame, text: 'Maintain a 7-day streak — consistency matters more than marathon sessions', color: 'text-orange-500' },
+      { icon: Clock, text: 'Start with just 2 focused hours/day — build the habit before increasing volume', color: 'text-emerald-500' },
+      { icon: BookOpen, text: 'Begin with your highest-weightage subjects (Pathology, Pharmacology, Medicine) for maximum ROI', color: 'text-blue-500' },
+      { icon: Target, text: 'Do 10-20 MCQs daily from what you studied that day — active recall beats re-reading 3x', color: 'text-amber-500' },
+      { icon: Flame, text: 'Focus on a 7-day streak first — consistency beats intensity at this stage', color: 'text-orange-500' },
     ],
   },
   {
@@ -51,12 +51,12 @@ const phases: Phase[] = [
     gradient: 'from-blue-500 to-indigo-500',
     borderColor: 'border-blue-500/30',
     bgColor: 'bg-gradient-to-br from-blue-500/10 to-indigo-500/5',
-    message: 'You\'re building a solid base. Focus on covering high-weightage subjects and starting MCQ practice early.',
+    message: 'Great start! Now build depth in high-weightage subjects while keeping momentum.',
     tips: [
-      { icon: BookOpen, text: 'Complete Pre-clinical subjects first — they form 30%+ of the exam', color: 'text-blue-500' },
-      { icon: Brain, text: 'Start spaced revision for topics you\'ve finished — don\'t wait till the end', color: 'text-violet-500' },
-      { icon: FileQuestion, text: 'Aim for 50+ MCQs/day with analysis of wrong answers', color: 'text-amber-500' },
-      { icon: Target, text: 'Begin PYQ practice for completed subjects — understand exam patterns early', color: 'text-emerald-500' },
+      { icon: BookOpen, text: 'Prioritize high-weightage subjects first — Pharma, Patho, PSM, Medicine, Surgery carry 40%+ marks', color: 'text-blue-500' },
+      { icon: Brain, text: 'Start revising finished topics immediately — the forgetting curve is steepest in the first 48 hours', color: 'text-violet-500' },
+      { icon: FileQuestion, text: 'Increase to 50+ MCQs/day — always analyze wrong answers and note the "why"', color: 'text-amber-500' },
+      { icon: Target, text: 'Begin PYQ practice for completed subjects — understand recurring exam patterns early', color: 'text-emerald-500' },
     ],
   },
   {
@@ -66,12 +66,12 @@ const phases: Phase[] = [
     gradient: 'from-violet-500 to-purple-500',
     borderColor: 'border-violet-500/30',
     bgColor: 'bg-gradient-to-br from-violet-500/10 to-purple-500/5',
-    message: 'Great momentum! You\'re past the toughest phase. Now focus on depth and filling weak areas.',
+    message: 'You\'re past the toughest phase! Now deepen understanding and start identifying weak spots.',
     tips: [
-      { icon: RotateCcw, text: 'Revision is king now — schedule 30% of study time for revision', color: 'text-violet-500' },
-      { icon: FileQuestion, text: 'Target 100+ MCQs/day with focus on weak subjects', color: 'text-amber-500' },
-      { icon: GraduationCap, text: 'Take your first mock test — it\'s diagnostic, not judgmental', color: 'text-primary' },
-      { icon: FileText, text: 'Complete last 3 years PYQs for subjects you\'ve covered', color: 'text-emerald-500' },
+      { icon: RotateCcw, text: 'Dedicate 30% of study time to revision — it\'s more valuable than covering new topics now', color: 'text-violet-500' },
+      { icon: FileQuestion, text: 'Push to 100+ MCQs/day — focus extra on your weakest 3 subjects', color: 'text-amber-500' },
+      { icon: GraduationCap, text: 'Take your first full-length mock — treat it as diagnostic, not a test of your worth', color: 'text-primary' },
+      { icon: FileText, text: 'Complete last 3 years PYQs for covered subjects — pattern recognition is a superpower', color: 'text-emerald-500' },
     ],
   },
   {
@@ -81,12 +81,12 @@ const phases: Phase[] = [
     gradient: 'from-amber-500 to-orange-500',
     borderColor: 'border-amber-500/30',
     bgColor: 'bg-gradient-to-br from-amber-500/10 to-orange-500/5',
-    message: 'You\'re in the zone! Focus on weak areas and mock test improvement. Consistency is your superpower.',
+    message: 'You\'re in the zone! Sharpen weak areas and build exam stamina through mocks.',
     tips: [
-      { icon: AlertTriangle, text: 'Identify bottom 5 subjects and give them extra focus', color: 'text-destructive' },
-      { icon: GraduationCap, text: 'Take weekly mocks and analyze every wrong answer', color: 'text-primary' },
-      { icon: FileText, text: 'Complete 5 years of PYQs — they repeat patterns', color: 'text-emerald-500' },
-      { icon: Brain, text: 'Use image-based & clinical MCQs — they\'re increasing in exams', color: 'text-violet-500' },
+      { icon: AlertTriangle, text: 'Identify your bottom 5 subjects by accuracy — give them 2x attention this week', color: 'text-destructive' },
+      { icon: GraduationCap, text: 'Take weekly mocks and create an "error log" — categorize mistakes by type', color: 'text-primary' },
+      { icon: FileText, text: 'Complete 5 years of PYQs — 20-30% of exam questions are direct or modified repeats', color: 'text-emerald-500' },
+      { icon: Brain, text: 'Practice image-based & clinical scenario MCQs — their share is increasing every year', color: 'text-violet-500' },
     ],
   },
   {
@@ -96,12 +96,12 @@ const phases: Phase[] = [
     gradient: 'from-orange-500 to-red-500',
     borderColor: 'border-orange-500/30',
     bgColor: 'bg-gradient-to-br from-orange-500/10 to-red-500/5',
-    message: 'Excellent! You\'re well-prepared. Fine-tune weak spots and optimize mock performance.',
+    message: 'Excellent! You\'re well-prepared. Now optimize for accuracy and exam-day performance.',
     tips: [
-      { icon: Target, text: 'Focus on accuracy over speed — reduce silly mistakes', color: 'text-amber-500' },
-      { icon: GraduationCap, text: 'Simulate real exam conditions in mocks — 3.5hr, no breaks', color: 'text-primary' },
-      { icon: Star, text: 'Master high-yield topics: pharmacology tables, anatomy one-liners', color: 'text-amber-500' },
-      { icon: RotateCcw, text: 'Rapid revision cycles — cover full syllabus every 2-3 weeks', color: 'text-violet-500' },
+      { icon: Target, text: 'Shift focus from speed to accuracy — eliminating silly mistakes gains more marks than new topics', color: 'text-amber-500' },
+      { icon: GraduationCap, text: 'Do full 3.5-hour mock simulations with no breaks — train your exam stamina', color: 'text-primary' },
+      { icon: Star, text: 'Master high-yield one-liners: pharma tables, enzyme deficiencies, classic presentations', color: 'text-amber-500' },
+      { icon: RotateCcw, text: 'Run rapid full-syllabus revision cycles — aim to cover everything every 2-3 weeks', color: 'text-violet-500' },
     ],
   },
   {
@@ -111,12 +111,12 @@ const phases: Phase[] = [
     gradient: 'from-emerald-500 to-green-500',
     borderColor: 'border-emerald-500/30',
     bgColor: 'bg-gradient-to-br from-emerald-500/10 to-green-500/5',
-    message: 'Outstanding preparation! Maintain your edge and trust your preparation.',
+    message: 'Outstanding preparation! Maintain your edge, stay sharp, and trust the work you\'ve put in.',
     tips: [
-      { icon: CheckCircle2, text: 'Maintain daily revision — don\'t let any subject go cold', color: 'text-emerald-500' },
-      { icon: Award, text: 'Focus on time management and question selection strategy', color: 'text-primary' },
-      { icon: Brain, text: 'Practice elimination technique for uncertain MCQs', color: 'text-violet-500' },
-      { icon: Flame, text: 'Stay calm and trust your preparation — you\'ve earned this', color: 'text-orange-500' },
+      { icon: CheckCircle2, text: 'Keep daily revision touch-points — even 30 min/subject prevents cold spots', color: 'text-emerald-500' },
+      { icon: Award, text: 'Master question selection strategy — know when to attempt vs skip for maximum score', color: 'text-primary' },
+      { icon: Brain, text: 'Perfect the elimination technique — you can gain 5-10% by converting educated guesses', color: 'text-violet-500' },
+      { icon: Flame, text: 'Prioritize sleep & mental health — a fresh mind outperforms an exhausted one on exam day', color: 'text-orange-500' },
     ],
   },
 ];
@@ -542,6 +542,56 @@ function SubjectBreakdownSection({ subjects, color }: { subjects: SubjectReadine
   );
 }
 
+function HowItsCalculated() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-primary/15 overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-primary/5 hover:bg-primary/10 transition-colors"
+      >
+        <span className="text-[11px] font-semibold flex items-center gap-1.5">
+          <Lightbulb className="w-3.5 h-3.5 text-primary" />
+          <span className="text-primary">How it's calculated</span>
+        </span>
+        {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 py-3 space-y-3 text-[11px] text-muted-foreground leading-relaxed">
+              <p className="font-medium text-foreground">Your readiness score is based on 5 weighted components:</p>
+              <div className="space-y-1.5">
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><BookOpen className="w-3 h-3 text-blue-500" /> Syllabus Coverage</span><span className="font-semibold text-foreground">35 pts</span></div>
+                <p className="pl-[18px] text-[10px]">% of topics marked as mastered, weighted by subject exam weightage</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><RotateCcw className="w-3 h-3 text-violet-500" /> Revision Quality</span><span className="font-semibold text-foreground">20 pts</span></div>
+                <p className="pl-[18px] text-[10px]">How many topics have active spaced repetition with ≥3 confidence</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileQuestion className="w-3 h-3 text-amber-500" /> MCQ Practice</span><span className="font-semibold text-foreground">20 pts</span></div>
+                <p className="pl-[18px] text-[10px]">Questions solved vs target, weighted by accuracy percentage</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-500" /> PYQ Completion</span><span className="font-semibold text-foreground">15 pts</span></div>
+                <p className="pl-[18px] text-[10px]">% of topics with completed previous year question sessions</p>
+                <div className="flex justify-between"><span className="flex items-center gap-1.5"><GraduationCap className="w-3 h-3 text-primary" /> Mock Performance</span><span className="font-semibold text-foreground">10 pts</span></div>
+                <p className="pl-[18px] text-[10px]">Based on latest mock score percentile and improvement trend</p>
+              </div>
+              <div className="border-t border-border pt-2 space-y-1">
+                <p><span className="text-emerald-500 font-medium">Bonuses</span> for study streaks, balanced subject coverage, and consistent daily practice</p>
+                <p><span className="text-destructive font-medium">Penalties</span> for inactivity (&gt;3 days gap), heavily imbalanced prep, or declining mock scores</p>
+              </div>
+              <p className="text-[10px] italic">Score = Base (100) + Bonuses − Penalties, capped at 0–100</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendData: number[] }) {
   const { score, breakdown, color, recommendations } = result;
 
@@ -586,17 +636,8 @@ function FullBreakdown({ result, trendData }: { result: ReadinessResult; trendDa
         </div>
       )}
 
-      {/* How it works */}
-      <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-        <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1.5">
-          <Lightbulb className="w-3.5 h-3.5 text-primary" />
-          <span className="text-primary">How it's calculated</span>
-        </h4>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Syllabus (35) + Revision (20) + MCQ (20) + PYQ (15) + Mocks (10) = 100 base points. 
-          Bonuses for streaks, balance, and consistency. Penalties for inactivity or imbalanced prep.
-        </p>
-      </div>
+      {/* How it works - expandable */}
+      <HowItsCalculated />
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
