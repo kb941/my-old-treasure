@@ -679,7 +679,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
               <label className="text-sm font-medium mb-1.5 block">Source</label>
               <Input
                 value={testSource}
-                onChange={e => setTestSource(e.target.value)}
+                onChange={e => { setTestSource(e.target.value); setTimeout(() => updateAutoTitle(undefined, undefined, undefined, undefined, e.target.value), 0); }}
                 placeholder="e.g., Marrow, PrepLadder..."
                 autoFocus={false}
               />
