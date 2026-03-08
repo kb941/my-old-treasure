@@ -182,23 +182,93 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
     onClose();
   };
 
-  const autoFillTitle = (label: string) => {
-    setTitle(`${typeLabels[type]} - ${label}`);
-  };
+  // Auto-generate title based on current selections
+  const buildAutoTitle = useCallback((
+    overrideType?: Task['type'],
+    overrideSubjectId?: string,
+    overrideChapterId?: string,
+    overrideTopicId?: string,
+    overrideTestSource?: string,
+    overridePyqFullMock?: boolean,
+    overridePyqExam?: string,
+    overridePyqYears?: number[],
+    overridePyqSessions?: string[],
+  ) => {
+    const t = overrideType ?? type;
+    const sId = overrideSubjectId ?? subjectId;
+    const cId = overrideChapterId ?? chapterId;
+    const tId = overrideTopicId ?? topicId;
+    const src = overrideTestSource ?? testSource;
+    const fullMock = overridePyqFullMock ?? pyqFullMock;
+    const exam = overridePyqExam ?? pyqExam;
+    const years = overridePyqYears ?? pyqYears;
+    const sessions = overridePyqSessions ?? pyqSessions;
+
+    const subName = initialSubjects.find(s => s.id === sId)?.name || '';
+    const chName = chapters.find(c => c.id === cId)?.name || '';
+    const topName = (() => {
+      if (!tId) return '';
+      const ch = chapters.find(c => c.id === cId);
+      return ch?.topics.find(tp => tp.id === tId)?.name || '';
+    })();
+
+    const prefix = typeLabels[t];
+    let parts: string[] = [];
+
+    switch (t) {
+      case 'study':
+      case 'mcq':
+      case 'revision':
+        if (topName) parts = [topName];
+        else if (chName) parts = [chName];
+        else if (subName) parts = [subName];
+        break;
+      case 'pyq':
+        if (fullMock) {
+          parts = ['Full Mock'];
+          if (exam) parts.push(exam);
+          if (sessions.length > 0) parts.push(sessions.join(', '));
+          else if (years.length > 0) parts.push(years.join(', '));
+        } else {
+          if (subName) parts = [subName];
+          if (chName) parts.push(chName);
+        }
+        break;
+      case 'test':
+        if (src) parts.push(src);
+        if (subName) parts.push(subName);
+        if (topName) parts.push(topName);
+        else if (chName) parts.push(chName);
+        break;
+      case 'mock':
+        if (src) parts.push(src);
+        break;
+    }
+
+    if (parts.length > 0) return `${prefix} - ${parts.join(' • ')}`;
+    return '';
+  }, [type, subjectId, chapterId, topicId, testSource, pyqFullMock, pyqExam, pyqYears, pyqSessions, chapters]);
+
+  const updateAutoTitle = useCallback((...args: Parameters<typeof buildAutoTitle>) => {
+    const newTitle = buildAutoTitle(...args);
+    setTitle(newTitle);
+  }, [buildAutoTitle]);
 
   const handleSearchResultClick = (result: NonNullable<typeof searchResults>[0]) => {
     setSubjectId(result.subjectId);
     setChapterId(result.chapterId);
     if (result.topicId) {
       setTopicId(result.topicId);
-      autoFillTitle(result.topicName!);
     } else {
       setTopicId('');
-      autoFillTitle(result.chapterName);
     }
     setSearchQuery('');
     setExpandedSubject(result.subjectId);
     setExpandedChapter(result.chapterId);
+    // Defer title update
+    setTimeout(() => {
+      updateAutoTitle(undefined, result.subjectId, result.chapterId, result.topicId || '');
+    }, 0);
   };
 
   const handleSubjectSelect = (id: string) => {
@@ -210,8 +280,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
       setTopicId('');
       setExpandedSubject(id);
       setExpandedChapter(null);
-      const sub = initialSubjects.find(s => s.id === id);
-      if (sub && !title) autoFillTitle(sub.name);
+      updateAutoTitle(undefined, id, '', '');
     }
   };
 
