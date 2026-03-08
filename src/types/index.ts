@@ -82,7 +82,7 @@ export interface StudySession {
   id: string;
   date: Date;
   duration: number;
-  type: 'study' | 'revision' | 'mcq' | 'mock';
+  type: 'study' | 'revision' | 'mcq' | 'mock' | 'pyq' | 'test';
   subjectId?: string;
   topicId?: string;
   chapterId?: string;
