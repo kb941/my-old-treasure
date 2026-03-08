@@ -11,6 +11,7 @@ interface ReadinessInput {
   mcqLogs: { date: string; count: number }[];
   pyqData: PYQEntry[];
   examDate: Date;
+  examName: string;
   mcqGoalPerSubject: number;
   markingScheme: MarkingScheme;
   pyqYearFrom: number;
