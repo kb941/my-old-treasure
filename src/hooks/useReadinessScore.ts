@@ -344,11 +344,15 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     }
 
     // ===== 5. MOCK TEST PERFORMANCE (10%) =====
+    // Use recent 60 days OR last 3 mocks, whichever gives more data
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
-    const recentMocks = mockTests
+    const mocksIn60d = mockTests
       .filter(m => new Date(m.date) > sixtyDaysAgo)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const last3Mocks = [...mockTests]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, Math.max(3, mockTests.filter(m => new Date(m.date) > sixtyDaysAgo).length));
+      .slice(0, 3);
+    const recentMocks = mocksIn60d.length >= last3Mocks.length ? mocksIn60d : last3Mocks;
 
     let mockScore = 0;
     if (recentMocks.length > 0) {
