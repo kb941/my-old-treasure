@@ -281,6 +281,16 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                                         {topic.name}
                                       </button>
                                     ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Notes */}
                 <div>
@@ -291,16 +301,6 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                     placeholder="Add any notes for this task..."
                     className="min-h-[60px] text-sm"
                   />
-                </div>
-              </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </ScrollArea>
