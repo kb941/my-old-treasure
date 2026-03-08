@@ -641,16 +641,22 @@ export function ProfileModal({
                         {subjects
                           .filter(s => s.category === category)
                           .map(subject => (
-                            <div key={subject.id} className="flex items-center gap-3 bg-secondary/30 rounded-lg p-2">
+                            <div key={subject.id} className="flex items-center gap-2 bg-secondary/30 rounded-lg p-2">
                               <span className="flex-1 text-sm truncate">{subject.name}</span>
+                              {(() => {
+                                const info = EXAM_WEIGHTAGES[newExamName]?.[subject.id];
+                                return info?.range ? (
+                                  <span className="text-[10px] text-muted-foreground shrink-0">({info.range[0]}–{info.range[1]})</span>
+                                ) : null;
+                              })()}
                               <Input
                                 type="number"
                                 value={weightages[subject.id] || 0}
                                 onChange={(e) => updateWeightage(subject.id, Number(e.target.value))}
-                                className="w-16 h-8 text-center text-sm"
+                                className="w-14 h-7 text-center text-xs"
                                 min={0} max={50}
                               />
-                              <span className="text-xs text-muted-foreground w-4">Q</span>
+                              <span className="text-xs text-muted-foreground w-3">Q</span>
                             </div>
                           ))}
                       </div>
