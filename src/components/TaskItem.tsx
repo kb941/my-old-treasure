@@ -155,7 +155,26 @@ export function TaskItem({
         )}
 
         <button
-          onClick={(e) => { e.stopPropagation(); onToggle(task.id); }}
+          ref={checkboxRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!task.completed) {
+              const rect = (e.target as HTMLElement).getBoundingClientRect();
+              confetti({
+                particleCount: 40,
+                spread: 50,
+                startVelocity: 15,
+                gravity: 0.8,
+                scalar: 0.6,
+                origin: {
+                  x: rect.left / window.innerWidth + rect.width / window.innerWidth / 2,
+                  y: rect.top / window.innerHeight,
+                },
+                colors: ['#14b8a6', '#6366f1', '#f59e0b', '#22c55e', '#ec4899'],
+              });
+            }
+            onToggle(task.id);
+          }}
           className={cn(
             "w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all",
             task.completed ? "bg-primary border-primary" : "border-muted-foreground/40 hover:border-primary"
