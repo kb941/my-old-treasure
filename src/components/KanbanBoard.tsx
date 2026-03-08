@@ -39,6 +39,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addToColumn, setAddToColumn] = useState<TaskColumn>('today');
   const [reorderMode, setReorderMode] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const getColumnTasks = (columnId: TaskColumn) =>
     tasks.filter(t => t.column === columnId);
@@ -67,11 +68,22 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
     onTasksChange(tasks.filter(t => t.id !== taskId));
   };
 
+  const editTask = (updatedTask: Task) => {
+    onTasksChange(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+  };
+
+  const openEditModal = (task: Task) => {
+    setEditingTask(task);
+    setAddToColumn(task.column);
+    setAddModalOpen(true);
+  };
+
   const clearDone = () => {
     onTasksChange(tasks.filter(t => t.column !== 'done'));
   };
 
   const openAddModal = (column: TaskColumn) => {
+    setEditingTask(null);
     setAddToColumn(column);
     setAddModalOpen(true);
   };
@@ -97,6 +109,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 onToggle={onToggleTask}
                 onMove={moveTask}
                 onDelete={deleteTask}
+                onEdit={openEditModal}
                 onTimerComplete={onTimerComplete}
                 onDone={onTaskDone}
                 onStartFocus={onStartFocus}
@@ -120,6 +133,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               onToggle={onToggleTask}
               onMove={moveTask}
               onDelete={deleteTask}
+              onEdit={openEditModal}
               onTimerComplete={onTimerComplete}
               onDone={onTaskDone}
               onStartFocus={onStartFocus}
@@ -215,8 +229,10 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
 
         <AddTaskModal
           isOpen={addModalOpen}
-          onClose={() => setAddModalOpen(false)}
+          onClose={() => { setAddModalOpen(false); setEditingTask(null); }}
           onAdd={addTask}
+          onEdit={editTask}
+          editTask={editingTask}
           defaultColumn={addToColumn}
           chapters={chapters}
         />
@@ -285,8 +301,10 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
 
       <AddTaskModal
         isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={() => { setAddModalOpen(false); setEditingTask(null); }}
         onAdd={addTask}
+        onEdit={editTask}
+        editTask={editingTask}
         defaultColumn={addToColumn}
         chapters={chapters}
       />

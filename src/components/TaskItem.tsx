@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, RotateCcw, Coffee, CheckCircle2, Star, Trash2 } from 'lucide-react';
+import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, RotateCcw, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
@@ -34,6 +34,7 @@ interface TaskItemProps {
   onTimerComplete?: (taskId: string, duration: number) => void;
   onDone?: (taskId: string, elapsedMinutes: number, confidence?: number) => void;
   onDelete?: (taskId: string) => void;
+  onEdit?: (task: Task) => void;
   onStartFocus?: (taskId: string) => void;
   showTimer?: boolean;
   isDraggable?: boolean;
@@ -41,7 +42,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({
-  task, onToggle, onMove, onTimerComplete, onDone, onDelete, onStartFocus,
+  task, onToggle, onMove, onTimerComplete, onDone, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false,
   pomodoroSettings = DEFAULT_POMODORO
 }: TaskItemProps) {
@@ -183,7 +184,7 @@ export function TaskItem({
                     {phase.replace('-', ' ')}
                   </span>
                 </div>
-                <span className="text-[11px] text-muted-foreground">Session {sessionCount}</span>
+                <span className="text-[11px] text-muted-foreground">Session {sessionCount + 1}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -259,6 +260,11 @@ export function TaskItem({
 
         {/* Actions */}
         <div className="flex flex-col gap-0.5">
+          {onEdit && (
+            <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1 hover:bg-secondary rounded transition-colors">
+              <Pencil className="w-3 h-3 text-muted-foreground" />
+            </button>
+          )}
           {canMoveLeft && (
             <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }} className="p-1 hover:bg-secondary rounded transition-colors">
               <ArrowLeft className="w-3 h-3 text-muted-foreground" />

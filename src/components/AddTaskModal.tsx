@@ -12,6 +12,8 @@ interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (task: Omit<Task, 'id'>) => void;
+  onEdit?: (task: Task) => void;
+  editTask?: Task | null;
   defaultColumn: TaskColumn;
   chapters?: Chapter[];
   pyqYearFrom?: number;
@@ -34,7 +36,8 @@ const typeLabels: Record<Task['type'], string> = {
   study: 'Study', revision: 'Revise', mcq: 'MCQs', pyq: 'PYQs', test: 'Test', mock: 'Mock Test',
 };
 
-export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: AddTaskModalProps) {
+export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, defaultColumn, chapters = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: AddTaskModalProps) {
+  const isEditMode = !!editTask;
   const [title, setTitle] = useState('');
   const [type, setType] = useState<Task['type']>('study');
   const [subjectId, setSubjectId] = useState('');
@@ -58,9 +61,20 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
   const subjectListRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
-  // Reset everything on close
+  // Populate fields when editing, reset on close
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && editTask) {
+      setTitle(editTask.title);
+      setType(editTask.type);
+      setSubjectId(editTask.subjectId || '');
+      setChapterId(editTask.chapterId || '');
+      setTopicId(editTask.topicId || '');
+      setDuration(editTask.duration);
+      setPriority(editTask.priority);
+      setNotes(editTask.notes || '');
+      if (editTask.subjectId) setExpandedSubject(editTask.subjectId);
+      if (editTask.chapterId) setExpandedChapter(editTask.chapterId);
+    } else if (!isOpen) {
       setTitle('');
       setType('study');
       resetSelections();
@@ -70,7 +84,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
       setTestSource('');
       setPyqFullMock(false);
     }
-  }, [isOpen]);
+  }, [isOpen, editTask]);
 
   const resetSelections = useCallback(() => {
     setSubjectId('');
@@ -98,14 +112,8 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
     setSearchQuery('');
     setPyqFullMock(false);
     setTestSource('');
-    // Update title prefix if auto-generated
-    if (title && Object.values(typeLabels).some(l => title.startsWith(l + ' - '))) {
-      const suffix = title.split(' - ').slice(1).join(' - ');
-      if (suffix) setTitle(`${typeLabels[newType]} - ${suffix}`);
-      else setTitle('');
-    } else if (!title) {
-      // keep empty
-    }
+    // Clear title on type change so auto-title regenerates fresh
+    setTitle('');
   };
 
   // Scroll to selected subject after search selection
@@ -167,18 +175,32 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
 
   const handleSubmit = () => {
     if (!title.trim()) return;
-    onAdd({
-      title: title.trim(),
-      type,
-      subjectId: subjectId || undefined,
-      chapterId: chapterId || undefined,
-      topicId: topicId || undefined,
-      duration,
-      completed: false,
-      column: defaultColumn,
-      priority,
-      notes: notes.trim() || undefined,
-    });
+    if (isEditMode && editTask && onEdit) {
+      onEdit({
+        ...editTask,
+        title: title.trim(),
+        type,
+        subjectId: subjectId || undefined,
+        chapterId: chapterId || undefined,
+        topicId: topicId || undefined,
+        duration,
+        priority,
+        notes: notes.trim() || undefined,
+      });
+    } else {
+      onAdd({
+        title: title.trim(),
+        type,
+        subjectId: subjectId || undefined,
+        chapterId: chapterId || undefined,
+        topicId: topicId || undefined,
+        duration,
+        completed: false,
+        column: defaultColumn,
+        priority,
+        notes: notes.trim() || undefined,
+      });
+    }
     onClose();
   };
 
@@ -718,7 +740,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
 
             {/* Header */}
             <div className="flex items-center justify-between p-4 shrink-0">
-              <h2 className="text-lg font-bold">Add Task</h2>
+              <h2 className="text-lg font-bold">{isEditMode ? 'Edit Task' : 'Add Task'}</h2>
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="w-5 h-5" />
               </Button>
@@ -837,8 +859,7 @@ export function AddTaskModal({ isOpen, onClose, onAdd, defaultColumn, chapters =
                 className="w-full h-12 text-base gradient-primary text-primary-foreground"
                 disabled={!title.trim()}
               >
-                <Plus className="w-5 h-5 mr-2" />
-                Add Task
+                {isEditMode ? 'Save Changes' : 'Add Task'}
               </Button>
             </div>
           </motion.div>
