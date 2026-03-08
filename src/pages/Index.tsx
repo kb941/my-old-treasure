@@ -339,6 +339,19 @@ const Index = () => {
     toast({ title: 'Syllabus Reset', description: 'All chapters and topics restored to defaults.' });
   };
 
+  const handleClearSampleData = () => {
+    setMockTests([]);
+    setStats({
+      totalXP: 0, level: 1, currentStreak: 0, longestStreak: 0,
+      totalStudyHours: 0, todayStudyMinutes: 0, averageAccuracy: 0,
+      topicsCompleted: 0, subjectsCompleted: 0,
+    });
+    setStudyLogs([]);
+    setMcqLogs([]);
+    localStorage.removeItem('neetpg-readiness-trend');
+    toast({ title: 'Sample Data Cleared', description: 'Mock tests and stats reset to zero. Your syllabus progress is preserved.' });
+  };
+
   const desktopTabs = [
     { id: 'today' as Tab, label: 'Today' },
     { id: 'subjects' as Tab, label: 'Subjects' },
