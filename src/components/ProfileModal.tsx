@@ -630,8 +630,8 @@ export function ProfileModal({
                       <BookOpen className="w-4 h-4 text-primary" />
                       Subject Weightages
                     </h3>
-                    <span className={`text-sm font-medium ${totalWeightage === 200 ? 'text-green-500' : 'text-amber-500'}`}>
-                      Total: {totalWeightage}/200
+                    <span className={`text-sm font-medium ${totalWeightage === (EXAM_MARKING[newExamName]?.totalMarks === 300 ? 300 : 200) ? 'text-green-500' : 'text-amber-500'}`}>
+                      Total: {totalWeightage}/{EXAM_MARKING[newExamName]?.totalMarks === 300 ? 300 : 200}
                     </span>
                   </div>
                   <div className="space-y-2">
