@@ -255,9 +255,17 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                 {/* Controls */}
                 <div className="flex items-center gap-3 shrink-0">
                   <Button variant="outline" size="icon" className="w-10 h-10 rounded-full" onClick={() => {
-                    setTimeRemaining(getPhaseDuration(phase));
+                    // Skip task - move to next without completing
+                    if (incompleteTasks.length > 1) {
+                      setCurrentTaskIndex(prev => (prev + 1) % incompleteTasks.length);
+                    }
+                    setIsRunning(false);
+                    setPhase('study');
+                    setTimeRemaining(pomodoroSettings.studyDuration * 60);
+                    setTotalStudyTime(0);
+                    setSessionCount(0);
                   }}>
-                    <RotateCcw className="w-4 h-4" />
+                    <SkipForward className="w-4 h-4" />
                   </Button>
 
                   <Button
