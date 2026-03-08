@@ -113,23 +113,33 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     // ===== 1. SYLLABUS COVERAGE (35%) =====
     // Only main-video, rr-video, btr-video count for syllabus score.
-    // Dynamic weights based on which of these 3 are enabled in profile:
-    // 1 type → 100%; 2 types → 70/30; 3 types → 50/30/20
+    // Weights by identity, based on which are enabled:
+    // main only → 100%; rr only → 100%; btr only → 100%
+    // main+rr → 70/30; rr+btr → 70/30; main+btr → 70/30
+    // main+rr+btr → 50/30/20
     const SCORABLE_STAGES = ['main-video', 'rr-video', 'btr-video'] as const;
     const enabledStages = contentTypes
       .filter(ct => SCORABLE_STAGES.includes(ct.id as any) && ct.enabled)
       .map(ct => ct.id);
 
+    // Build weights map based on which specific types are enabled
     const stageWeights: Record<string, number> = {};
-    if (enabledStages.length === 1) {
+    const hasMain = enabledStages.includes('main-video');
+    const hasRR = enabledStages.includes('rr-video');
+    const hasBTR = enabledStages.includes('btr-video');
+    const enabledCount = enabledStages.length;
+
+    if (enabledCount === 1) {
       stageWeights[enabledStages[0]] = 1.0;
-    } else if (enabledStages.length === 2) {
+    } else if (enabledCount === 2) {
+      // First enabled gets 70%, second gets 30%
       stageWeights[enabledStages[0]] = 0.7;
       stageWeights[enabledStages[1]] = 0.3;
-    } else if (enabledStages.length >= 3) {
-      stageWeights[enabledStages[0]] = 0.5;
-      stageWeights[enabledStages[1]] = 0.3;
-      stageWeights[enabledStages[2]] = 0.2;
+    } else if (enabledCount >= 3) {
+      // main=50%, rr=30%, btr=20%
+      if (hasMain) stageWeights['main-video'] = 0.5;
+      if (hasRR) stageWeights['rr-video'] = 0.3;
+      if (hasBTR) stageWeights['btr-video'] = 0.2;
     }
 
     let weightedSyllabusCoverage = 0;
