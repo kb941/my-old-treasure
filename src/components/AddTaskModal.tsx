@@ -859,6 +859,16 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
                 className="w-full h-12 text-base gradient-primary text-primary-foreground"
                 disabled={!title.trim()}
               >
+                {isEditMode ? 'Save Changes' : 'Add Task'}
+              </Button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+              >
                 <Plus className="w-5 h-5 mr-2" />
                 Add Task
               </Button>
