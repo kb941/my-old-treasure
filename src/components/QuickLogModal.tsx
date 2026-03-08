@@ -201,103 +201,167 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
     return 'Select subject...';
   };
 
+  const topicSearchResults = useMemo(() => {
+    if (!topicSearch.trim()) return null;
+    const q = topicSearch.toLowerCase();
+    const results: { subjectId: string; subjectName: string; chapterId: string; chapterName: string; topicId?: string; topicName?: string }[] = [];
+    chapters.forEach(ch => {
+      const subjectName = initialSubjects.find(s => s.id === ch.subjectId)?.name || '';
+      if (ch.name.toLowerCase().includes(q)) {
+        results.push({ subjectId: ch.subjectId, subjectName, chapterId: ch.id, chapterName: ch.name });
+      }
+      ch.topics.forEach(t => {
+        if (t.name.toLowerCase().includes(q)) {
+          results.push({ subjectId: ch.subjectId, subjectName, chapterId: ch.id, chapterName: ch.name, topicId: t.id, topicName: t.name });
+        }
+      });
+    });
+    return results.slice(0, 20);
+  }, [topicSearch, chapters]);
+
   // Shared subject+chapter picker (no topics for PYQ)
   const renderSubjectChapterPicker = (showTopics: boolean) => (
     <div>
       <label className="text-sm font-medium mb-2 block">What did you {logType === 'pyq' ? 'solve' : 'study'}?</label>
-      <div className="space-y-1 max-h-48 overflow-y-auto rounded-lg border border-border">
-        {initialSubjects.map(s => {
-          const subjectChapters = chapters.filter(c => c.subjectId === s.id);
-          const isSelected = subjectId === s.id;
-          const isExpanded = expandedSubject === s.id;
 
-          return (
-            <div key={s.id} className="overflow-hidden">
-              <button
-                onClick={() => handleSubjectSelect(s.id)}
-                className={`w-full p-3 flex items-center justify-between text-left text-sm transition-all ${
-                  isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
-                }`}
-              >
-                <span className="font-medium">{s.name}</span>
-                {subjectChapters.length > 0 && (
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
-                )}
-              </button>
-              <AnimatePresence>
-                {isExpanded && subjectChapters.length > 0 && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden bg-secondary/20"
-                  >
-                    <div className="pl-4 py-1">
-                      {subjectChapters.map(chapter => {
-                        const isChapterSelected = chapterId === chapter.id;
-                        const isChapterExpanded = expandedChapter === chapter.id;
-                        return (
-                          <div key={chapter.id}>
-                            <button
-                              onClick={() => {
-                                setChapterId(isChapterSelected ? '' : chapter.id);
-                                setTopicId('');
-                                setExpandedChapter(isChapterSelected ? null : chapter.id);
-                              }}
-                              className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
-                                isChapterSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
-                              }`}
-                            >
-                              {showTopics && chapter.topics.length > 0 && (
-                                <ChevronRight className={`w-3 h-3 transition-transform ${isChapterExpanded ? 'rotate-90' : ''}`} />
-                              )}
-                              <span>{chapter.name}</span>
-                              {showTopics && (
-                                <span className="text-xs text-muted-foreground ml-auto">
-                                  {chapter.topics.length} topics
-                                </span>
-                              )}
-                            </button>
-                            {/* Topics - only if showTopics */}
-                            {showTopics && (
-                              <AnimatePresence>
-                                {isChapterExpanded && chapter.topics.length > 0 && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden ml-4 pl-2 border-l border-border"
-                                  >
-                                    {chapter.topics.map(topic => (
-                                      <button
-                                        key={topic.id}
-                                        onClick={() => setTopicId(topicId === topic.id ? '' : topic.id)}
-                                        className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
-                                          topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
-                                        }`}
-                                      >
-                                        {topic.name}
-                                      </button>
-                                    ))}
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+      {/* Search bar */}
+      <div className="relative mb-2">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          value={topicSearch}
+          onChange={e => setTopicSearch(e.target.value)}
+          placeholder="Search topics, chapters..."
+          className="pl-9 h-9 text-sm"
+        />
       </div>
+
+      {/* Search Results */}
+      {topicSearchResults && topicSearchResults.length > 0 && (
+        <div className="mb-2 border border-border rounded-lg max-h-40 overflow-y-auto">
+          {topicSearchResults.map((r, i) => (
+            <button
+              key={`${r.chapterId}-${r.topicId || 'ch'}-${i}`}
+              onClick={() => {
+                setSubjectId(r.subjectId);
+                setChapterId(r.chapterId);
+                if (r.topicId) setTopicId(r.topicId); else setTopicId('');
+                setTopicSearch('');
+                setExpandedSubject(r.subjectId);
+                setExpandedChapter(r.chapterId);
+              }}
+              className="w-full p-2 text-left text-xs hover:bg-secondary/50 transition-all border-b border-border last:border-b-0"
+            >
+              <span className="font-medium text-foreground">{r.topicName || r.chapterName}</span>
+              <span className="text-muted-foreground ml-1">
+                • {r.subjectName}{r.topicName ? ` › ${r.chapterName}` : ''}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {topicSearchResults && topicSearchResults.length === 0 && (
+        <p className="text-xs text-muted-foreground mb-2 text-center py-2">No results found</p>
+      )}
+
+      {!topicSearch && (
+        <div className="space-y-1 max-h-48 overflow-y-auto rounded-lg border border-border">
+          {initialSubjects.map(s => {
+            const subjectChapters = chapters.filter(c => c.subjectId === s.id);
+            const isSelected = subjectId === s.id;
+            const isExpanded = expandedSubject === s.id;
+
+            return (
+              <div key={s.id} className="overflow-hidden">
+                <button
+                  onClick={() => handleSubjectSelect(s.id)}
+                  className={`w-full p-3 flex items-center justify-between text-left text-sm transition-all ${
+                    isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                  }`}
+                >
+                  <span className="font-medium">{s.name}</span>
+                  {subjectChapters.length > 0 && (
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {isExpanded && subjectChapters.length > 0 && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden bg-secondary/20"
+                    >
+                      <div className="pl-4 py-1">
+                        {subjectChapters.map(chapter => {
+                          const isChapterSelected = chapterId === chapter.id;
+                          const isChapterExpanded = expandedChapter === chapter.id;
+                          return (
+                            <div key={chapter.id}>
+                              <button
+                                onClick={() => {
+                                  setChapterId(isChapterSelected ? '' : chapter.id);
+                                  setTopicId('');
+                                  setExpandedChapter(isChapterSelected ? null : chapter.id);
+                                }}
+                                className={`w-full p-2 rounded flex items-center gap-2 text-sm ${
+                                  isChapterSelected ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                                }`}
+                              >
+                                {showTopics && chapter.topics.length > 0 && (
+                                  <ChevronRight className={`w-3 h-3 transition-transform ${isChapterExpanded ? 'rotate-90' : ''}`} />
+                                )}
+                                <span>{chapter.name}</span>
+                                {showTopics && (
+                                  <span className="text-xs text-muted-foreground ml-auto">
+                                    {chapter.topics.length} topics
+                                  </span>
+                                )}
+                              </button>
+                              {/* Topics - only if showTopics */}
+                              {showTopics && (
+                                <AnimatePresence>
+                                  {isChapterExpanded && chapter.topics.length > 0 && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden ml-4 pl-2 border-l border-border"
+                                    >
+                                      {chapter.topics.map(topic => (
+                                        <button
+                                          key={topic.id}
+                                          onClick={() => setTopicId(topicId === topic.id ? '' : topic.id)}
+                                          className={`w-full p-1.5 rounded text-xs text-left my-0.5 ${
+                                            topicId === topic.id ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/50'
+                                          }`}
+                                        >
+                                          {topic.name}
+                                        </button>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {subjectId && (
-        <div className="mt-2 p-2 bg-primary/10 rounded-lg text-sm">
-          <span className="text-muted-foreground">Logging for: </span>
-          <span className="font-medium text-primary">{getSelectionLabel()}</span>
+        <div className="mt-2 p-2 bg-primary/10 rounded-lg text-sm flex items-center justify-between">
+          <span>
+            <span className="text-muted-foreground">Logging for: </span>
+            <span className="font-medium text-primary">{getSelectionLabel()}</span>
+          </span>
+          <button onClick={() => { setSubjectId(''); setChapterId(''); setTopicId(''); setExpandedSubject(null); setExpandedChapter(null); }} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
         </div>
       )}
     </div>
