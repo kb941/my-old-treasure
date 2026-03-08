@@ -294,8 +294,22 @@ const Index = () => {
       topics: chapter.topics.map(topic => {
         if (topic.id !== topicId) return topic;
         const schedule = getScheduleForConfidence(topic.confidence, srSettings);
-        const nextSession = Math.min(topic.revisionSession + 1, schedule.length);
-        const nextSchedule = schedule[nextSession - 1];
+        const nextSession = topic.revisionSession + 1;
+        
+        // Check if we're at or past the maintenance session (perpetual 90-day cycle)
+        const maintenanceIdx = schedule.findIndex(s => s.name === 'Maintenance');
+        if (maintenanceIdx >= 0 && nextSession >= maintenanceIdx) {
+          // Stay at maintenance session, schedule another 90 days
+          const maintenanceSched = schedule[maintenanceIdx];
+          return {
+            ...topic,
+            revisionSession: maintenanceIdx,
+            lastStudied: new Date(),
+            nextRevisionDate: addDays(new Date(), maintenanceSched.daysAfterPrevious),
+          };
+        }
+        
+        const nextSchedule = schedule[nextSession] || schedule[nextSession - 1];
         return {
           ...topic,
           revisionSession: nextSession,
@@ -574,15 +588,21 @@ const Index = () => {
           )}
 
           {activeTab === 'analytics' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
+              {/* Readiness Score - prominent */}
+              <ReadinessScoreCard result={readinessResult} />
+
+              {/* Weekly Overview + MCQ Chart side by side on desktop */}
+              <div className="grid lg:grid-cols-2 gap-4">
+                <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} />
+                <McqWeeklyChart mcqLogs={mcqLogs} />
+              </div>
+
               {/* Achievements Badge Panel */}
               <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={() => setActiveTab('achievements' as Tab)} />
 
               {/* Predictions */}
               <MockAnalytics mockTests={mockTests} markingScheme={markingScheme} stats={stats} chapters={chapters} studyLogs={studyLogs} />
-              
-              {/* MCQs Weekly Chart */}
-              <McqWeeklyChart mcqLogs={mcqLogs} />
 
               {/* Content Progress */}
               <ContentProgressDashboard chapters={chapters} contentTypes={contentTypes} />
@@ -592,12 +612,6 @@ const Index = () => {
 
               {/* PYQ Accuracy Trends */}
               <PYQAccuracyTrends subjects={subjects} />
-              
-              {/* Weekly Stats + Readiness */}
-              <div className="grid lg:grid-cols-2 gap-4">
-                <WeeklyStats weeklyHours={[6,7,5,8,4,9,7]} weeklyAccuracy={[72,75,68,78,71,80,74]} />
-                <ReadinessScoreCard result={readinessResult} />
-              </div>
             </div>
           )}
 

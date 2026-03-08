@@ -33,11 +33,27 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
   const isStageComplete = (stageId: string) => stages.includes(stageId);
 
   const toggleStage = (stageId: string) => {
-    const newStages = isStageComplete(stageId)
+    const isScorableStage = ['main-video', 'rr-video', 'btr-video'].includes(stageId);
+    const wasComplete = isStageComplete(stageId);
+    const newStages = wasComplete
       ? stages.filter(s => s !== stageId)
       : [...stages, stageId];
     const pyqDone = newStages.includes('pyqs');
-    onUpdate({ ...topic, completedStages: newStages, pyqDone });
+    
+    const updates: Partial<Topic> = { completedStages: newStages, pyqDone };
+    
+    // When marking a scorable stage (main/RR/BTR) as complete, auto-set confidence to 3 and start SR
+    if (!wasComplete && isScorableStage && topic.confidence === 0) {
+      updates.confidence = 3;
+      updates.lastStudied = new Date();
+      const newSchedule = getScheduleForConfidence(3, srSettings);
+      if (newSchedule[0]) {
+        updates.nextRevisionDate = addDays(new Date(), newSchedule[0].daysAfterPrevious);
+        updates.revisionSession = 0;
+      }
+    }
+    
+    onUpdate({ ...topic, ...updates });
   };
 
   const setConfidence = (value: number) => {

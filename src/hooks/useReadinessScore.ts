@@ -491,8 +491,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     if (hasStudyLogs) {
       const lastLog = new Date(studyLogs[studyLogs.length - 1].date);
       const daysSinceStudy = Math.ceil((now.getTime() - lastLog.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSinceStudy >= 7) { inactive = -6; penaltyDetails.push(`${daysSinceStudy} days inactive! Resume immediately`); }
-      else if (daysSinceStudy >= 3) { inactive = -3; penaltyDetails.push(`${daysSinceStudy} days since last study`); }
+      if (daysSinceStudy >= 7) { inactive = -3; penaltyDetails.push(`${daysSinceStudy} days inactive! Resume immediately`); }
+      else if (daysSinceStudy >= 3) { inactive = -1; penaltyDetails.push(`${daysSinceStudy} days since last study`); }
     }
 
     let accuracyDrop = 0;

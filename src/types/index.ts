@@ -196,7 +196,8 @@ export const DEFAULT_SR_SCHEDULES: Record<number, SpacedRepetitionSession[]> = {
     { sessionNumber: 4, name: '4th Review', daysAfterPrevious: 7 },
     { sessionNumber: 5, name: '5th Review', daysAfterPrevious: 14 },
     { sessionNumber: 6, name: '6th Review', daysAfterPrevious: 21 },
-    { sessionNumber: 7, name: 'Final', daysAfterPrevious: 30 },
+    { sessionNumber: 7, name: '7th Review', daysAfterPrevious: 30 },
+    { sessionNumber: 8, name: 'Final', daysAfterPrevious: 60 },
   ],
   2: [
     { sessionNumber: 1, name: '1st Review', daysAfterPrevious: 1 },
@@ -237,7 +238,23 @@ export function getScheduleForConfidence(
 ): SpacedRepetitionSession[] {
   const schedules = settings?.schedules || DEFAULT_SR_SCHEDULES;
   const tier = Math.max(1, Math.min(5, confidence || 3));
-  return schedules[tier] || schedules[3];
+  const schedule = schedules[tier] || schedules[3];
+  
+  // Add perpetual 90-day "Maintenance" review after final session
+  const lastSession = schedule[schedule.length - 1];
+  if (lastSession && lastSession.name === 'Final') {
+    return [
+      ...schedule,
+      { sessionNumber: lastSession.sessionNumber + 1, name: 'Maintenance', daysAfterPrevious: 90 },
+    ];
+  }
+  return schedule;
+}
+
+// Check if a session is the perpetual maintenance session
+export function isMaintenanceSession(sessionNumber: number, schedule: SpacedRepetitionSession[]): boolean {
+  const last = schedule[schedule.length - 1];
+  return last?.name === 'Maintenance' && sessionNumber >= last.sessionNumber;
 }
 
 export interface RevisionReminder {
