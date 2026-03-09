@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/PageTransition';
+import realDashboard from '@/assets/real-dashboard.jpg';
+import realSubjects from '@/assets/real-subjects.jpg';
+import realTopics from '@/assets/real-topics.jpg';
+import realRevision from '@/assets/real-revision.jpg';
+import realInsights from '@/assets/real-insights.jpg';
 
 const FadeIn = ({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
   const ref = useRef(null);
