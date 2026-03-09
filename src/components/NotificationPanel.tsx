@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Lightbulb, Target } from 'lucide-react';
 import { RevisionReminder, Task, Achievement } from '@/types';
