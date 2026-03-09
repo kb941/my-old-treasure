@@ -113,7 +113,7 @@ export function OnboardingWizard() {
 
     const types = DEFAULT_CONTENT_TYPES.map(ct => ({
       ...ct,
-      enabled: data.contentTypes.includes(ct.id),
+      enabled: ct.compulsory ? true : data.contentTypes.includes(ct.id),
     }));
     localStorage.setItem('neetpg-content-types', JSON.stringify(types));
     navigate('/');
