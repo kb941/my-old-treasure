@@ -110,6 +110,10 @@ export function ProfileTab(props: ProfileTabProps) {
   const [localPyqYearFrom, setLocalPyqYearFrom] = useState(props.pyqYearFrom);
   const [localPyqYearTo, setLocalPyqYearTo] = useState(props.pyqYearTo);
   const [localMcqGoal, setLocalMcqGoal] = useState(props.mcqGoalPerSubject);
+  const [localPushSettings, setLocalPushSettings] = useState<PushNotificationSettings>(props.pushNotificationSettings);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
   const PYQ_YEARS = Array.from({ length: 15 }, (_, i) => 2025 - i);
   const [hasChanges, setHasChanges] = useState(false);
 
