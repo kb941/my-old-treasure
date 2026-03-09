@@ -11,8 +11,15 @@ const Login = () => {
 
   const handleStart = () => {
     if (name.trim()) {
-      localStorage.setItem("planos-user", JSON.stringify({ name: name.trim(), loggedIn: true }));
-      navigate("/");
+      // Check if already onboarded before
+      const onboarded = localStorage.getItem("planos-onboarded");
+      if (onboarded) {
+        localStorage.setItem("planos-user", JSON.stringify({ name: name.trim(), loggedIn: true }));
+        navigate("/");
+      } else {
+        // Go to onboarding wizard instead of directly logging in
+        navigate("/onboarding", { state: { name: name.trim() } });
+      }
     }
   };
 
