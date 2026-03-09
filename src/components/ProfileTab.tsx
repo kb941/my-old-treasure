@@ -14,6 +14,16 @@ import { cn } from '@/lib/utils';
 import { ProfileData } from '@/components/ProfileModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const EXAM_WEIGHTAGES: Record<string, Record<string, { avg: number; range?: [number, number] }>> = {
   'NEET PG': {
