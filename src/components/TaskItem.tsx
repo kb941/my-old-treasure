@@ -62,7 +62,7 @@ interface TaskItemProps {
 export function TaskItem({
   task, onToggle, onMove, onTimerComplete, onDone, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false, isEditMode = false,
-  pomodoroSettings = DEFAULT_POMODORO
+  pomodoroSettings = DEFAULT_POMODORO, activeTimerTaskId, onTimerStart
 }: TaskItemProps) {
   const Icon = typeIcons[task.type];
   const accent = typeAccents[task.type] || typeAccents.study;
