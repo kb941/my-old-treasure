@@ -33,6 +33,7 @@ import { NotificationPanel } from '@/components/NotificationPanel';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { addDays } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { usePushNotifications, PushNotificationSettings, DEFAULT_PUSH_SETTINGS } from '@/hooks/usePushNotifications';
 
 const DEFAULT_POMODORO: PomodoroSettings = {
   studyDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, sessionsBeforeLongBreak: 4,
@@ -68,6 +69,7 @@ const Index = () => {
   const [pyqYearFrom, setPyqYearFrom] = useLocalStorage<number>('neetpg-pyq-year-from', 2016);
   const [pyqYearTo, setPyqYearTo] = useLocalStorage<number>('neetpg-pyq-year-to', 2025);
   const [mcqGoalPerSubject, setMcqGoalPerSubject] = useLocalStorage<number>('neetpg-mcq-goal', 100);
+  const [pushNotificationSettings, setPushNotificationSettings] = useLocalStorage<PushNotificationSettings>('neetpg-push-notifications', DEFAULT_PUSH_SETTINGS);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
@@ -97,6 +99,9 @@ const Index = () => {
 
   const { reminders, hasReminders } = useRevisionReminders(chapters);
   const [pyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', []);
+  
+  // Enable push notifications
+  usePushNotifications(reminders, pushNotificationSettings);
 
   const readinessResult = useReadinessScore({
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData,
@@ -234,6 +239,7 @@ const Index = () => {
     if (data.pyqYearFrom !== undefined) setPyqYearFrom(data.pyqYearFrom);
     if (data.pyqYearTo !== undefined) setPyqYearTo(data.pyqYearTo);
     if (data.mcqGoalPerSubject !== undefined) setMcqGoalPerSubject(data.mcqGoalPerSubject);
+    if (data.pushNotificationSettings) setPushNotificationSettings(data.pushNotificationSettings);
     setSubjects(prev => prev.map(s => ({ ...s, weightage: data.subjectWeightages[s.id] || s.weightage })));
     toast({ title: "Profile updated!" });
   };
@@ -639,7 +645,9 @@ const Index = () => {
               examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
               pomodoroSettings={pomodoroSettings} srSettings={srSettings}
               contentTypes={contentTypes} breakDuration={breakDuration}
-              markingScheme={markingScheme} onSave={handleSaveProfile}
+              markingScheme={markingScheme}
+              pushNotificationSettings={pushNotificationSettings}
+              onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
               onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}
               pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}

@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut, Download, Upload } from 'lucide-react';
+import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut, Download, Upload, Bell, BellOff } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
+import { requestNotificationPermission, PushNotificationSettings } from '@/hooks/usePushNotifications';
+import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -74,6 +76,7 @@ interface ProfileTabProps {
   pyqYearFrom: number;
   pyqYearTo: number;
   mcqGoalPerSubject: number;
+  pushNotificationSettings: PushNotificationSettings;
   onSave: (data: ProfileData) => void;
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
@@ -107,6 +110,10 @@ export function ProfileTab(props: ProfileTabProps) {
   const [localPyqYearFrom, setLocalPyqYearFrom] = useState(props.pyqYearFrom);
   const [localPyqYearTo, setLocalPyqYearTo] = useState(props.pyqYearTo);
   const [localMcqGoal, setLocalMcqGoal] = useState(props.mcqGoalPerSubject);
+  const [localPushSettings, setLocalPushSettings] = useState<PushNotificationSettings>(props.pushNotificationSettings);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
   const PYQ_YEARS = Array.from({ length: 15 }, (_, i) => 2025 - i);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -140,6 +147,7 @@ export function ProfileTab(props: ProfileTabProps) {
     setLocalPyqYearFrom(props.pyqYearFrom);
     setLocalPyqYearTo(props.pyqYearTo);
     setLocalMcqGoal(props.mcqGoalPerSubject);
+    setLocalPushSettings(props.pushNotificationSettings);
     setLocalContentTypes(props.contentTypes.map(ct => ({ ...ct })));
     const s = props.srSettings.schedules;
     const result: Record<number, typeof s[1]> = {};
@@ -255,6 +263,29 @@ export function ProfileTab(props: ProfileTabProps) {
     navigate('/login');
   };
 
+  const handleTogglePushNotifications = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        setLocalPushSettings(prev => ({ ...prev, enabled: true }));
+        setNotificationPermission('granted');
+        markChanged();
+        toast({ title: "Push notifications enabled", description: "You'll receive alerts for overdue revisions" });
+      } else {
+        toast({ 
+          title: "Permission denied", 
+          description: "Please enable notifications in your browser settings",
+          variant: "destructive"
+        });
+        setNotificationPermission(Notification.permission);
+      }
+    } else {
+      setLocalPushSettings(prev => ({ ...prev, enabled: false }));
+      markChanged();
+      toast({ title: "Push notifications disabled" });
+    }
+  };
+
   const handleExportData = () => {
     try {
       const allData: Record<string, any> = {};
@@ -266,7 +297,7 @@ export function ProfileTab(props: ProfileTabProps) {
         'neetpg-target-rank', 'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types',
         'neetpg-break-duration', 'neetpg-marking-scheme', 'neetpg-study-logs',
         'neetpg-mcq-logs', 'neetpg-pyq-year-from', 'neetpg-pyq-year-to',
-        'neetpg-mcq-goal', 'planos-pyq-tracker-v2', 'readiness-snapshots',
+        'neetpg-mcq-goal', 'neetpg-push-notifications', 'planos-pyq-tracker-v2', 'readiness-snapshots',
         'theme', 'planos-user'
       ];
 
@@ -530,6 +561,70 @@ export function ProfileTab(props: ProfileTabProps) {
                     {PYQ_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
+              </div>
+            </div>
+
+            {/* Push Notifications */}
+            <div className="space-y-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                {localPushSettings.enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
+                Push Notifications
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Enable Notifications</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Get alerts for overdue revisions</p>
+                  </div>
+                  <Switch
+                    checked={localPushSettings.enabled}
+                    onCheckedChange={handleTogglePushNotifications}
+                  />
+                </div>
+                
+                {localPushSettings.enabled && (
+                  <>
+                    <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Overdue Only</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Only notify for overdue revisions</p>
+                      </div>
+                      <Switch
+                        checked={localPushSettings.overdueOnly}
+                        onCheckedChange={(checked) => {
+                          setLocalPushSettings(prev => ({ ...prev, overdueOnly: checked }));
+                          markChanged();
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">Check Interval (minutes)</label>
+                      <Input
+                        type="number"
+                        value={localPushSettings.checkInterval}
+                        onChange={(e) => {
+                          setLocalPushSettings(prev => ({ ...prev, checkInterval: Number(e.target.value) }));
+                          markChanged();
+                        }}
+                        min={15}
+                        max={240}
+                        step={15}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        How often to check for overdue revisions (15-240 min)
+                      </p>
+                    </div>
+                  </>
+                )}
+                
+                {notificationPermission === 'denied' && (
+                  <div className="p-3 bg-destructive/10 rounded-lg">
+                    <p className="text-xs text-destructive">
+                      ⚠️ Notifications blocked. Please enable in browser settings.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

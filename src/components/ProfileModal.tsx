@@ -4,6 +4,7 @@ import { X, User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, St
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
+import { PushNotificationSettings } from '@/hooks/usePushNotifications';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -87,6 +88,7 @@ export interface ProfileData {
   pyqYearFrom?: number;
   pyqYearTo?: number;
   mcqGoalPerSubject?: number;
+  pushNotificationSettings?: PushNotificationSettings;
 }
 
 export function ProfileModal({ 
