@@ -40,6 +40,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   const [addToColumn, setAddToColumn] = useState<TaskColumn>('today');
   const [reorderMode, setReorderMode] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [activeTimerTaskId, setActiveTimerTaskId] = useState<string | null>(null);
 
   const getColumnTasks = (columnId: TaskColumn) =>
     tasks.filter(t => t.column === columnId);
@@ -117,6 +118,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 isDraggable={true}
                 isEditMode={true}
                 pomodoroSettings={pomodoroSettings}
+                activeTimerTaskId={activeTimerTaskId}
+                onTimerStart={setActiveTimerTaskId}
               />
             </Reorder.Item>
           ))}
@@ -140,6 +143,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               isDraggable={false}
               isEditMode={false}
               pomodoroSettings={pomodoroSettings}
+              activeTimerTaskId={activeTimerTaskId}
+              onTimerStart={setActiveTimerTaskId}
             />
           ))}
         </AnimatePresence>

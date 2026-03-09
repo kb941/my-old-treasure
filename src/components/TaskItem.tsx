@@ -55,12 +55,14 @@ interface TaskItemProps {
   isDraggable?: boolean;
   isEditMode?: boolean;
   pomodoroSettings?: PomodoroSettings;
+  activeTimerTaskId?: string | null;
+  onTimerStart?: (taskId: string | null) => void;
 }
 
 export function TaskItem({
   task, onToggle, onMove, onTimerComplete, onDone, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false, isEditMode = false,
-  pomodoroSettings = DEFAULT_POMODORO
+  pomodoroSettings = DEFAULT_POMODORO, activeTimerTaskId, onTimerStart
 }: TaskItemProps) {
   const Icon = typeIcons[task.type];
   const accent = typeAccents[task.type] || typeAccents.study;
@@ -128,6 +130,7 @@ export function TaskItem({
     setSessionCount(0);
     setTimeRemaining(pomodoroSettings.studyDuration * 60);
     setTotalElapsedStudyTime(0);
+    onTimerStart?.(null);
   };
 
   const fireConfetti = () => {
@@ -144,6 +147,7 @@ export function TaskItem({
 
   const handleDone = () => {
     setIsTimerRunning(false);
+    onTimerStart?.(null);
     fireConfetti();
     if (task.topicId) {
       setShowConfidencePicker(true);
@@ -257,10 +261,21 @@ export function TaskItem({
 
               <div className="flex items-center gap-1 mt-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); setIsTimerRunning(!isTimerRunning); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isTimerRunning) {
+                      setIsTimerRunning(false);
+                      onTimerStart?.(null);
+                    } else {
+                      setIsTimerRunning(true);
+                      onTimerStart?.(task.id);
+                    }
+                  }}
+                  disabled={!isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
-                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
+                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15",
+                    !isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id && "opacity-40 cursor-not-allowed"
                   )}
                 >
                   {isTimerRunning ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Start</>}
@@ -321,26 +336,20 @@ export function TaskItem({
           ) : (
             <>
               {canMoveLeft && (
-                <motion.button
-                  whileTap={{ scale: 0.8, x: -4 }}
-                  whileHover={{ scale: 1.15 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                <button
                   onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }}
-                  className="p-1 hover:bg-secondary rounded transition-colors"
+                  className="p-1 hover:bg-secondary rounded transition-all duration-150 active:scale-90"
                 >
                   <ArrowLeft className="w-3 h-3 text-muted-foreground" />
-                </motion.button>
+                </button>
               )}
               {canMoveRight && (
-                <motion.button
-                  whileTap={{ scale: 0.8, x: 4 }}
-                  whileHover={{ scale: 1.15 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                <button
                   onClick={(e) => { e.stopPropagation(); onMove(task.id, 'right'); }}
-                  className="p-1 hover:bg-secondary rounded transition-colors"
+                  className="p-1 hover:bg-secondary rounded transition-all duration-150 active:scale-90"
                 >
                   <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                </motion.button>
+                </button>
               )}
             </>
           )}
