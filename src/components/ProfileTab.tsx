@@ -306,6 +306,13 @@ export function ProfileTab(props: ProfileTabProps) {
   const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPendingImportFile(file);
+    setShowImportConfirm(true);
+    e.target.value = '';
+  };
+
+  const confirmImport = () => {
+    if (!pendingImportFile) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
@@ -320,8 +327,9 @@ export function ProfileTab(props: ProfileTabProps) {
         toast({ title: 'Import failed', description: 'The file is not a valid backup.', variant: 'destructive' });
       }
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.readAsText(pendingImportFile);
+    setPendingImportFile(null);
+    setShowImportConfirm(false);
   };
 
   return (
