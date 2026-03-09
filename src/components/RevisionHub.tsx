@@ -422,12 +422,6 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
             )}>
               <CalendarIcon className="w-3.5 h-3.5" /> Calendar
             </button>
-            <button onClick={() => setViewMode('streak')} className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all",
-              viewMode === 'streak' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}>
-              <Flame className="w-3.5 h-3.5" /> Streak
-            </button>
           </div>
 
           {viewMode === 'list' && (
