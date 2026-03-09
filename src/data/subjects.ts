@@ -64,10 +64,14 @@ export const achievements = [
   { id: 'syllabus-silver', name: 'Silver Scholar', description: '10 subjects 100% complete', icon: '🥈', unlockedAt: null, progress: 0, target: 10 },
   { id: 'syllabus-gold', name: 'Gold Scholar', description: 'All subjects 100% complete', icon: '🥇', unlockedAt: null, progress: 0, target: 19 },
 
-  // Revision Master
-  { id: 'revision-50', name: 'Revision Pro', description: '3 revision cycles for 50 topics', icon: '🔄', unlockedAt: null, progress: 0, target: 50 },
-  { id: 'revision-100', name: 'Revision Master', description: '3 revision cycles for 100 topics', icon: '🔁', unlockedAt: null, progress: 0, target: 100 },
-  { id: 'revision-subject', name: 'Subject Revisionist', description: '5 revision cycles for any subject', icon: '📚', unlockedAt: null, progress: 0, target: 1 },
+  // Revision Achievements
+  { id: 'revision-first', name: 'First Revision', description: 'Complete your first revision', icon: '🔄', unlockedAt: null, progress: 0, target: 1 },
+  { id: 'revision-10', name: 'Revision Starter', description: 'Complete 10 revisions', icon: '📖', unlockedAt: null, progress: 0, target: 10 },
+  { id: 'revision-50', name: 'Revision Pro', description: 'Complete 50 revisions', icon: '📚', unlockedAt: null, progress: 0, target: 50 },
+  { id: 'revision-100', name: 'Revision Master', description: 'Complete 100 revisions', icon: '🔁', unlockedAt: null, progress: 0, target: 100 },
+  { id: 'revision-streak-7', name: 'Revision Streak', description: '7-day revision streak', icon: '⚡', unlockedAt: null, progress: 0, target: 7 },
+  { id: 'revision-streak-30', name: 'Revision Champion', description: '30-day revision streak', icon: '🏅', unlockedAt: null, progress: 0, target: 30 },
+  { id: 'revision-cycle-3', name: 'Cycle Master', description: '3 revision cycles for 50 topics', icon: '🎯', unlockedAt: null, progress: 0, target: 50 },
 
   // Question Solver
   { id: 'qs-1k', name: '1K Solver', description: '1,000 questions solved', icon: '✏️', unlockedAt: null, progress: 0, target: 1000 },
