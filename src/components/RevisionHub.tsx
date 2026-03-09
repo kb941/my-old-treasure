@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, Check, Calendar, Clock, ChevronRight, AlertTriangle, 
   Sparkles, Plus, Star, Filter, RotateCcw, CalendarDays,
-  ChevronDown, BookOpen, LayoutList, CalendarIcon
+  ChevronDown, BookOpen, LayoutList, CalendarIcon, Search, X
 } from 'lucide-react';
 import { Chapter, Topic, SpacedRepetitionSettings, getScheduleForConfidence, Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isBefore, isToday, startOfDay, addDays, differenceInDays, isAfter } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { RevisionCalendar } from '@/components/RevisionCalendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface RevisionItem {
   topicId: string;

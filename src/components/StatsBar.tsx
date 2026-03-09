@@ -36,13 +36,13 @@ export function StatsBar({ stats, onStatClick }: StatsBarProps) {
       key: 'xp', icon: Zap,
       label: 'XP', value: `Lv ${stats.level}`,
       sub: levelTitle, progress: levelProgress,
-      iconColor: 'text-amber-500', barColor: 'bg-amber-500/60',
+      iconColor: 'text-primary', barColor: 'bg-primary/60',
     },
     {
       key: 'streak', icon: Flame,
       label: 'Streak', value: `${stats.currentStreak}d`,
       sub: `Best: ${stats.longestStreak}d`, progress: Math.min(streakProgress, 100),
-      iconColor: 'text-orange-500', barColor: 'bg-orange-500/60',
+      iconColor: 'text-primary', barColor: 'bg-primary/60',
     },
     {
       key: 'study', icon: Clock,
