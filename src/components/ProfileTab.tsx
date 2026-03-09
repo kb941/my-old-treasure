@@ -74,6 +74,7 @@ interface ProfileTabProps {
   pyqYearFrom: number;
   pyqYearTo: number;
   mcqGoalPerSubject: number;
+  pushNotificationSettings: PushNotificationSettings;
   onSave: (data: ProfileData) => void;
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
