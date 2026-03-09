@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/PageTransition';
+import realDashboard from '@/assets/real-dashboard.jpg';
+import realSubjects from '@/assets/real-subjects.jpg';
+import realTopics from '@/assets/real-topics.jpg';
+import realRevision from '@/assets/real-revision.jpg';
+import realInsights from '@/assets/real-insights.jpg';
 
 const FadeIn = ({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
   const ref = useRef(null);
@@ -194,6 +199,36 @@ const Landing = () => {
                 <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
               </FadeIn>
             ))}
+          </div>
+        </section>
+
+        {/* Screenshots Showcase */}
+        <section className="py-16 sm:py-24 px-4">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn className="text-center mb-10 sm:mb-14">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">See It In Action</h2>
+              <p className="text-sm text-muted-foreground">Real screenshots from the app</p>
+            </FadeIn>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+              {[
+                { img: realDashboard, title: 'Dashboard', desc: 'Stats, tasks & Kanban board' },
+                { img: realSubjects, title: 'Subjects', desc: '19 subjects with PYQ tracker' },
+                { img: realTopics, title: 'Topic Tracking', desc: 'Chapter & topic-level progress' },
+                { img: realRevision, title: 'Revisions', desc: 'Spaced repetition scheduler' },
+                { img: realInsights, title: 'Analytics', desc: 'Rank prediction & trends' },
+              ].map((item, i) => (
+                <FadeIn key={item.title} delay={i * 0.08}>
+                  <div className="text-center group">
+                    <div className="rounded-2xl overflow-hidden shadow-card border-2 border-border/50 mb-3 group-hover:shadow-card-hover group-hover:border-primary/20 transition-all">
+                      <img src={item.img} alt={`Plan OS ${item.title}`} className="w-full" loading="lazy" />
+                    </div>
+                    <h3 className="font-semibold text-xs sm:text-sm">{item.title}</h3>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
           </div>
         </section>
 
