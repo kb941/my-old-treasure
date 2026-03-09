@@ -566,7 +566,7 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     // Recommendations - use dynamic content type names
     const recommendations: string[] = [];
     const primaryContentName = enabledStages.length > 0 
-      ? contentTypes.find(ct => ct.id === enabledStages[0])?.name || 'content'
+      ? contentTypes.find(ct => ct.id === enabledStages[0])?.label || 'content'
       : 'content';
     
     if (!hasAnyProgress) {
