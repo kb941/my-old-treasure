@@ -369,9 +369,6 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-[9px] text-muted-foreground">Tap for breakdown & tips</p>
-                {trendData.length >= 2 && (
-                  <Sparkline data={trendData.slice(-14)} color={phase.color} width={50} height={14} />
-                )}
               </div>
             </div>
           </div>
