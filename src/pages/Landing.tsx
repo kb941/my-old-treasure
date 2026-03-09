@@ -72,9 +72,14 @@ const Landing = () => {
             </div>
             <span className="font-bold text-lg">Plan OS</span>
           </div>
-          <Button onClick={handleCTA} size="sm" className="gradient-primary text-primary-foreground gap-1">
-            {isLoggedIn ? 'Dashboard' : 'Get Started'} <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
+           <div className="flex items-center gap-2">
+             <Button variant="ghost" size="sm" onClick={() => navigate('/how-to-use')} className="gap-1 text-muted-foreground">
+               <HelpCircle className="w-3.5 h-3.5" /> How to Use
+             </Button>
+             <Button onClick={handleCTA} size="sm" className="gradient-primary text-primary-foreground gap-1">
+               {isLoggedIn ? 'Dashboard' : 'Get Started'} <ArrowRight className="w-3.5 h-3.5" />
+             </Button>
+           </div>
         </div>
       </motion.nav>
 
