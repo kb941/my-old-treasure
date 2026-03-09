@@ -49,7 +49,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
 
   const getSubjectName = useCallback((subjectId: string) => 
     subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
