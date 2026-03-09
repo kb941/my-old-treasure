@@ -574,8 +574,12 @@ export function ProfileTab(props: ProfileTabProps) {
               <Button variant="outline" className="w-full" onClick={handleExportData}>
                 <Download className="w-4 h-4 mr-2" /> Download Full Backup
               </Button>
+              <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportData} />
+              <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" /> Import Backup
+              </Button>
               <p className="text-xs text-muted-foreground">
-                Exports all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
+                Export or import all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
               </p>
             </div>
 
