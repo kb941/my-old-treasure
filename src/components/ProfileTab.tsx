@@ -564,7 +564,70 @@ export function ProfileTab(props: ProfileTabProps) {
               </div>
             </div>
 
+            {/* Push Notifications */}
             <div className="space-y-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                {localPushSettings.enabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
+                Push Notifications
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Enable Notifications</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Get alerts for overdue revisions</p>
+                  </div>
+                  <Switch
+                    checked={localPushSettings.enabled}
+                    onCheckedChange={handleTogglePushNotifications}
+                  />
+                </div>
+                
+                {localPushSettings.enabled && (
+                  <>
+                    <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Overdue Only</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Only notify for overdue revisions</p>
+                      </div>
+                      <Switch
+                        checked={localPushSettings.overdueOnly}
+                        onCheckedChange={(checked) => {
+                          setLocalPushSettings(prev => ({ ...prev, overdueOnly: checked }));
+                          markChanged();
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">Check Interval (minutes)</label>
+                      <Input
+                        type="number"
+                        value={localPushSettings.checkInterval}
+                        onChange={(e) => {
+                          setLocalPushSettings(prev => ({ ...prev, checkInterval: Number(e.target.value) }));
+                          markChanged();
+                        }}
+                        min={15}
+                        max={240}
+                        step={15}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        How often to check for overdue revisions (15-240 min)
+                      </p>
+                    </div>
+                  </>
+                )}
+                
+                {notificationPermission === 'denied' && (
+                  <div className="p-3 bg-destructive/10 rounded-lg">
+                    <p className="text-xs text-destructive">
+                      ⚠️ Notifications blocked. Please enable in browser settings.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
               <h3 className="font-semibold flex items-center gap-2">
                 <Video className="w-4 h-4 text-primary" />
                 Content Types
