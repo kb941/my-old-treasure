@@ -80,7 +80,7 @@ const features = [
       'Rank predictor based on real NEET PG data',
       'Readiness score combining all metrics',
     ],
-    screenshot: screenshotAnalytics,
+    screenshot: screenshotInsights,
   },
   {
     id: 'focus',
