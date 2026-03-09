@@ -99,6 +99,9 @@ const Index = () => {
 
   const { reminders, hasReminders } = useRevisionReminders(chapters);
   const [pyqData] = useLocalStorage<PYQEntry[]>('planos-pyq-tracker-v2', []);
+  
+  // Enable push notifications
+  usePushNotifications(reminders, pushNotificationSettings);
 
   const readinessResult = useReadinessScore({
     chapters, subjects, mockTests, stats, studyLogs, mcqLogs, pyqData,
