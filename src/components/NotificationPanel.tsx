@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Lightbulb, Target } from 'lucide-react';
 import { RevisionReminder, Task, Achievement } from '@/types';
@@ -173,99 +174,103 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
     <>
       <NotificationBell count={count} onClick={() => setIsOpen(true)} />
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:right-4 md:left-auto md:w-[380px] md:top-16 bg-card rounded-2xl border border-border shadow-lg overflow-hidden flex flex-col"
-            >
-              {/* Header */}
-              <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-primary" />
-                  <h2 className="font-semibold text-base">Notifications</h2>
-                  {count > 0 && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {count}
-                    </span>
-                  )}
-                </div>
-                <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-secondary">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Notifications list */}
-              <div className="flex-1 overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                    <Bell className="w-8 h-8 mb-3 opacity-30" />
-                    <p className="text-sm font-medium">All caught up!</p>
-                    <p className="text-xs mt-1">No new notifications</p>
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+                onClick={() => setIsOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:right-4 md:left-auto md:w-[380px] md:top-16 z-50 bg-card rounded-2xl border border-border shadow-lg overflow-hidden flex flex-col"
+              >
+                {/* Header */}
+                <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-primary" />
+                    <h2 className="font-semibold text-base">Notifications</h2>
+                    {count > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {count}
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <div className="divide-y divide-border/50">
-                    {notifications.map((notif, i) => {
-                      const Icon = notif.icon;
-                      return (
-                        <motion.div
-                          key={notif.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.03 }}
-                          className="px-4 py-3 hover:bg-muted/30 transition-colors"
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={cn(
-                              "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
-                              notif.type === 'revision' ? 'bg-destructive/10' :
-                              notif.type === 'achievement' ? 'bg-amber-500/10' :
-                              notif.type === 'tip' ? 'bg-primary/10' :
-                              'bg-primary/10'
-                            )}>
-                              <Icon className={cn("w-4 h-4", notif.color)} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium leading-tight">{notif.title}</p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5">{notif.description}</p>
-                              <div className="flex items-center gap-2 mt-1.5">
-                                {notif.action && (
+                  <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-secondary">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Notifications list */}
+                <div className="flex-1 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <Bell className="w-8 h-8 mb-3 opacity-30" />
+                      <p className="text-sm font-medium">All caught up!</p>
+                      <p className="text-xs mt-1">No new notifications</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/50">
+                      {notifications.map((notif, i) => {
+                        const Icon = notif.icon;
+                        return (
+                          <motion.div
+                            key={notif.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.03 }}
+                            className="px-4 py-3 hover:bg-muted/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
+                                notif.type === 'revision' ? 'bg-destructive/10' :
+                                notif.type === 'achievement' ? 'bg-amber-500/10' :
+                                notif.type === 'tip' ? 'bg-primary/10' :
+                                'bg-primary/10'
+                              )}>
+                                <Icon className={cn("w-4 h-4", notif.color)} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium leading-tight">{notif.title}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">{notif.description}</p>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  {notif.action && (
+                                    <button
+                                      onClick={() => { notif.action?.(); handleDismiss(notif.id); }}
+                                      className="text-[11px] font-medium text-primary hover:underline"
+                                    >
+                                      {notif.actionLabel}
+                                    </button>
+                                  )}
                                   <button
-                                    onClick={() => { notif.action?.(); handleDismiss(notif.id); }}
-                                    className="text-[11px] font-medium text-primary hover:underline"
+                                    onClick={() => handleDismiss(notif.id)}
+                                    className="text-[11px] text-muted-foreground hover:text-foreground"
                                   >
-                                    {notif.actionLabel}
+                                    Dismiss
                                   </button>
-                                )}
-                                <button
-                                  onClick={() => handleDismiss(notif.id)}
-                                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                                >
-                                  Dismiss
-                                </button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
