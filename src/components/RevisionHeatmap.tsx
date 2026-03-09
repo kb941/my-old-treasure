@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfDay } from 'date-fns';
+import { subWeeks, startOfWeek, addDays, format, startOfDay, isBefore, isAfter } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface RevisionHeatmapProps {
@@ -7,12 +7,11 @@ interface RevisionHeatmapProps {
 }
 
 export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
-  const heatmapData = useMemo(() => {
-    const currentMonth = new Date();
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
+  const { weeks, maxCount, totalRevisions, activeDays } = useMemo(() => {
+    const today = startOfDay(new Date());
+    const weeksToShow = 12; // ~3 months
+    const start = startOfWeek(subWeeks(today, weeksToShow - 1), { weekStartsOn: 0 });
+    
     // Count revisions per day
     const countMap = new Map<string, number>();
     revisionDates.forEach(dateStr => {
@@ -21,97 +20,93 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
       countMap.set(key, (countMap.get(key) || 0) + 1);
     });
 
-    // Build data array
-    const data = days.map(day => {
-      const key = format(day, 'yyyy-MM-dd');
-      const count = countMap.get(key) || 0;
-      return { date: day, count, key };
-    });
+    // Build weeks array (columns) with 7 days each (rows)
+    const weeksData: Array<Array<{ date: Date; count: number; key: string; isInRange: boolean }>> = [];
+    let currentDate = start;
+    let total = 0;
+    let active = 0;
+    let max = 1;
 
-    const maxCount = Math.max(...data.map(d => d.count), 1);
+    for (let w = 0; w < weeksToShow; w++) {
+      const week: Array<{ date: Date; count: number; key: string; isInRange: boolean }> = [];
+      for (let d = 0; d < 7; d++) {
+        const key = format(currentDate, 'yyyy-MM-dd');
+        const count = countMap.get(key) || 0;
+        const isInRange = !isAfter(currentDate, today);
+        
+        if (isInRange) {
+          total += count;
+          if (count > 0) active++;
+          max = Math.max(max, count);
+        }
+        
+        week.push({ date: currentDate, count, key, isInRange });
+        currentDate = addDays(currentDate, 1);
+      }
+      weeksData.push(week);
+    }
 
-    return { data, maxCount };
+    return { weeks: weeksData, maxCount: max, totalRevisions: total, activeDays: active };
   }, [revisionDates]);
 
-  const getIntensityColor = (count: number, max: number) => {
-    if (count === 0) return 'bg-secondary/30';
-    const intensity = count / max;
-    if (intensity <= 0.25) return 'bg-primary/25';
-    if (intensity <= 0.5) return 'bg-primary/50';
-    if (intensity <= 0.75) return 'bg-primary/75';
-    return 'bg-primary';
+  const getIntensityColor = (count: number, isInRange: boolean) => {
+    if (!isInRange) return 'bg-transparent';
+    if (count === 0) return 'bg-muted/40';
+    const intensity = count / maxCount;
+    if (intensity <= 0.25) return 'bg-orange-300/60 dark:bg-orange-400/40';
+    if (intensity <= 0.5) return 'bg-orange-400/70 dark:bg-orange-500/60';
+    if (intensity <= 0.75) return 'bg-orange-500/80 dark:bg-orange-500/80';
+    return 'bg-orange-500 dark:bg-orange-400';
   };
 
-  // Group by weeks
-  const weeks: Array<Array<{ date: Date; count: number; key: string }>> = [];
-  let currentWeek: Array<{ date: Date; count: number; key: string }> = [];
-  
-  heatmapData.data.forEach((day, idx) => {
-    currentWeek.push(day);
-    if (currentWeek.length === 7 || idx === heatmapData.data.length - 1) {
-      weeks.push([...currentWeek]);
-      currentWeek = [];
-    }
-  });
+  const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Revision Intensity - {format(new Date(), 'MMMM yyyy')}</h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Less</span>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded bg-secondary/30" />
-            <div className="w-3 h-3 rounded bg-primary/25" />
-            <div className="w-3 h-3 rounded bg-primary/50" />
-            <div className="w-3 h-3 rounded bg-primary/75" />
-            <div className="w-3 h-3 rounded bg-primary" />
-          </div>
-          <span>More</span>
+    <div className="space-y-3">
+      {/* Heatmap grid */}
+      <div className="flex gap-1">
+        {/* Day labels column */}
+        <div className="flex flex-col gap-[3px] pr-1">
+          {dayLabels.map((label, i) => (
+            <div key={i} className="h-[10px] w-3 text-[8px] text-muted-foreground flex items-center justify-end">
+              {i % 2 === 1 ? label : ''}
+            </div>
+          ))}
+        </div>
+        
+        {/* Weeks columns */}
+        <div className="flex gap-[3px] overflow-x-auto">
+          {weeks.map((week, weekIdx) => (
+            <div key={weekIdx} className="flex flex-col gap-[3px]">
+              {week.map((day) => (
+                <div
+                  key={day.key}
+                  className={cn(
+                    "w-[10px] h-[10px] rounded-sm transition-colors",
+                    getIntensityColor(day.count, day.isInRange),
+                    day.isInRange && "hover:ring-1 hover:ring-foreground/30"
+                  )}
+                  title={day.isInRange ? `${format(day.date, 'MMM d')}: ${day.count} revision${day.count !== 1 ? 's' : ''}` : ''}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="space-y-1">
-        {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} className="flex gap-1">
-            {week.map((day) => (
-              <div
-                key={day.key}
-                className={cn(
-                  "flex-1 aspect-square rounded-md transition-all hover:ring-2 hover:ring-primary/50 cursor-pointer",
-                  getIntensityColor(day.count, heatmapData.maxCount)
-                )}
-                title={`${format(day.date, 'MMM d')}: ${day.count} revision${day.count !== 1 ? 's' : ''}`}
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  {day.count > 0 && (
-                    <span className="text-[8px] font-bold text-primary-foreground opacity-80">
-                      {day.count}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+      {/* Legend */}
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+        <span>{activeDays} active days · {totalRevisions} total</span>
+        <div className="flex items-center gap-1">
+          <span>Less</span>
+          <div className="flex gap-[2px]">
+            <div className="w-[10px] h-[10px] rounded-sm bg-muted/40" />
+            <div className="w-[10px] h-[10px] rounded-sm bg-orange-300/60 dark:bg-orange-400/40" />
+            <div className="w-[10px] h-[10px] rounded-sm bg-orange-400/70 dark:bg-orange-500/60" />
+            <div className="w-[10px] h-[10px] rounded-sm bg-orange-500/80 dark:bg-orange-500/80" />
+            <div className="w-[10px] h-[10px] rounded-sm bg-orange-500 dark:bg-orange-400" />
           </div>
-        ))}
-      </div>
-
-      <div className="pt-3 border-t border-border">
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div>
-            <p className="text-xs text-muted-foreground">Total Days</p>
-            <p className="text-lg font-bold text-foreground">{revisionDates.length}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Avg/Day</p>
-            <p className="text-lg font-bold text-foreground">
-              {revisionDates.length > 0 ? (revisionDates.length / heatmapData.data.filter(d => d.count > 0).length).toFixed(1) : '0'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Peak Day</p>
-            <p className="text-lg font-bold text-foreground">{heatmapData.maxCount}</p>
-          </div>
+          <span>More</span>
         </div>
       </div>
     </div>
