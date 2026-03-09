@@ -310,27 +310,72 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
     <div className="space-y-4">
       {/* Revision Streak Banner */}
       {revisionStreak.current > 0 && (
-        <div className="gradient-flame rounded-2xl p-4 shadow-card border border-primary/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-2xl">🔥</span>
+        <>
+          <button 
+            onClick={() => setShowStreakCalendar(!showStreakCalendar)}
+            className="w-full bg-card hover:bg-accent/50 rounded-xl p-3 border border-border transition-colors group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="text-lg">🔥</div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold">
+                    {revisionStreak.current} day streak
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click to view calendar
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  {revisionStreak.current} Day Streak!
-                </h3>
-                <p className="text-sm text-white/80">
-                  Keep the momentum going
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Best</p>
+                  <p className="text-lg font-bold text-foreground">{revisionStreak.longest}</p>
+                </div>
+                <ChevronDown className={cn(
+                  "w-4 h-4 text-muted-foreground transition-transform",
+                  showStreakCalendar && "rotate-180"
+                )} />
+              </div>
+            </div>
+          </button>
+
+          {showStreakCalendar && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-card rounded-xl p-4 border border-border">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4" />
+                  Revision Days This Month
+                </h4>
+                <Calendar
+                  mode="multiple"
+                  selected={revisionDates.map(d => new Date(d))}
+                  month={new Date()}
+                  className="rounded-md"
+                  modifiers={{
+                    revision: revisionDates.map(d => new Date(d))
+                  }}
+                  modifiersStyles={{
+                    revision: {
+                      fontWeight: 'bold',
+                      backgroundColor: 'hsl(var(--primary))',
+                      color: 'hsl(var(--primary-foreground))',
+                      borderRadius: '0.375rem'
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  {revisionDates.length} revision {revisionDates.length === 1 ? 'day' : 'days'} this month
                 </p>
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-white/70">Best Streak</p>
-              <p className="text-2xl font-bold text-white">{revisionStreak.longest}</p>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </>
       )}
 
       {/* Summary Cards */}
