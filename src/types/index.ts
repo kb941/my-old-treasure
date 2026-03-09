@@ -164,6 +164,7 @@ export interface StudyLog {
   date: string;
   minutesStudied: number;
   hour: number;
+  subjectId?: string;
 }
 
 export interface PomodoroSettings {

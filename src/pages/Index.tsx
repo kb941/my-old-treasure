@@ -240,7 +240,7 @@ const Index = () => {
     }
     setStats(s => ({ ...s, todayStudyMinutes: s.todayStudyMinutes + data.duration, totalXP: s.totalXP + 10 }));
     const now = new Date();
-    setStudyLogs(prev => [...prev, { date: now.toISOString().split('T')[0], minutesStudied: data.duration, hour: now.getHours() }]);
+    setStudyLogs(prev => [...prev, { date: now.toISOString().split('T')[0], minutesStudied: data.duration, hour: now.getHours(), subjectId: data.subject }]);
     if (data.questionsAttempted && data.questionsAttempted > 0) {
       setMcqLogs(prev => [...prev, { date: now.toISOString().split('T')[0], count: data.questionsAttempted! }]);
     }
