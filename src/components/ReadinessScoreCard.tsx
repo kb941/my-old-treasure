@@ -286,7 +286,7 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
                       <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(pct, 100)}%` }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
-                          className="h-full rounded-full" style={{ backgroundColor: phase.color }} />
+                          className={`h-full rounded-full ${item.color.replace('text-', 'bg-')}`} />
                       </div>
                     </div>
                   );
