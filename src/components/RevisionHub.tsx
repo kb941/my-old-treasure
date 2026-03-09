@@ -45,7 +45,7 @@ type ViewMode = 'list' | 'calendar';
 
 const PAGE_SIZE = 15;
 
-export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToTasks, subjects, tasks = [] }: RevisionHubProps) {
+export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToTasks, subjects, tasks = [], revisionDates }: RevisionHubProps) {
   const [filter, setFilter] = useState<ViewFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
