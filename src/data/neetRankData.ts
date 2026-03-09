@@ -99,14 +99,12 @@ export function predictRank(marks: number): { rankMin: number; rankMax: number; 
   const entry = NEET_PG_RANK_TABLE.find(r => marks >= r.marksMin && marks <= r.marksMax)
     || NEET_PG_RANK_TABLE[NEET_PG_RANK_TABLE.length - 1];
 
-  // Interpolate within the range
   const marksRange = entry.marksMax - entry.marksMin || 1;
   const fraction = (marks - entry.marksMin) / marksRange;
   const rankRange = entry.rankMax - entry.rankMin;
   const interpolatedRankMax = Math.round(entry.rankMax - fraction * rankRange);
   const interpolatedRankMin = Math.max(1, interpolatedRankMax - Math.round(rankRange * 0.1));
 
-  // Determine bracket
   let bracket: RankBracketInfo;
   const midRank = (interpolatedRankMin + interpolatedRankMax) / 2;
   if (midRank <= 1000) bracket = RANK_BRACKET_INFO[0];
@@ -117,4 +115,18 @@ export function predictRank(marks: number): { rankMin: number; rankMax: number; 
   else bracket = RANK_BRACKET_INFO[5];
 
   return { rankMin: interpolatedRankMin, rankMax: interpolatedRankMax, bracket };
+}
+
+/** Given a rank, estimate the approximate marks (midpoint of the matching range) */
+export function predictScoreFromRank(rank: number): number {
+  const entry = NEET_PG_RANK_TABLE.find(r => rank >= r.rankMin && rank <= r.rankMax);
+  if (!entry) {
+    // If rank is beyond our table, find closest
+    if (rank < 1) return 800;
+    return 250;
+  }
+  const rankRange = entry.rankMax - entry.rankMin || 1;
+  const fraction = (entry.rankMax - rank) / rankRange;
+  const marksRange = entry.marksMax - entry.marksMin || 1;
+  return Math.round(entry.marksMin + fraction * marksRange);
 }
