@@ -48,9 +48,9 @@ export interface ContentType {
 
 export const DEFAULT_CONTENT_TYPES: ContentType[] = [
   { id: 'main-video', label: 'Main Video', shortLabel: 'Main', compulsory: false, enabled: true },
-  { id: 'rr-video', label: 'RR Video', shortLabel: 'RR', compulsory: false, enabled: true },
-  { id: 'btr-video', label: 'BTR Video', shortLabel: 'BTR', compulsory: false, enabled: true },
-  { id: 'extra-video', label: 'Extra Video', shortLabel: 'Extra', compulsory: false, enabled: true },
+  { id: 'rr-video', label: 'RR Video', shortLabel: 'RR', compulsory: false, enabled: false },
+  { id: 'btr-video', label: 'BTR Video', shortLabel: 'BTR', compulsory: false, enabled: false },
+  { id: 'extra-video', label: 'Extra Video', shortLabel: 'Extra', compulsory: false, enabled: false },
   { id: 'mcqs', label: 'MCQs', shortLabel: 'MCQ', compulsory: true, enabled: true },
   { id: 'pyqs', label: 'PYQs', shortLabel: 'PYQ', compulsory: true, enabled: true },
 ];
