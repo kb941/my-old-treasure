@@ -232,63 +232,76 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
     <div
       key={`${item.topicId}-s${item.sessionNumber}`}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-xl transition-colors",
+        "rounded-xl transition-colors overflow-hidden",
         item.isOverdue ? "bg-destructive/10 border border-destructive/20"
           : item.isDueToday ? "bg-amber-500/10 border border-amber-500/20"
-          : "bg-secondary/30 hover:bg-secondary/50"
+          : "bg-secondary/30 hover:bg-secondary/50 border border-border/50"
       )}
     >
-      <div className={cn(
-        "w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold",
-        item.isOverdue ? "bg-destructive/20 text-destructive"
-          : item.isDueToday ? "bg-amber-500/20 text-amber-500"
-          : item.sessionNumber >= item.totalSessions ? "bg-primary/20 text-primary"
-          : "bg-primary/15 text-primary"
-      )}>
-        {item.isOverdue ? <AlertTriangle className="w-4 h-4" />
-          : item.sessionNumber >= item.totalSessions ? <Sparkles className="w-4 h-4" />
-          : <span>{item.sessionNumber}/{item.totalSessions}</span>}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{item.topicName}</p>
-        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-            {getSubjectName(item.subjectId)} · {item.chapterName}
-          </span>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
-            {item.sessionName}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <div className="flex gap-0.5">
-            {[1, 2, 3, 4, 5].map(s => (
-              <Star key={s} className={cn("w-2.5 h-2.5", s <= item.confidence ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20")} />
-            ))}
-          </div>
-          <span className={cn("text-[10px]", item.isOverdue ? "text-destructive font-medium" : "text-muted-foreground")}>
+      {/* Top action: Add to Task */}
+      {isCurrent && (
+        <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
+          <div className={cn(
+            "flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full",
+            item.isOverdue ? "bg-destructive/15 text-destructive"
+              : item.isDueToday ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+              : "bg-primary/10 text-primary"
+          )}>
+            <Clock className="w-3 h-3" />
             {item.isOverdue ? `${formatDistanceToNow(item.dueDate)} overdue`
               : item.isDueToday ? 'Due today'
-              : format(item.dueDate, 'MMM d, yyyy')}
-          </span>
+              : format(item.dueDate, 'MMM d')}
+          </div>
+          {!isInTasks(item.topicId) ? (
+            <Button size="sm" variant="secondary" onClick={() => handleAddToTask(item)} className="h-6 px-2 text-[10px] rounded-full">
+              <Plus className="w-3 h-3 mr-0.5" />Add to Tasks
+            </Button>
+          ) : (
+            <span className="text-[10px] text-primary font-medium px-2">✓ In tasks</span>
+          )}
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="px-3 py-2.5 space-y-2">
+        <div className="flex items-start gap-2.5">
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5",
+            item.isOverdue ? "bg-destructive/20 text-destructive"
+              : item.isDueToday ? "bg-amber-500/20 text-amber-500"
+              : "bg-primary/15 text-primary"
+          )}>
+            {item.isOverdue ? <AlertTriangle className="w-3.5 h-3.5" />
+              : item.sessionNumber >= item.totalSessions ? <Sparkles className="w-3.5 h-3.5" />
+              : <span>{item.sessionNumber}/{item.totalSessions}</span>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm leading-snug">{item.topicName}</p>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className="text-[10px] text-muted-foreground">
+                {getSubjectName(item.subjectId)} · {item.chapterName}
+              </span>
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+                {item.sessionName}
+              </span>
+            </div>
+            <div className="flex gap-0.5 mt-1.5">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star key={s} className={cn("w-2.5 h-2.5", s <= item.confidence ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20")} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
-        {isCurrent && !isInTasks(item.topicId) && (
-          <Button size="sm" variant="secondary" onClick={() => handleAddToTask(item)} className="h-7 px-2 text-xs">
-            <Plus className="w-3 h-3 mr-1" />Task
+      {/* Bottom action: Done */}
+      {isCurrent && (
+        <div className="px-3 pb-2.5">
+          <Button size="sm" onClick={() => onCompleteRevision(item.topicId)} className="w-full h-8 text-xs rounded-lg">
+            <Check className="w-3.5 h-3.5 mr-1" />Mark as Done
           </Button>
-        )}
-        {isCurrent && isInTasks(item.topicId) && (
-          <span className="text-[10px] text-primary font-medium px-2">In tasks</span>
-        )}
-        {isCurrent && (
-          <Button size="sm" onClick={() => onCompleteRevision(item.topicId)} className="h-7 px-2 text-xs">
-            <Check className="w-3 h-3 mr-1" />Done
-          </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 
