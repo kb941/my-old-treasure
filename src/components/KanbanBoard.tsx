@@ -118,6 +118,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 isDraggable={true}
                 isEditMode={true}
                 pomodoroSettings={pomodoroSettings}
+                activeTimerTaskId={activeTimerTaskId}
+                onTimerStart={setActiveTimerTaskId}
               />
             </Reorder.Item>
           ))}
