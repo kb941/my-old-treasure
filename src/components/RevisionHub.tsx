@@ -49,7 +49,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
 
   const getSubjectName = useCallback((subjectId: string) => 
     subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
@@ -93,7 +93,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   const filtered = useMemo(() => {
     let result = allRevisions;
-    if (selectedSubject) result = result.filter(r => r.subjectId === selectedSubject);
+    if (selectedSubject && selectedSubject !== 'all') result = result.filter(r => r.subjectId === selectedSubject);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(r =>
@@ -327,7 +327,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
                   <SelectValue placeholder="All Subjects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Subjects</SelectItem>
+                  <SelectItem value="all">All Subjects</SelectItem>
                   {subjects.map(s => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
