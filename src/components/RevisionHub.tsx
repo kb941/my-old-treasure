@@ -316,7 +316,13 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
           onClick={() => setShowStreakDialog(true)}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-card hover:bg-accent/40 border border-border/60 transition-all group"
         >
-          <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-pulse" />
+          <motion.div
+            animate={{ scaleY: [1, 1.15, 0.95, 1.1, 1], scaleX: [1, 0.92, 1.05, 0.95, 1], rotate: [-2, 2, -1, 1, 0] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ originY: 'bottom' }}
+          >
+            <Flame className="w-4 h-4 text-orange-500 shrink-0" />
+          </motion.div>
           <span className="text-xs font-semibold text-foreground">{revisionStreak.current}d streak</span>
           <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Trophy className="w-2.5 h-2.5" />{revisionStreak.longest}d</span>
           <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto group-hover:translate-x-0.5 transition-transform" />
