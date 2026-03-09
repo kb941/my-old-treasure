@@ -552,7 +552,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       });
       if (neglected.length > 0) {
         imbalanced = Math.max(-3, neglected.length * -1);
-        penaltyDetails.push(`${neglected.length} high-weightage subject(s) neglected`);
+        const neglectedNames = neglected.map(s => s.name).slice(0, 4).join(', ');
+        penaltyDetails.push(`High-weightage subjects neglected: ${neglectedNames}`);
       }
     }
 
