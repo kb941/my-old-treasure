@@ -42,7 +42,7 @@ const DEFAULT_POMODORO: PomodoroSettings = {
 const Index = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<Tab>('today');
-  const [tasks, setTasks] = useLocalStorage<Task[]>('neetpg-tasks', mockTasks);
+  const [tasks, setTasks] = useLocalStorage<Task[]>('neetpg-tasks', []);
   const [subjects, setSubjects] = useLocalStorage<Subject[]>('neetpg-subjects', initialSubjects);
   const [chapters, setChapters] = useLocalStorage<Chapter[]>('neetpg-chapters', defaultChapters);
   const [stats, setStats] = useLocalStorage<UserStats>('neetpg-stats', {
@@ -409,8 +409,13 @@ const Index = () => {
     const keysToRemove = [
       'neetpg-tasks', 'neetpg-subjects', 'neetpg-chapters', 'neetpg-stats',
       'neetpg-mocktests', 'neetpg-examdate', 'neetpg-examname', 'neetpg-target',
-      'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types', 'neetpg-break-duration',
-      'neetpg-marking-scheme', 'neetpg-study-logs', 'planos-pyq-tracker', 'planos-user',
+      'neetpg-target-rank', 'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types',
+      'neetpg-break-duration', 'neetpg-marking-scheme', 'neetpg-study-logs',
+      'neetpg-mcq-logs', 'neetpg-pyq-year-from', 'neetpg-pyq-year-to',
+      'neetpg-mcq-goal', 'neetpg-push-notifications', 'planos-pyq-tracker-v2',
+      'neetpg-readiness-trend', 'neetpg-revision-dates',
+      'planos-notification-history', 'planos-last-notification',
+      'planos-onboarded', 'planos-user',
     ];
     keysToRemove.forEach(key => localStorage.removeItem(key));
     window.location.reload();
