@@ -4,9 +4,10 @@ import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   BookOpen, ArrowRight, CheckCircle2, BarChart3,
   Brain, Target, Zap, Shield, Clock,
-  ChevronDown, Sparkles, Layout, RotateCcw, Trophy
+  ChevronDown, Sparkles, Layout, RotateCcw, Trophy, HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageTransition } from '@/components/PageTransition';
 import screenshotDashboard from '@/assets/screenshot-dashboard.jpg';
 import screenshotAnalytics from '@/assets/screenshot-analytics.jpg';
 import screenshotSubjects from '@/assets/screenshot-subjects.jpg';
@@ -56,6 +57,7 @@ const Landing = () => {
   const handleCTA = () => navigate(isLoggedIn ? '/' : '/login');
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Navbar */}
       <motion.nav
@@ -70,9 +72,14 @@ const Landing = () => {
             </div>
             <span className="font-bold text-lg">Plan OS</span>
           </div>
-          <Button onClick={handleCTA} size="sm" className="gradient-primary text-primary-foreground gap-1">
-            {isLoggedIn ? 'Dashboard' : 'Get Started'} <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
+           <div className="flex items-center gap-2">
+             <Button variant="ghost" size="sm" onClick={() => navigate('/how-to-use')} className="gap-1 text-muted-foreground">
+               <HelpCircle className="w-3.5 h-3.5" /> How to Use
+             </Button>
+             <Button onClick={handleCTA} size="sm" className="gradient-primary text-primary-foreground gap-1">
+               {isLoggedIn ? 'Dashboard' : 'Get Started'} <ArrowRight className="w-3.5 h-3.5" />
+             </Button>
+           </div>
         </div>
       </motion.nav>
 
@@ -270,6 +277,7 @@ const Landing = () => {
         <p className="text-[11px] text-muted-foreground">Your intelligent study operating system • 100% free & offline</p>
       </footer>
     </div>
+    </PageTransition>
   );
 };
 
