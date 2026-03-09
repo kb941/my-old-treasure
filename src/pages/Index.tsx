@@ -240,7 +240,7 @@ const Index = () => {
     }
     setStats(s => ({ ...s, todayStudyMinutes: s.todayStudyMinutes + data.duration, totalXP: s.totalXP + 10 }));
     const now = new Date();
-    setStudyLogs(prev => [...prev, { date: now.toISOString().split('T')[0], minutesStudied: data.duration, hour: now.getHours() }]);
+    setStudyLogs(prev => [...prev, { date: now.toISOString().split('T')[0], minutesStudied: data.duration, hour: now.getHours(), subjectId: data.subjectId }]);
     if (data.questionsAttempted && data.questionsAttempted > 0) {
       setMcqLogs(prev => [...prev, { date: now.toISOString().split('T')[0], count: data.questionsAttempted! }]);
     }
@@ -635,6 +635,7 @@ const Index = () => {
                             contentTypes={contentTypes} srSettings={srSettings}
                             forceExpanded={expandedSubjectId === subject.id}
                             examName={examName}
+                            studyLogs={studyLogs}
                             onChaptersChange={(subjectId, newChapters) => {
                               setChapters(prev => [...prev.filter(c => c.subjectId !== subjectId), ...newChapters]);
                             }}

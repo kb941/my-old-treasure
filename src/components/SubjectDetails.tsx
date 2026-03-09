@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronRight, Plus, X, Check, Trash2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { Subject, Chapter, Topic, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, SpacedRepetitionSettings, getScheduleForConfidence } from '@/types';
+import { Subject, Chapter, Topic, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, SpacedRepetitionSettings, getScheduleForConfidence, StudyLog } from '@/types';
 import { addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ interface SubjectDetailsProps {
   srSettings?: SpacedRepetitionSettings;
   forceExpanded?: boolean;
   examName?: string;
+  studyLogs?: StudyLog[];
 }
 
 type WeightageInfo = { avg: number; range?: [number, number] };
@@ -54,7 +55,7 @@ const categoryColors: Record<string, string> = {
   'Short Subjects': 'from-amber-500 to-orange-500',
 };
 
-export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName }: SubjectDetailsProps) {
+export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName, studyLogs = [] }: SubjectDetailsProps) {
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const [isExpanded, setIsExpanded] = useState(forceExpanded || false);
 
@@ -272,8 +273,9 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                   <span>Last studied: {formatDistanceToNow(lastStudied, { addSuffix: true })}</span>
                 )}
                 {(() => {
-                  const topicsStudied = subjectChapters.flatMap(c => c.topics).filter(t => t.lastStudied).length;
-                  return topicsStudied > 0 ? <span>{topicsStudied}/{totalTopics} topics touched</span> : null;
+                  const totalMinutes = studyLogs.filter(l => l.subjectId === subject.id).reduce((sum, l) => sum + l.minutesStudied, 0);
+                  const hours = (totalMinutes / 60).toFixed(1);
+                  return totalMinutes > 0 ? <span>{hours}h logged</span> : null;
                 })()}
               </div>
             </div>
