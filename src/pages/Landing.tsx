@@ -5,7 +5,8 @@ import {
   BookOpen, ArrowRight, BarChart3, Target, Zap, Shield, Clock,
   ChevronDown, Sparkles, Layout, RotateCcw, Trophy, HelpCircle,
   Brain, Bell, ListChecks, CheckCircle2, Star, TrendingUp,
-  Calendar, Flame, Award, Monitor
+  Calendar, Flame, Award, Monitor, AlertTriangle, Download, Upload,
+  Smartphone, Share
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/PageTransition';
