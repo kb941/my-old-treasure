@@ -4,9 +4,10 @@ import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   BookOpen, ArrowRight, CheckCircle2, BarChart3,
   Brain, Target, Zap, Shield, Clock,
-  ChevronDown, Sparkles, Layout, RotateCcw, Trophy
+  ChevronDown, Sparkles, Layout, RotateCcw, Trophy, HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageTransition } from '@/components/PageTransition';
 import screenshotDashboard from '@/assets/screenshot-dashboard.jpg';
 import screenshotAnalytics from '@/assets/screenshot-analytics.jpg';
 import screenshotSubjects from '@/assets/screenshot-subjects.jpg';
