@@ -635,6 +635,7 @@ const Index = () => {
                             contentTypes={contentTypes} srSettings={srSettings}
                             forceExpanded={expandedSubjectId === subject.id}
                             examName={examName}
+                            studyLogs={studyLogs}
                             onChaptersChange={(subjectId, newChapters) => {
                               setChapters(prev => [...prev.filter(c => c.subjectId !== subjectId), ...newChapters]);
                             }}
