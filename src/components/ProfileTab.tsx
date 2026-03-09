@@ -628,6 +628,7 @@ export function ProfileTab(props: ProfileTabProps) {
               </div>
             </div>
 
+            <div className="space-y-4">
               <h3 className="font-semibold flex items-center gap-2">
                 <Video className="w-4 h-4 text-primary" />
                 Content Types
