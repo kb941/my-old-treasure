@@ -147,6 +147,7 @@ export function TaskItem({
 
   const handleDone = () => {
     setIsTimerRunning(false);
+    onTimerStart?.(null);
     fireConfetti();
     if (task.topicId) {
       setShowConfidencePicker(true);
