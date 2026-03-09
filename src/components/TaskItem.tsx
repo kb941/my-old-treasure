@@ -259,7 +259,17 @@ export function TaskItem({
 
               <div className="flex items-center gap-1 mt-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); setIsTimerRunning(!isTimerRunning); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isTimerRunning) {
+                      setIsTimerRunning(false);
+                      onTimerStart?.(null);
+                    } else {
+                      setIsTimerRunning(true);
+                      onTimerStart?.(task.id);
+                    }
+                  }}
+                  disabled={!isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
                     isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
