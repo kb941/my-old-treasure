@@ -37,6 +37,7 @@ interface RevisionHubProps {
   onAddToTasks: (task: Omit<Task, 'id'>) => void;
   subjects: { id: string; name: string }[];
   tasks?: Task[];
+  revisionDates: string[];
 }
 
 type ViewFilter = 'all' | 'overdue' | 'today' | 'week' | 'month';
