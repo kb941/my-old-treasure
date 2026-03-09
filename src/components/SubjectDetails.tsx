@@ -75,6 +75,22 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
   );
   const progress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
+  // Last studied across all topics in this subject
+  const lastStudied = useMemo(() => {
+    const dates = subjectChapters.flatMap(c => c.topics)
+      .map(t => t.lastStudied)
+      .filter(Boolean)
+      .map(d => new Date(d!).getTime());
+    return dates.length > 0 ? new Date(Math.max(...dates)) : null;
+  }, [subjectChapters]);
+
+  // Chapter progress helper
+  const getChapterProgress = (chapter: Chapter) => {
+    if (chapter.topics.length === 0) return 0;
+    const done = chapter.topics.filter(t => t.completedStages.length > 0).length;
+    return Math.round((done / chapter.topics.length) * 100);
+  };
+
   const toggleChapter = (chapterId: string) => {
     setExpandedChapters(prev => 
       prev.includes(chapterId) 
