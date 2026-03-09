@@ -209,9 +209,19 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
                       </span>
                     )}
                   </div>
-                  <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-secondary">
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {count > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                    <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-secondary">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Notifications list */}
