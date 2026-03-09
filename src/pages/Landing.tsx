@@ -272,6 +272,7 @@ const Landing = () => {
         <p className="text-[11px] text-muted-foreground">Your intelligent study operating system • 100% free & offline</p>
       </footer>
     </div>
+    </PageTransition>
   );
 };
 
