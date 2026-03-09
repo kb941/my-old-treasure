@@ -158,7 +158,6 @@ function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; c
 function TrendBadge({ trend }: { trend: number[] }) {
   if (trend.length < 2) return null;
   const diff = trend[trend.length - 1] - trend[0];
-  if (Math.abs(diff) < 0.1) return null;
   const icon = diff > 1 ? TrendingUp : diff < -1 ? TrendingDown : Minus;
   const Icon = icon;
   const colorCls = diff > 1 ? 'text-emerald-500' : diff < -1 ? 'text-destructive' : 'text-muted-foreground';
@@ -370,9 +369,6 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-[9px] text-muted-foreground">Tap for breakdown & tips</p>
-                {trendData.length >= 2 && (
-                  <Sparkline data={trendData.slice(-14)} color={phase.color} width={50} height={14} />
-                )}
               </div>
             </div>
           </div>
