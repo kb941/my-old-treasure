@@ -447,13 +447,15 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     let balancedBonus = 0;
     const criticalSubNames = CRITICAL_SUBJECT_IDS;
-    const weakCritical = subjects.filter(s => {
+    // Use same threshold (50%) and same check (main-video or enabled primary stage) as penalty for consistency
+    const primaryStage = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
+    const weakCriticalForBonus = subjects.filter(s => {
       if (!criticalSubNames.includes(s.id)) return false;
       const subTopics = allTopics.filter(t => t.subjectId === s.id);
-      const done = subTopics.filter(t => t.completedStages.length > 0).length;
-      return subTopics.length > 0 && (done / subTopics.length) < 0.4;
+      const done = subTopics.filter(t => t.completedStages.includes(primaryStage)).length;
+      return subTopics.length > 0 && (done / subTopics.length) < 0.5;
     });
-    if (weakCritical.length === 0 && hasAnyProgress && totalTopics > 0) {
+    if (weakCriticalForBonus.length === 0 && hasAnyProgress && totalTopics > 0) {
       balancedBonus = 2;
       bonusDetails.push('Balanced: All critical subjects strong 💎');
     }
@@ -492,16 +494,19 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
     if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
+      // Use the primary enabled stage for consistency
+      const primaryStageForPenalty = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
       const weak = subjects.filter(s => CRITICAL_SUBJECT_IDS.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-        const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
+        const done = subTopics.filter(t => t.completedStages.includes(primaryStageForPenalty)).length;
         return subTopics.length > 0 && (done / subTopics.length) < 0.5;
       });
       critWeakSubs.push(...weak);
       if (critWeakSubs.length > 0) {
         criticalWeakPenalty = Math.max(-7, critWeakSubs.reduce((s, sub) => {
           const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-          const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
+          const primaryStageForCalc = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
+          const done = subTopics.filter(t => t.completedStages.includes(primaryStageForCalc)).length;
           const gap = (0.5 - done / subTopics.length) * (sub.weightage / totalWeightage);
           return s + gap * -0.5 * 100;
         }, 0));
@@ -558,15 +563,28 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     // Sort subject breakdown by gap (biggest gaps first)
     subjectBreakdown.sort((a, b) => b.gap - a.gap);
 
-    // Recommendations
+    // Recommendations - use dynamic content type names
     const recommendations: string[] = [];
+    const primaryContentName = enabledStages.length > 0 
+      ? contentTypes.find(ct => ct.id === enabledStages[0])?.label || 'content'
+      : 'content';
+    
     if (!hasAnyProgress) {
       recommendations.push('Start by going to Subjects tab and marking completed stages');
     }
-    if (syllabusScore < 20 && hasAnyProgress) recommendations.push('Focus on completing Main videos for all subjects');
+    if (syllabusScore < 20 && hasAnyProgress) {
+      recommendations.push(`Focus on completing ${primaryContentName} for all subjects`);
+    }
     if (revisionScore < 8 && hasAnyProgress) recommendations.push('Complete more revision cycles across subjects');
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
-    if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
+    
+    // Only recommend critical subjects that are actually below 50% completion
+    if (critWeakSubs.length > 0) {
+      // Filter to only show top 3 weakest critical subjects
+      const topWeakCritical = critWeakSubs.slice(0, 3);
+      recommendations.push(`Prioritize: ${topWeakCritical.map(s => s.name).join(', ')}`);
+    }
+    
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
     if (pyqsDone < scopedPyqEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
     if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
