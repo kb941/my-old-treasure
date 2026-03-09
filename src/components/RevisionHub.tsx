@@ -93,7 +93,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   const filtered = useMemo(() => {
     let result = allRevisions;
-    if (selectedSubject) result = result.filter(r => r.subjectId === selectedSubject);
+    if (selectedSubject && selectedSubject !== 'all') result = result.filter(r => r.subjectId === selectedSubject);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(r =>
