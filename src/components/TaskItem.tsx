@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
-import { Task, TaskColumn, PomodoroSettings } from '@/types';
+import { Task, TaskColumn, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
