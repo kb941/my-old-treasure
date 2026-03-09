@@ -256,6 +256,29 @@ export function ProfileTab(props: ProfileTabProps) {
     navigate('/login');
   };
 
+  const handleTogglePushNotifications = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        setLocalPushSettings(prev => ({ ...prev, enabled: true }));
+        setNotificationPermission('granted');
+        markChanged();
+        toast({ title: "Push notifications enabled", description: "You'll receive alerts for overdue revisions" });
+      } else {
+        toast({ 
+          title: "Permission denied", 
+          description: "Please enable notifications in your browser settings",
+          variant: "destructive"
+        });
+        setNotificationPermission(Notification.permission);
+      }
+    } else {
+      setLocalPushSettings(prev => ({ ...prev, enabled: false }));
+      markChanged();
+      toast({ title: "Push notifications disabled" });
+    }
+  };
+
   const handleExportData = () => {
     try {
       const allData: Record<string, any> = {};
