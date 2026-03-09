@@ -273,8 +273,9 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                   <span>Last studied: {formatDistanceToNow(lastStudied, { addSuffix: true })}</span>
                 )}
                 {(() => {
-                  const topicsStudied = subjectChapters.flatMap(c => c.topics).filter(t => t.lastStudied).length;
-                  return topicsStudied > 0 ? <span>{topicsStudied}/{totalTopics} topics touched</span> : null;
+                  const totalMinutes = studyLogs.filter(l => l.subjectId === subject.id).reduce((sum, l) => sum + l.minutesStudied, 0);
+                  const hours = (totalMinutes / 60).toFixed(1);
+                  return totalMinutes > 0 ? <span>{hours}h logged</span> : null;
                 })()}
               </div>
             </div>
