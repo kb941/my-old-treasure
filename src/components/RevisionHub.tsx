@@ -294,6 +294,31 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   return (
     <div className="space-y-4">
+      {/* Revision Streak Banner */}
+      {revisionStreak.current > 0 && (
+        <div className="gradient-flame rounded-2xl p-4 shadow-card border border-primary/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <span className="text-2xl">🔥</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  {revisionStreak.current} Day Streak!
+                </h3>
+                <p className="text-sm text-white/80">
+                  Keep the momentum going
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/70">Best Streak</p>
+              <p className="text-2xl font-bold text-white">{revisionStreak.longest}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className={cn("rounded-xl p-3 text-center border", overdueCount > 0 ? "bg-destructive/10 border-destructive/20" : "bg-card border-border")}>
