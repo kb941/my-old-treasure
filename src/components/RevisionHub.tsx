@@ -334,41 +334,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
               Revision Streak
             </DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="heatmap" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
-              <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            </TabsList>
-            <TabsContent value="heatmap" className="mt-4">
-              <RevisionHeatmap revisionDates={revisionDates} />
-            </TabsContent>
-            <TabsContent value="calendar" className="mt-4">
-              <div className="space-y-4">
-                <Calendar
-                  mode="multiple"
-                  selected={revisionDates.map(d => new Date(d))}
-                  month={new Date()}
-                  className="rounded-md pointer-events-auto mx-auto"
-                  modifiers={{
-                    revision: revisionDates.map(d => new Date(d))
-                  }}
-                  modifiersStyles={{
-                    revision: {
-                      fontWeight: 'bold',
-                      backgroundColor: 'hsl(var(--primary))',
-                      color: 'hsl(var(--primary-foreground))',
-                      borderRadius: '0.5rem'
-                    }
-                  }}
-                />
-                <div className="pt-3 border-t border-border">
-                  <p className="text-xs text-muted-foreground text-center">
-                    {revisionDates.length} revision {revisionDates.length === 1 ? 'day' : 'days'} this month
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <RevisionHeatmap revisionDates={revisionDates} />
         </DialogContent>
       </Dialog>
 
