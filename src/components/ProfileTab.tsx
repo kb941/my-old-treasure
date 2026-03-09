@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut } from 'lucide-react';
+import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ProfileData } from '@/components/ProfileModal';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const EXAM_WEIGHTAGES: Record<string, Record<string, { avg: number; range?: [number, number] }>> = {
   'NEET PG': {
@@ -239,6 +240,52 @@ export function ProfileTab(props: ProfileTabProps) {
   const handleLogout = () => {
     localStorage.removeItem('planos-user');
     navigate('/login');
+  };
+
+  const handleExportData = () => {
+    try {
+      const allData: Record<string, any> = {};
+      
+      // Export all localStorage keys related to the app
+      const keys = [
+        'neetpg-tasks', 'neetpg-subjects', 'neetpg-chapters', 'neetpg-stats',
+        'neetpg-mocktests', 'neetpg-examdate', 'neetpg-examname', 'neetpg-target',
+        'neetpg-target-rank', 'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types',
+        'neetpg-break-duration', 'neetpg-marking-scheme', 'neetpg-study-logs',
+        'neetpg-mcq-logs', 'neetpg-pyq-year-from', 'neetpg-pyq-year-to',
+        'neetpg-mcq-goal', 'planos-pyq-tracker-v2', 'readiness-snapshots',
+        'theme', 'planos-user'
+      ];
+
+      keys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value !== null) {
+          allData[key] = value;
+        }
+      });
+
+      const dataStr = JSON.stringify(allData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `planos-backup-${format(new Date(), 'yyyy-MM-dd-HHmm')}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Data exported successfully!',
+        description: 'Your backup file has been downloaded.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Could not export data. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -515,6 +562,19 @@ export function ProfileTab(props: ProfileTabProps) {
               </Button>
               <p className="text-xs text-muted-foreground">
                 Syncs MCQ/PYQ completion fields from your existing topic checkmarks (no data is deleted).
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t border-border">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Download className="w-4 h-4 text-primary" />
+                Export Data
+              </h3>
+              <Button variant="outline" className="w-full" onClick={handleExportData}>
+                <Download className="w-4 h-4 mr-2" /> Download Full Backup
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Exports all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
               </p>
             </div>
 
