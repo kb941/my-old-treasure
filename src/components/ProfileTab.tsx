@@ -125,6 +125,7 @@ export function ProfileTab(props: ProfileTabProps) {
     }
     return result;
   });
+  const [maintenanceInterval, setMaintenanceInterval] = useState(props.srSettings.maintenanceIntervalDays ?? 90);
 
   const [localContentTypes, setLocalContentTypes] = useState<ContentType[]>(() =>
     props.contentTypes.map(ct => ({ ...ct }))
