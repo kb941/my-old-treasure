@@ -510,7 +510,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
           const gap = (0.5 - done / subTopics.length) * (sub.weightage / totalWeightage);
           return s + gap * -0.5 * 100;
         }, 0));
-        penaltyDetails.push(`${critWeakSubs.length} critical subject(s) need attention`);
+        const critNames = critWeakSubs.map(s => s.name).slice(0, 4).join(', ');
+        penaltyDetails.push(`Critical subjects need attention: ${critNames}`);
       }
     }
 
@@ -551,7 +552,8 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
       });
       if (neglected.length > 0) {
         imbalanced = Math.max(-3, neglected.length * -1);
-        penaltyDetails.push(`${neglected.length} high-weightage subject(s) neglected`);
+        const neglectedNames = neglected.map(s => s.name).slice(0, 4).join(', ');
+        penaltyDetails.push(`High-weightage subjects neglected: ${neglectedNames}`);
       }
     }
 

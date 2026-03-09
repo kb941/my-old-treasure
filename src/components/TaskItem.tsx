@@ -321,14 +321,26 @@ export function TaskItem({
           ) : (
             <>
               {canMoveLeft && (
-                <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }} className="p-1 hover:bg-secondary rounded transition-colors">
+                <motion.button
+                  whileTap={{ scale: 0.8, x: -4 }}
+                  whileHover={{ scale: 1.15 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  onClick={(e) => { e.stopPropagation(); onMove(task.id, 'left'); }}
+                  className="p-1 hover:bg-secondary rounded transition-colors"
+                >
                   <ArrowLeft className="w-3 h-3 text-muted-foreground" />
-                </button>
+                </motion.button>
               )}
               {canMoveRight && (
-                <button onClick={(e) => { e.stopPropagation(); onMove(task.id, 'right'); }} className="p-1 hover:bg-secondary rounded transition-colors">
+                <motion.button
+                  whileTap={{ scale: 0.8, x: 4 }}
+                  whileHover={{ scale: 1.15 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  onClick={(e) => { e.stopPropagation(); onMove(task.id, 'right'); }}
+                  className="p-1 hover:bg-secondary rounded transition-colors"
+                >
                   <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                </button>
+                </motion.button>
               )}
             </>
           )}
