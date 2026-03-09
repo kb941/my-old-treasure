@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Lightbulb, Target } from 'lucide-react';
+import { Bell, X, Clock, RotateCcw, Trophy, BookOpen, Zap, Lightbulb, Target, History } from 'lucide-react';
 import { RevisionReminder, Task, Achievement } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -16,6 +17,10 @@ interface Notification {
   color: string;
   action?: () => void;
   actionLabel?: string;
+}
+
+export interface DismissedNotification extends Notification {
+  dismissedAt: Date;
 }
 
 interface NotificationPanelProps {
@@ -38,6 +43,33 @@ const DAILY_TIPS = [
   { title: '😴 Sleep consolidates memory', desc: '7-8 hours of sleep after studying helps cement new knowledge' },
 ];
 
+// Load dismissed notifications from localStorage
+function loadDismissedHistory(): DismissedNotification[] {
+  try {
+    const stored = localStorage.getItem('planos-notification-history');
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return parsed.map((n: any) => ({
+      ...n,
+      dismissedAt: new Date(n.dismissedAt),
+      time: n.time ? new Date(n.time) : undefined,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// Save dismissed notifications to localStorage
+function saveDismissedHistory(notifications: DismissedNotification[]) {
+  try {
+    // Keep only last 100 notifications
+    const limited = notifications.slice(-100);
+    localStorage.setItem('planos-notification-history', JSON.stringify(limited));
+  } catch (e) {
+    console.warn('Failed to save notification history', e);
+  }
+}
+
 export function NotificationBell({ count, onClick }: { count: number; onClick: () => void }) {
   return (
     <button onClick={onClick} className="relative p-2 rounded-xl hover:bg-secondary/80 transition-colors">
@@ -58,6 +90,7 @@ export function NotificationBell({ count, onClick }: { count: number; onClick: (
 export function NotificationPanel({ reminders, achievements, streakDays, tasks, onCompleteRevision, onNavigateToRevision }: NotificationPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   const notifications = useMemo((): Notification[] => {
     const items: Notification[] = [];
@@ -165,13 +198,29 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
     return items.filter(n => !dismissed.has(n.id));
   }, [reminders, achievements, streakDays, tasks, dismissed, onNavigateToRevision]);
 
-  const handleDismiss = (id: string) => {
-    setDismissed(prev => new Set(prev).add(id));
+  const handleDismiss = (notif: Notification) => {
+    // Add to dismissed set
+    setDismissed(prev => new Set(prev).add(notif.id));
+    
+    // Save to history
+    const history = loadDismissedHistory();
+    const dismissedNotif: DismissedNotification = {
+      ...notif,
+      dismissedAt: new Date(),
+    };
+    saveDismissedHistory([...history, dismissedNotif]);
   };
 
   const handleMarkAllAsRead = () => {
-    const allIds = notifications.map(n => n.id);
-    setDismissed(new Set(allIds));
+    // Dismiss all current notifications
+    notifications.forEach(notif => {
+      handleDismiss(notif);
+    });
+  };
+
+  const handleViewHistory = () => {
+    setIsOpen(false);
+    navigate('/notifications');
   };
 
   const count = notifications.length;
@@ -210,6 +259,13 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleViewHistory}
+                      className="p-1 rounded-full hover:bg-secondary"
+                      title="View history"
+                    >
+                      <History className="w-4 h-4" />
+                    </button>
                     {count > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
@@ -260,14 +316,14 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
                                 <div className="flex items-center gap-2 mt-1.5">
                                   {notif.action && (
                                     <button
-                                      onClick={() => { notif.action?.(); handleDismiss(notif.id); }}
+                                      onClick={() => { notif.action?.(); handleDismiss(notif); }}
                                       className="text-[11px] font-medium text-primary hover:underline"
                                     >
                                       {notif.actionLabel}
                                     </button>
                                   )}
                                   <button
-                                    onClick={() => handleDismiss(notif.id)}
+                                    onClick={() => handleDismiss(notif)}
                                     className="text-[11px] text-muted-foreground hover:text-foreground"
                                   >
                                     Dismiss
