@@ -9,6 +9,8 @@ import { ContentProgressDashboard } from '@/components/ContentProgressDashboard'
 import { AdvancedAnalytics } from '@/components/AdvancedAnalytics';
 import { PYQAccuracyTrends } from '@/components/PYQAccuracyTrends';
 import { AchievementsBadgePanel } from '@/components/AchievementsBadgePanel';
+import { SubjectStudyHours } from '@/components/SubjectStudyHours';
+import { RankPredictor } from '@/components/RankPredictor';
 import { MockTest, MarkingScheme, UserStats, Chapter, StudyLog, Subject, ContentType, Achievement } from '@/types';
 import { ReadinessResult } from '@/hooks/useReadinessScore';
 
