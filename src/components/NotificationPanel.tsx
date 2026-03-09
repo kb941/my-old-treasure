@@ -175,19 +175,20 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:right-4 md:left-auto md:w-[380px] md:top-16 bg-card rounded-2xl border border-border shadow-lg overflow-hidden flex flex-col"
+              className="fixed inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:right-4 md:left-auto md:w-[380px] md:top-16 z-50 bg-card rounded-2xl border border-border shadow-lg overflow-hidden flex flex-col"
             >
               {/* Header */}
               <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-3 flex items-center justify-between">
