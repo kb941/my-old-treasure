@@ -267,6 +267,15 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                   return info?.range ? ` (${info.range[0]}–${info.range[1]})` : '';
                 })()} • {subjectChapters.length} ch • {totalTopics} topics • {progress}%
               </p>
+              <div className="flex items-center gap-3 mt-0.5 text-[10px] text-white/70">
+                {lastStudied && (
+                  <span>Last studied: {formatDistanceToNow(lastStudied, { addSuffix: true })}</span>
+                )}
+                {(() => {
+                  const topicsStudied = subjectChapters.flatMap(c => c.topics).filter(t => t.lastStudied).length;
+                  return topicsStudied > 0 ? <span>{topicsStudied}/{totalTopics} topics touched</span> : null;
+                })()}
+              </div>
             </div>
           </div>
         </div>
@@ -489,7 +498,6 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px] text-muted-foreground">
               {subjectChapters.length} ch • {totalTopics} topics
-              {lastStudied && ` • ${formatDistanceToNow(lastStudied, { addSuffix: true })}`}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-1">
