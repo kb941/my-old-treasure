@@ -318,7 +318,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         >
           <Flame className="w-4 h-4 text-orange-500 shrink-0" />
           <span className="text-xs font-semibold text-foreground">{revisionStreak.current}d streak</span>
-          <span className="text-[10px] text-muted-foreground">· best {revisionStreak.longest}d</span>
+          <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Trophy className="w-2.5 h-2.5" />{revisionStreak.longest}d</span>
           <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
