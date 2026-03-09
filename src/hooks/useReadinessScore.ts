@@ -494,16 +494,19 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     let criticalWeakPenalty = 0;
     const critWeakSubs: Subject[] = [];
     if (hasAnyProgress && weightedSyllabusCoverage > 0.05) {
+      // Use the primary enabled stage for consistency
+      const primaryStageForPenalty = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
       const weak = subjects.filter(s => CRITICAL_SUBJECT_IDS.includes(s.id)).filter(sub => {
         const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-        const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
+        const done = subTopics.filter(t => t.completedStages.includes(primaryStageForPenalty)).length;
         return subTopics.length > 0 && (done / subTopics.length) < 0.5;
       });
       critWeakSubs.push(...weak);
       if (critWeakSubs.length > 0) {
         criticalWeakPenalty = Math.max(-7, critWeakSubs.reduce((s, sub) => {
           const subTopics = allTopics.filter(t => t.subjectId === sub.id);
-          const done = subTopics.filter(t => t.completedStages.includes('main-video')).length;
+          const primaryStageForCalc = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
+          const done = subTopics.filter(t => t.completedStages.includes(primaryStageForCalc)).length;
           const gap = (0.5 - done / subTopics.length) * (sub.weightage / totalWeightage);
           return s + gap * -0.5 * 100;
         }, 0));
