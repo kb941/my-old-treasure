@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, Check, Clock, ChevronRight, AlertTriangle, 
   Sparkles, Plus, Star, RotateCcw, CalendarDays,
-  LayoutList, CalendarIcon, Search, X, Flame, Trophy
+  LayoutList, CalendarIcon, Search, X, Flame, Trophy, ChevronDown
 } from 'lucide-react';
 import { Chapter, Topic, SpacedRepetitionSettings, getScheduleForConfidence, Task } from '@/types';
 import { cn } from '@/lib/utils';
