@@ -5,7 +5,8 @@ import {
   BookOpen, ArrowRight, BarChart3, Target, Zap, Shield, Clock,
   ChevronDown, Sparkles, Layout, RotateCcw, Trophy, HelpCircle,
   Brain, Bell, ListChecks, CheckCircle2, Star, TrendingUp,
-  Calendar, Flame, Award, Monitor
+  Calendar, Flame, Award, Monitor, AlertTriangle, Download, Upload,
+  Smartphone, Share
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/PageTransition';
@@ -345,7 +346,140 @@ const Landing = () => {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* Important: Data Warning */}
+        <section className="py-12 sm:py-16 px-4 border-y border-destructive/20 bg-destructive/5">
+          <div className="max-w-2xl mx-auto">
+            <FadeIn>
+              <div className="flex items-start gap-4 p-5 sm:p-6 rounded-2xl bg-card border border-destructive/30 shadow-card">
+                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-base mb-2 text-destructive">⚠️ Important: Your Data Lives in Your Browser</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                    Plan OS stores all your data locally in your browser (localStorage). This means:
+                  </p>
+                  <ul className="space-y-1.5 text-xs text-muted-foreground mb-4">
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span><strong className="text-foreground">Clearing browser data / cache</strong> will permanently delete all your progress, tasks, and settings.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span><strong className="text-foreground">Using incognito / private mode</strong> means data won't be saved after closing.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span><strong className="text-foreground">Switching browsers or devices</strong> won't carry your data over automatically.</span>
+                    </li>
+                  </ul>
+                  <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Use the Export Backup feature regularly to keep your data safe!</span>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* How to Import / Export */}
+        <section className="py-12 sm:py-16 px-4">
+          <div className="max-w-2xl mx-auto">
+            <FadeIn className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Backup & Restore Your Data</h2>
+              <p className="text-sm text-muted-foreground">Never lose your progress. Export backups regularly.</p>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FadeIn delay={0.05}>
+                <div className="bg-card rounded-xl border border-border p-5 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Download className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-sm">Export (Backup)</h3>
+                  </div>
+                  <ol className="space-y-1.5 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">1.</span> Open the <strong className="text-foreground">Profile</strong> tab</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">2.</span> Scroll to <strong className="text-foreground">Export Data</strong> section</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">3.</span> Tap <strong className="text-foreground">"Download Full Backup"</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">4.</span> A JSON file will be saved — keep it safe!</li>
+                  </ol>
+                </div>
+              </FadeIn>
+
+              <FadeIn delay={0.1}>
+                <div className="bg-card rounded-xl border border-border p-5 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Upload className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-sm">Import (Restore)</h3>
+                  </div>
+                  <ol className="space-y-1.5 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">1.</span> Open the <strong className="text-foreground">Profile</strong> tab</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">2.</span> Scroll to <strong className="text-foreground">Export Data</strong> section</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">3.</span> Tap <strong className="text-foreground">"Import Backup"</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">4.</span> Select your backup JSON file — app will reload</li>
+                  </ol>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
+        </section>
+
+        {/* Install as App */}
+        <section className="py-12 sm:py-16 px-4 bg-card/30 border-y border-border/50">
+          <div className="max-w-2xl mx-auto">
+            <FadeIn className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Install as an App</h2>
+              <p className="text-sm text-muted-foreground">Add Plan OS to your home screen for a native app experience.</p>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FadeIn delay={0.05}>
+                <div className="bg-card rounded-xl border border-border p-5 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Smartphone className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-sm">iPhone / iPad (Safari)</h3>
+                  </div>
+                  <ol className="space-y-1.5 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">1.</span> Open Plan OS in <strong className="text-foreground">Safari</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">2.</span> Tap the <strong className="text-foreground">Share</strong> button (box with arrow)</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">3.</span> Scroll and tap <strong className="text-foreground">"Add to Home Screen"</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">4.</span> Tap <strong className="text-foreground">Add</strong> — done!</li>
+                  </ol>
+                </div>
+              </FadeIn>
+
+              <FadeIn delay={0.1}>
+                <div className="bg-card rounded-xl border border-border p-5 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Monitor className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-sm">Android (Chrome)</h3>
+                  </div>
+                  <ol className="space-y-1.5 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">1.</span> Open Plan OS in <strong className="text-foreground">Chrome</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">2.</span> Tap the <strong className="text-foreground">⋮ menu</strong> (top right)</li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">3.</span> Tap <strong className="text-foreground">"Add to Home screen"</strong></li>
+                    <li className="flex items-start gap-2"><span className="font-bold text-foreground">4.</span> Tap <strong className="text-foreground">Add</strong> — opens like a real app!</li>
+                  </ol>
+                </div>
+              </FadeIn>
+            </div>
+
+            <FadeIn delay={0.15} className="text-center mt-4">
+              <p className="text-[11px] text-muted-foreground">Once installed, Plan OS opens full-screen without browser bars — just like a native app.</p>
+            </FadeIn>
+          </div>
+        </section>
+
+
         <section className="py-16 sm:py-20 px-4">
           <FadeIn>
             <div className="max-w-sm mx-auto text-center bg-card rounded-2xl p-8 border border-border shadow-card">

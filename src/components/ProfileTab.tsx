@@ -300,7 +300,9 @@ export function ProfileTab(props: ProfileTabProps) {
         'neetpg-target-rank', 'neetpg-pomodoro', 'neetpg-sr', 'neetpg-content-types',
         'neetpg-break-duration', 'neetpg-marking-scheme', 'neetpg-study-logs',
         'neetpg-mcq-logs', 'neetpg-pyq-year-from', 'neetpg-pyq-year-to',
-        'neetpg-mcq-goal', 'neetpg-push-notifications', 'planos-pyq-tracker-v2', 'readiness-snapshots',
+        'neetpg-mcq-goal', 'neetpg-push-notifications', 'planos-pyq-tracker-v2',
+        'neetpg-readiness-trend', 'neetpg-revision-dates',
+        'planos-onboarded', 'planos-notification-history', 'planos-last-notification',
         'theme', 'planos-user'
       ];
 
