@@ -55,6 +55,48 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const getSubjectName = useCallback((subjectId: string) => 
     subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
 
+  // Calculate revision streak
+  const revisionStreak = useMemo(() => {
+    if (revisionDates.length === 0) return { current: 0, longest: 0 };
+    
+    const sortedDates = [...new Set(revisionDates)]
+      .map(d => startOfDay(new Date(d)))
+      .sort((a, b) => b.getTime() - a.getTime());
+    
+    const today = startOfDay(new Date());
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    
+    // Check if streak is active (last revision was today or yesterday)
+    const lastDate = sortedDates[0];
+    const daysSinceLastRevision = differenceInDays(today, lastDate);
+    
+    if (daysSinceLastRevision <= 1) {
+      // Calculate current streak
+      for (let i = 0; i < sortedDates.length; i++) {
+        const expectedDate = addDays(today, -i);
+        if (differenceInDays(expectedDate, sortedDates[i]) === 0) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+    
+    // Calculate longest streak
+    for (let i = 0; i < sortedDates.length; i++) {
+      if (i === 0 || differenceInDays(sortedDates[i - 1], sortedDates[i]) === 1) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+    
+    return { current: currentStreak, longest: longestStreak };
+  }, [revisionDates]);
+
   // Build only CURRENT revision items (no future projections for performance)
   const allRevisions = useMemo(() => {
     const items: RevisionItem[] = [];
