@@ -146,22 +146,36 @@ export function RevisionCalendar({ chapters, srSettings }: RevisionCalendarProps
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="border-t border-border pt-3 space-y-1.5"
+          exit={{ opacity: 0, height: 0 }}
+          className="border-t border-border pt-4 space-y-2"
         >
-          <p className="text-xs font-medium text-muted-foreground mb-2">
-            {format(new Date(selectedDate), 'EEEE, MMM d')} — {selectedRevisions.length} revision{selectedRevisions.length !== 1 ? 's' : ''}
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold">
+              {format(new Date(selectedDate), 'EEEE, MMMM d')}
+            </p>
+            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+              {selectedRevisions.length} revision{selectedRevisions.length !== 1 ? 's' : ''}
+            </span>
+          </div>
           {selectedRevisions.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">No revisions on this day</p>
+            <p className="text-xs text-muted-foreground text-center py-6">No revisions scheduled</p>
           ) : (
             selectedRevisions.map((r, i) => (
               <div key={i} className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-xs",
-                r.isOverdue ? "bg-destructive/10" : "bg-secondary/40"
+                "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs border transition-colors",
+                r.isOverdue ? "bg-destructive/10 border-destructive/30" : "bg-secondary/50 border-border hover:bg-secondary"
               )}>
-                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", r.isOverdue ? "bg-destructive" : "bg-primary")} />
+                <div className={cn(
+                  "w-2 h-2 rounded-full shrink-0",
+                  r.isOverdue ? "bg-destructive" : "bg-primary"
+                )} />
                 <span className="truncate flex-1 font-medium">{r.topicName}</span>
-                <span className="text-muted-foreground shrink-0">S{r.sessionNumber}</span>
+                <span className={cn(
+                  "shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold",
+                  r.isOverdue ? "bg-destructive/20 text-destructive" : "bg-primary/15 text-primary"
+                )}>
+                  S{r.sessionNumber}
+                </span>
               </div>
             ))
           )}
