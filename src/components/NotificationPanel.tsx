@@ -62,50 +62,51 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
   const notifications = useMemo((): Notification[] => {
     const items: Notification[] = [];
 
-    // Overdue revisions
-    reminders.filter(r => r.isOverdue).forEach(r => {
+    // Group overdue revisions
+    const overdueRevisions = reminders.filter(r => r.isOverdue);
+    if (overdueRevisions.length > 0) {
       items.push({
-        id: `rev-${r.topicId}`,
+        id: 'rev-overdue-group',
         type: 'revision',
-        title: `Revision overdue: ${r.topicName}`,
-        description: `${r.sessionName} • ${formatDistanceToNow(r.dueDate)} overdue`,
-        time: r.dueDate,
+        title: `${overdueRevisions.length} revision${overdueRevisions.length > 1 ? 's' : ''} overdue`,
+        description: overdueRevisions.map(r => r.topicName).slice(0, 3).join(', ') + (overdueRevisions.length > 3 ? ` +${overdueRevisions.length - 3} more` : ''),
         icon: RotateCcw,
         color: 'text-destructive',
-        action: () => onCompleteRevision(r.topicId),
-        actionLabel: 'Done',
+        action: () => onNavigateToRevision(),
+        actionLabel: 'View all',
       });
-    });
+    }
 
-    // Today's revisions
-    reminders.filter(r => !r.isOverdue && !r.isDueTomorrow).forEach(r => {
-      const inTasks = tasks.some(t => t.topicId === r.topicId && t.type === 'revision' && !t.completed);
-      if (!inTasks) {
-        items.push({
-          id: `rev-today-${r.topicId}`,
-          type: 'revision',
-          title: `Revision due: ${r.topicName}`,
-          description: r.sessionName,
-          time: r.dueDate,
-          icon: Clock,
-          color: 'text-amber-500',
-          action: () => onNavigateToRevision(),
-          actionLabel: 'View',
-        });
-      }
-    });
-
-    // Tomorrow's revisions
-    reminders.filter(r => r.isDueTomorrow).forEach(r => {
+    // Group today's revisions (excluding those already in tasks)
+    const todayRevisions = reminders.filter(r => !r.isOverdue && !r.isDueTomorrow);
+    const todayNotInTasks = todayRevisions.filter(r => 
+      !tasks.some(t => t.topicId === r.topicId && t.type === 'revision' && !t.completed)
+    );
+    if (todayNotInTasks.length > 0) {
       items.push({
-        id: `rev-tmrw-${r.topicId}`,
+        id: 'rev-today-group',
+        type: 'revision',
+        title: `${todayNotInTasks.length} revision${todayNotInTasks.length > 1 ? 's' : ''} due today`,
+        description: todayNotInTasks.map(r => r.topicName).slice(0, 3).join(', ') + (todayNotInTasks.length > 3 ? ` +${todayNotInTasks.length - 3} more` : ''),
+        icon: Clock,
+        color: 'text-amber-500',
+        action: () => onNavigateToRevision(),
+        actionLabel: 'View',
+      });
+    }
+
+    // Group tomorrow's revisions
+    const tomorrowRevisions = reminders.filter(r => r.isDueTomorrow);
+    if (tomorrowRevisions.length > 0) {
+      items.push({
+        id: 'rev-tmrw-group',
         type: 'reminder',
-        title: `Tomorrow: ${r.topicName}`,
-        description: `${r.sessionName} due tomorrow`,
+        title: `${tomorrowRevisions.length} revision${tomorrowRevisions.length > 1 ? 's' : ''} due tomorrow`,
+        description: tomorrowRevisions.map(r => r.topicName).slice(0, 3).join(', ') + (tomorrowRevisions.length > 3 ? ` +${tomorrowRevisions.length - 3} more` : ''),
         icon: Clock,
         color: 'text-blue-500',
       });
-    });
+    }
 
     // Recent achievements
     achievements.filter(a => a.unlockedAt).forEach(a => {
@@ -162,7 +163,7 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
     });
 
     return items.filter(n => !dismissed.has(n.id));
-  }, [reminders, achievements, streakDays, tasks, dismissed, onCompleteRevision, onNavigateToRevision]);
+  }, [reminders, achievements, streakDays, tasks, dismissed, onNavigateToRevision]);
 
   const handleDismiss = (id: string) => {
     setDismissed(prev => new Set(prev).add(id));
