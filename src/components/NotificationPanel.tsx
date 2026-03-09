@@ -89,7 +89,16 @@ export function NotificationBell({ count, onClick }: { count: number; onClick: (
 
 export function NotificationPanel({ reminders, achievements, streakDays, tasks, onCompleteRevision, onNavigateToRevision }: NotificationPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [dismissed, setDismissed] = useState<Set<string>>(() => {
+    // Load previously dismissed notification IDs from history
+    const history = loadDismissedHistory();
+    // Only keep dismissals from the last 24 hours for recurring notifications
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentIds = history
+      .filter(n => new Date(n.dismissedAt).getTime() > oneDayAgo)
+      .map(n => n.id);
+    return new Set(recentIds);
+  });
   const navigate = useNavigate();
 
   const notifications = useMemo((): Notification[] => {

@@ -192,10 +192,7 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                 </div>
                 {topic.confidence > 0 && (
                   <p className="text-[10px] text-muted-foreground px-2">
-                    Revisions: {(() => {
-                      const schedule = DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3];
-                      return schedule.map(s => `${s.daysAfterPrevious}d`).join(' → ');
-                    })()}
+                    1st revision in {(DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d, {(DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3]).length} total sessions
                   </p>
                 )}
               </div>

@@ -317,10 +317,7 @@ export function TaskItem({
                     ))}
                   </div>
                   <p className="text-[10px] text-muted-foreground text-center">
-                    Next revisions: {(() => {
-                      const schedule = DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3];
-                      return schedule.slice(0, 4).map(s => `${s.daysAfterPrevious}d`).join(' → ') + '…';
-                    })()}
+                    1st revision in {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d, then {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3]).length - 1} more sessions
                   </p>
                   <button
                     onClick={(e) => { e.stopPropagation(); confirmDoneWithConfidence(); }}
