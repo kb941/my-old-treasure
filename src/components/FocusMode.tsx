@@ -209,10 +209,7 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                   ))}
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Revisions: {(() => {
-                    const schedule = DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3];
-                    return schedule.map(s => `${s.daysAfterPrevious}d`).join(' → ');
-                  })()}
+                  1st revision in {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d, then {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3]).length - 1} more sessions
                 </p>
                 <Button onClick={() => finishCurrentTask(selectedConfidence)} className="w-full gradient-success text-primary-foreground">
                   Confirm & Next
