@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
-import { subWeeks, startOfWeek, addDays, format, startOfDay, isBefore, isAfter } from 'date-fns';
+import { subWeeks, startOfWeek, addDays, format, startOfDay, isAfter, getMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface RevisionHeatmapProps {
   revisionDates: string[];
 }
 
+const CELL_SIZE = 12;
+const GAP = 3;
+
 export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
-  const { weeks, maxCount, totalRevisions, activeDays } = useMemo(() => {
+  const { weeks, maxCount, totalRevisions, activeDays, monthLabels } = useMemo(() => {
     const today = startOfDay(new Date());
-    const weeksToShow = 12; // ~3 months
+    const weeksToShow = 16;
     const start = startOfWeek(subWeeks(today, weeksToShow - 1), { weekStartsOn: 0 });
     
-    // Count revisions per day
     const countMap = new Map<string, number>();
     revisionDates.forEach(dateStr => {
       const date = startOfDay(new Date(dateStr));
@@ -20,12 +22,15 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
       countMap.set(key, (countMap.get(key) || 0) + 1);
     });
 
-    // Build weeks array (columns) with 7 days each (rows)
     const weeksData: Array<Array<{ date: Date; count: number; key: string; isInRange: boolean }>> = [];
     let currentDate = start;
     let total = 0;
     let active = 0;
     let max = 1;
+
+    // Track month labels with column positions
+    const months: { label: string; col: number }[] = [];
+    let lastMonth = -1;
 
     for (let w = 0; w < weeksToShow; w++) {
       const week: Array<{ date: Date; count: number; key: string; isInRange: boolean }> = [];
@@ -34,6 +39,15 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
         const count = countMap.get(key) || 0;
         const isInRange = !isAfter(currentDate, today);
         
+        // Track month change on first day of week
+        if (d === 0) {
+          const m = getMonth(currentDate);
+          if (m !== lastMonth) {
+            months.push({ label: format(currentDate, 'MMM'), col: w });
+            lastMonth = m;
+          }
+        }
+
         if (isInRange) {
           total += count;
           if (count > 0) active++;
@@ -46,7 +60,7 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
       weeksData.push(week);
     }
 
-    return { weeks: weeksData, maxCount: max, totalRevisions: total, activeDays: active };
+    return { weeks: weeksData, maxCount: max, totalRevisions: total, activeDays: active, monthLabels: months };
   }, [revisionDates]);
 
   const getIntensityColor = (count: number, isInRange: boolean) => {
@@ -59,33 +73,51 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
     return 'bg-orange-500 dark:bg-orange-400';
   };
 
-  const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const dayLabels = ['', 'M', '', 'W', '', 'F', ''];
+  const dayLabelWidth = 16;
+  const gridWidth = weeks.length * (CELL_SIZE + GAP) - GAP;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5 w-full">
+      {/* Month labels */}
+      <div className="flex" style={{ paddingLeft: dayLabelWidth + GAP }}>
+        <div className="relative w-full" style={{ height: 14 }}>
+          {monthLabels.map((m, i) => (
+            <span
+              key={i}
+              className="absolute text-[10px] text-muted-foreground"
+              style={{ left: m.col * (CELL_SIZE + GAP) }}
+            >
+              {m.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Heatmap grid */}
-      <div className="flex gap-1">
-        {/* Day labels column */}
-        <div className="flex flex-col gap-[3px] pr-1">
+      <div className="flex w-full">
+        {/* Day labels */}
+        <div className="flex flex-col shrink-0" style={{ width: dayLabelWidth, gap: GAP }}>
           {dayLabels.map((label, i) => (
-            <div key={i} className="h-[10px] w-3 text-[8px] text-muted-foreground flex items-center justify-end">
-              {i % 2 === 1 ? label : ''}
+            <div key={i} className="text-[9px] text-muted-foreground flex items-center justify-end pr-1" style={{ height: CELL_SIZE }}>
+              {label}
             </div>
           ))}
         </div>
-        
-        {/* Weeks columns */}
-        <div className="flex gap-[3px] overflow-x-auto">
+
+        {/* Grid - fills remaining space */}
+        <div className="flex flex-1 justify-between" style={{ gap: GAP }}>
           {weeks.map((week, weekIdx) => (
-            <div key={weekIdx} className="flex flex-col gap-[3px]">
+            <div key={weekIdx} className="flex flex-col" style={{ gap: GAP }}>
               {week.map((day) => (
                 <div
                   key={day.key}
                   className={cn(
-                    "w-[10px] h-[10px] rounded-sm transition-colors",
+                    "rounded-sm transition-colors flex-1 aspect-square",
                     getIntensityColor(day.count, day.isInRange),
                     day.isInRange && "hover:ring-1 hover:ring-foreground/30"
                   )}
+                  style={{ minWidth: CELL_SIZE, minHeight: CELL_SIZE }}
                   title={day.isInRange ? `${format(day.date, 'MMM d')}: ${day.count} revision${day.count !== 1 ? 's' : ''}` : ''}
                 />
               ))}
