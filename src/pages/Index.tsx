@@ -92,6 +92,32 @@ const Index = () => {
     }
   }, []);
 
+  // Auto-move revision tasks from "week" to "today" if their topic's revision is due
+  useEffect(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const allTopics = chapters.flatMap(ch => ch.topics.map(t => ({ ...t, chapterId: ch.id })));
+    
+    setTasks(prev => {
+      let changed = false;
+      const updated = prev.map(task => {
+        if (task.column === 'week' && task.type === 'revision' && task.topicId && !task.completed) {
+          const topic = allTopics.find(t => t.id === task.topicId);
+          if (topic?.nextRevisionDate) {
+            const dueDate = new Date(topic.nextRevisionDate);
+            dueDate.setHours(0, 0, 0, 0);
+            if (dueDate <= now) {
+              changed = true;
+              return { ...task, column: 'today' as const, priority: 'high' as const };
+            }
+          }
+        }
+        return task;
+      });
+      return changed ? updated : prev;
+    });
+  }, [chapters, tasks.length]);
+
   // Reset state and scroll to top when switching tabs
   useEffect(() => {
     setExpandedSubjectId(null);

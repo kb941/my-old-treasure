@@ -125,6 +125,7 @@ export function ProfileTab(props: ProfileTabProps) {
     }
     return result;
   });
+  const [maintenanceInterval, setMaintenanceInterval] = useState(props.srSettings.maintenanceIntervalDays ?? 90);
 
   const [localContentTypes, setLocalContentTypes] = useState<ContentType[]>(() =>
     props.contentTypes.map(ct => ({ ...ct }))
@@ -155,6 +156,7 @@ export function ProfileTab(props: ProfileTabProps) {
       result[i] = (s[i] || DEFAULT_SR_SCHEDULES[i] || []).map(x => ({ ...x }));
     }
     setSrSchedules(result);
+    setMaintenanceInterval(props.srSettings.maintenanceIntervalDays ?? 90);
     setHasChanges(false);
   }, [props.examDate, props.examName, props.targetScore, props.targetRank, props.pomodoroSettings, props.breakDuration, props.markingScheme, props.pyqYearFrom, props.pyqYearTo, props.mcqGoalPerSubject]);
 
@@ -197,7 +199,7 @@ export function ProfileTab(props: ProfileTabProps) {
       dailyStudyTarget,
       weeklyMockTarget,
       pomodoroSettings: { studyDuration, shortBreakDuration, longBreakDuration, sessionsBeforeLongBreak },
-      srSettings: { schedules: srSchedules },
+      srSettings: { schedules: srSchedules, maintenanceIntervalDays: maintenanceInterval },
       contentTypes: localContentTypes,
       breakDuration: breakDurationSetting,
       markingScheme: localMarkingScheme,
@@ -225,6 +227,7 @@ export function ProfileTab(props: ProfileTabProps) {
       result[i] = DEFAULT_SR_SCHEDULES[i].map(x => ({ ...x }));
     }
     setSrSchedules(result);
+    setMaintenanceInterval(90);
     markChanged();
   };
 
@@ -788,7 +791,7 @@ export function ProfileTab(props: ProfileTabProps) {
 
           {/* === Revision Tab === */}
           <TabsContent value="revision" className="p-4 space-y-6 mt-0">
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold flex items-center gap-2">
                   <RotateCcw className="w-4 h-4 text-primary" />
@@ -796,28 +799,67 @@ export function ProfileTab(props: ProfileTabProps) {
                 </h3>
                 <Button variant="ghost" size="sm" onClick={resetSrDefaults} className="text-xs">Reset Defaults</Button>
               </div>
-              <p className="text-xs text-muted-foreground">Configure revision intervals based on confidence level.</p>
-              {([1, 2, 3, 4, 5] as const).map(tier => (
-                <div key={tier} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <Star key={s} className={`w-3 h-3 ${s <= tier ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'}`} />
-                      ))}
-                    </div>
-                    <span className="text-sm font-medium">{tier} Star{tier > 1 ? 's' : ''}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(srSchedules[tier] || []).map((session, idx) => (
-                      <div key={idx} className="flex items-center gap-1 bg-secondary/30 rounded-lg px-2 py-1">
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">{session.name}:</span>
-                        <Input type="number" value={session.daysAfterPrevious} onChange={(e) => updateSrDay(tier, idx, Number(e.target.value))} className="w-12 h-6 text-center text-xs p-0" min={1} max={120} />
-                        <span className="text-xs text-muted-foreground">d</span>
-                      </div>
-                    ))}
-                  </div>
+              <p className="text-xs text-muted-foreground">Set review intervals (in days) for each confidence tier. After the final review, maintenance repeats at the interval below.</p>
+
+              {/* Maintenance Interval */}
+              <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl p-3">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Maintenance Interval</p>
+                  <p className="text-[11px] text-muted-foreground">Repeating review after all sessions complete</p>
                 </div>
-              ))}
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    type="number"
+                    value={maintenanceInterval}
+                    onChange={(e) => { setMaintenanceInterval(Math.max(7, Number(e.target.value))); markChanged(); }}
+                    className="w-16 h-8 text-center text-sm"
+                    min={7} max={365}
+                  />
+                  <span className="text-xs text-muted-foreground">days</span>
+                </div>
+              </div>
+
+              {/* Confidence Tiers */}
+              <div className="space-y-3">
+                {([1, 2, 3, 4, 5] as const).map(tier => {
+                  const tierLabels: Record<number, string> = { 1: 'Very Low', 2: 'Low', 3: 'Medium', 4: 'High', 5: 'Very High' };
+                  return (
+                    <div key={tier} className="bg-secondary/30 rounded-xl p-3 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} className={cn("w-3.5 h-3.5", s <= tier ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20')} />
+                            ))}
+                          </div>
+                          <span className="text-sm font-medium">{tierLabels[tier]}</span>
+                        </div>
+                        <span className="text-[11px] text-muted-foreground">{(srSchedules[tier] || []).length} sessions</span>
+                      </div>
+                      <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                        {(srSchedules[tier] || []).map((session, idx) => (
+                          <div key={idx} className="flex flex-col items-center gap-0.5 shrink-0">
+                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">{session.name}</span>
+                            <div className="flex items-center gap-0.5 bg-background rounded-lg border border-border px-1.5 py-1">
+                              <Input
+                                type="number"
+                                value={session.daysAfterPrevious}
+                                onChange={(e) => updateSrDay(tier, idx, Number(e.target.value))}
+                                className="w-10 h-5 text-center text-xs p-0 border-0 bg-transparent"
+                                min={1} max={120}
+                              />
+                              <span className="text-[10px] text-muted-foreground">d</span>
+                            </div>
+                            {idx < (srSchedules[tier] || []).length - 1 && (
+                              <div className="hidden" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </TabsContent>
 
