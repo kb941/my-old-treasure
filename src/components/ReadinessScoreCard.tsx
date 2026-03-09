@@ -158,7 +158,6 @@ function Sparkline({ data, color, width = 80, height = 24 }: { data: number[]; c
 function TrendBadge({ trend }: { trend: number[] }) {
   if (trend.length < 2) return null;
   const diff = trend[trend.length - 1] - trend[0];
-  if (Math.abs(diff) < 0.1) return null;
   const icon = diff > 1 ? TrendingUp : diff < -1 ? TrendingDown : Minus;
   const Icon = icon;
   const colorCls = diff > 1 ? 'text-emerald-500' : diff < -1 ? 'text-destructive' : 'text-muted-foreground';
