@@ -24,7 +24,7 @@ export function RankPredictor({ mockTests, markingScheme, target }: RankPredicto
     const totalQ = latest.totalQuestions || 200;
     const correct = Math.round((latest.score / 100) * totalQ);
     const wrong = totalQ - correct;
-    const marks = correct * (markingScheme.correctMarks || 4) - wrong * (markingScheme.negativeMarks || 1);
+    const marks = correct * (markingScheme.correctMarks || 4) - wrong * (markingScheme.incorrectMarks || 1);
     return Math.max(0, Math.min(800, marks));
   }, [mockTests, markingScheme]);
 
