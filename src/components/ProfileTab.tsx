@@ -87,6 +87,8 @@ export function ProfileTab(props: ProfileTabProps) {
 
   // Initialize/reset local state from props
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const [newExamDate, setNewExamDate] = useState<Date>(props.examDate);
   const [newExamName, setNewExamName] = useState(props.examName);
   const [newTargetScore, setNewTargetScore] = useState(props.targetScore);
