@@ -303,23 +303,25 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
           <div className="p-2 space-y-2 pb-6">
             {subjectChapters.map(chapter => {
               const isOpen = expandedChapters.includes(chapter.id);
+              const chapterProgress = getChapterProgress(chapter);
               return (
                 <div key={chapter.id} className="bg-card rounded-xl border border-border overflow-hidden">
                   {/* Chapter Header */}
-                  <div className="flex items-center gap-1.5 p-2">
-                    <button
-                      onClick={() => toggleChapter(chapter.id)}
-                      className="flex items-center gap-1.5 flex-1 text-left min-w-0"
-                    >
-                      <ChevronDown 
-                        className={cn(
-                          "w-3.5 h-3.5 text-muted-foreground transition-transform shrink-0",
-                          !isOpen && "-rotate-90"
-                        )}
-                      />
-                      <span className="font-medium text-sm truncate">{chapter.name}</span>
-                      <span className="text-[10px] text-muted-foreground ml-auto mr-1 shrink-0">
-                        {chapter.topics.length}
+                  <div className="p-2 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => toggleChapter(chapter.id)}
+                        className="flex items-center gap-1.5 flex-1 text-left min-w-0"
+                      >
+                        <ChevronDown 
+                          className={cn(
+                            "w-3.5 h-3.5 text-muted-foreground transition-transform shrink-0",
+                            !isOpen && "-rotate-90"
+                          )}
+                        />
+                        <span className="font-medium text-sm truncate">{chapter.name}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto mr-1 shrink-0">
+                          {chapter.topics.filter(t => t.completedStages.length > 0).length}/{chapter.topics.length}
                       </span>
                     </button>
                     <button
