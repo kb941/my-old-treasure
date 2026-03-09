@@ -70,6 +70,7 @@ const Index = () => {
   const [pyqYearTo, setPyqYearTo] = useLocalStorage<number>('neetpg-pyq-year-to', 2025);
   const [mcqGoalPerSubject, setMcqGoalPerSubject] = useLocalStorage<number>('neetpg-mcq-goal', 100);
   const [pushNotificationSettings, setPushNotificationSettings] = useLocalStorage<PushNotificationSettings>('neetpg-push-notifications', DEFAULT_PUSH_SETTINGS);
+  const [revisionDates, setRevisionDates] = useLocalStorage<string[]>('neetpg-revision-dates', []);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
