@@ -240,7 +240,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         {isCurrent && isInTasks(item.topicId) && (
           <span className="text-[10px] text-primary font-medium px-2">In tasks</span>
         )}
-        {isCurrent && (item.isOverdue || item.isDueToday) && (
+        {isCurrent && (
           <Button size="sm" onClick={() => onCompleteRevision(item.topicId)} className="h-7 px-2 text-xs">
             <Check className="w-3 h-3 mr-1" />Done
           </Button>
