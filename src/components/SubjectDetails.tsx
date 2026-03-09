@@ -489,7 +489,6 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px] text-muted-foreground">
               {subjectChapters.length} ch • {totalTopics} topics
-              {lastStudied && ` • ${formatDistanceToNow(lastStudied, { addSuffix: true })}`}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-1">
