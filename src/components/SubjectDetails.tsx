@@ -17,6 +17,7 @@ interface SubjectDetailsProps {
   srSettings?: SpacedRepetitionSettings;
   forceExpanded?: boolean;
   examName?: string;
+  studyLogs?: StudyLog[];
 }
 
 type WeightageInfo = { avg: number; range?: [number, number] };
