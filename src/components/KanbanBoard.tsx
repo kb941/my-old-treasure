@@ -143,6 +143,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               isDraggable={false}
               isEditMode={false}
               pomodoroSettings={pomodoroSettings}
+              activeTimerTaskId={activeTimerTaskId}
+              onTimerStart={setActiveTimerTaskId}
             />
           ))}
         </AnimatePresence>
