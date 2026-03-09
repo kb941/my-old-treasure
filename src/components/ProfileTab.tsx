@@ -776,6 +776,34 @@ export function ProfileTab(props: ProfileTabProps) {
           </Button>
         </div>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Import Data - Overwrite Warning
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will overwrite all your current data with the backup file. Your existing progress, tasks, and settings will be replaced.
+              <br /><br />
+              <strong>This action cannot be undone.</strong> Make sure you have a recent backup before proceeding.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowImportConfirm(false);
+              setPendingImportFile(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmImport} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Import & Overwrite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
