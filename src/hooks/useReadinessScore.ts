@@ -563,15 +563,28 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
     // Sort subject breakdown by gap (biggest gaps first)
     subjectBreakdown.sort((a, b) => b.gap - a.gap);
 
-    // Recommendations
+    // Recommendations - use dynamic content type names
     const recommendations: string[] = [];
+    const primaryContentName = enabledStages.length > 0 
+      ? contentTypes.find(ct => ct.id === enabledStages[0])?.name || 'content'
+      : 'content';
+    
     if (!hasAnyProgress) {
       recommendations.push('Start by going to Subjects tab and marking completed stages');
     }
-    if (syllabusScore < 20 && hasAnyProgress) recommendations.push('Focus on completing Main videos for all subjects');
+    if (syllabusScore < 20 && hasAnyProgress) {
+      recommendations.push(`Focus on completing ${primaryContentName} for all subjects`);
+    }
     if (revisionScore < 8 && hasAnyProgress) recommendations.push('Complete more revision cycles across subjects');
     if (mcqScore < 10 && hasAnyProgress) recommendations.push('Increase MCQ practice volume');
-    if (critWeakSubs.length > 0) recommendations.push(`Prioritize: ${critWeakSubs.map(s => s.name).join(', ')}`);
+    
+    // Only recommend critical subjects that are actually below 50% completion
+    if (critWeakSubs.length > 0) {
+      // Filter to only show top 3 weakest critical subjects
+      const topWeakCritical = critWeakSubs.slice(0, 3);
+      recommendations.push(`Prioritize: ${topWeakCritical.map(s => s.name).join(', ')}`);
+    }
+    
     if (mockTests.length < 3 && hasAnyProgress) recommendations.push('Take your next mock test this week');
     if (pyqsDone < scopedPyqEntries.length * 0.5 && hasAnyProgress) recommendations.push('Complete more PYQ sessions');
     if (subjectBreakdown.length > 0 && subjectBreakdown[0].gap > 2) {
