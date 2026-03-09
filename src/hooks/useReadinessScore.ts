@@ -447,13 +447,15 @@ export function useReadinessScore(input: ReadinessInput): ReadinessResult {
 
     let balancedBonus = 0;
     const criticalSubNames = CRITICAL_SUBJECT_IDS;
-    const weakCritical = subjects.filter(s => {
+    // Use same threshold (50%) and same check (main-video or enabled primary stage) as penalty for consistency
+    const primaryStage = enabledStages.length > 0 ? enabledStages[0] : 'main-video';
+    const weakCriticalForBonus = subjects.filter(s => {
       if (!criticalSubNames.includes(s.id)) return false;
       const subTopics = allTopics.filter(t => t.subjectId === s.id);
-      const done = subTopics.filter(t => t.completedStages.length > 0).length;
-      return subTopics.length > 0 && (done / subTopics.length) < 0.4;
+      const done = subTopics.filter(t => t.completedStages.includes(primaryStage)).length;
+      return subTopics.length > 0 && (done / subTopics.length) < 0.5;
     });
-    if (weakCritical.length === 0 && hasAnyProgress && totalTopics > 0) {
+    if (weakCriticalForBonus.length === 0 && hasAnyProgress && totalTopics > 0) {
       balancedBonus = 2;
       bonusDetails.push('Balanced: All critical subjects strong 💎');
     }
