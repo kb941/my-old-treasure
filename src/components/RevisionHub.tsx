@@ -42,7 +42,7 @@ interface RevisionHubProps {
 }
 
 type ViewFilter = 'all' | 'overdue' | 'today' | 'week' | 'month';
-type ViewMode = 'list' | 'calendar';
+type ViewMode = 'list' | 'calendar' | 'streak';
 
 const PAGE_SIZE = 15;
 
