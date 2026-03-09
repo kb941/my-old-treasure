@@ -14,6 +14,16 @@ import { cn } from '@/lib/utils';
 import { ProfileData } from '@/components/ProfileModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const EXAM_WEIGHTAGES: Record<string, Record<string, { avg: number; range?: [number, number] }>> = {
   'NEET PG': {
@@ -77,6 +87,8 @@ export function ProfileTab(props: ProfileTabProps) {
 
   // Initialize/reset local state from props
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const [newExamDate, setNewExamDate] = useState<Date>(props.examDate);
   const [newExamName, setNewExamName] = useState(props.examName);
   const [newTargetScore, setNewTargetScore] = useState(props.targetScore);
@@ -294,6 +306,13 @@ export function ProfileTab(props: ProfileTabProps) {
   const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPendingImportFile(file);
+    setShowImportConfirm(true);
+    e.target.value = '';
+  };
+
+  const confirmImport = () => {
+    if (!pendingImportFile) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
@@ -308,8 +327,9 @@ export function ProfileTab(props: ProfileTabProps) {
         toast({ title: 'Import failed', description: 'The file is not a valid backup.', variant: 'destructive' });
       }
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.readAsText(pendingImportFile);
+    setPendingImportFile(null);
+    setShowImportConfirm(false);
   };
 
   return (
@@ -756,6 +776,34 @@ export function ProfileTab(props: ProfileTabProps) {
           </Button>
         </div>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Import Data - Overwrite Warning
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will overwrite all your current data with the backup file. Your existing progress, tasks, and settings will be replaced.
+              <br /><br />
+              <strong>This action cannot be undone.</strong> Make sure you have a recent backup before proceeding.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowImportConfirm(false);
+              setPendingImportFile(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmImport} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Import & Overwrite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
