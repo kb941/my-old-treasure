@@ -130,6 +130,7 @@ export function TaskItem({
     setSessionCount(0);
     setTimeRemaining(pomodoroSettings.studyDuration * 60);
     setTotalElapsedStudyTime(0);
+    onTimerStart?.(null);
   };
 
   const fireConfetti = () => {
