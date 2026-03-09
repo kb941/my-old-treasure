@@ -55,6 +55,8 @@ interface TaskItemProps {
   isDraggable?: boolean;
   isEditMode?: boolean;
   pomodoroSettings?: PomodoroSettings;
+  activeTimerTaskId?: string | null;
+  onTimerStart?: (taskId: string | null) => void;
 }
 
 export function TaskItem({
