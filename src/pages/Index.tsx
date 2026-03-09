@@ -70,6 +70,7 @@ const Index = () => {
   const [pyqYearTo, setPyqYearTo] = useLocalStorage<number>('neetpg-pyq-year-to', 2025);
   const [mcqGoalPerSubject, setMcqGoalPerSubject] = useLocalStorage<number>('neetpg-mcq-goal', 100);
   const [pushNotificationSettings, setPushNotificationSettings] = useLocalStorage<PushNotificationSettings>('neetpg-push-notifications', DEFAULT_PUSH_SETTINGS);
+  const [revisionDates, setRevisionDates] = useLocalStorage<string[]>('neetpg-revision-dates', []);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
@@ -327,6 +328,10 @@ const Index = () => {
   };
 
   const handleCompleteRevision = (topicId: string) => {
+    // Track revision date for streak
+    const today = new Date().toISOString().split('T')[0];
+    setRevisionDates(prev => prev.includes(today) ? prev : [...prev, today]);
+    
     setChapters(prev => prev.map(chapter => ({
       ...chapter,
       topics: chapter.topics.map(topic => {
@@ -623,6 +628,7 @@ const Index = () => {
               onCompleteRevision={handleCompleteRevision}
               onAddToTasks={handleAddRevisionTask} subjects={subjects}
               tasks={tasks}
+              revisionDates={revisionDates}
             />
           )}
 

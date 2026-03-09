@@ -37,6 +37,7 @@ interface RevisionHubProps {
   onAddToTasks: (task: Omit<Task, 'id'>) => void;
   subjects: { id: string; name: string }[];
   tasks?: Task[];
+  revisionDates: string[];
 }
 
 type ViewFilter = 'all' | 'overdue' | 'today' | 'week' | 'month';
@@ -44,7 +45,7 @@ type ViewMode = 'list' | 'calendar';
 
 const PAGE_SIZE = 15;
 
-export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToTasks, subjects, tasks = [] }: RevisionHubProps) {
+export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToTasks, subjects, tasks = [], revisionDates }: RevisionHubProps) {
   const [filter, setFilter] = useState<ViewFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -53,6 +54,48 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   const getSubjectName = useCallback((subjectId: string) => 
     subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
+
+  // Calculate revision streak
+  const revisionStreak = useMemo(() => {
+    if (revisionDates.length === 0) return { current: 0, longest: 0 };
+    
+    const sortedDates = [...new Set(revisionDates)]
+      .map(d => startOfDay(new Date(d)))
+      .sort((a, b) => b.getTime() - a.getTime());
+    
+    const today = startOfDay(new Date());
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    
+    // Check if streak is active (last revision was today or yesterday)
+    const lastDate = sortedDates[0];
+    const daysSinceLastRevision = differenceInDays(today, lastDate);
+    
+    if (daysSinceLastRevision <= 1) {
+      // Calculate current streak
+      for (let i = 0; i < sortedDates.length; i++) {
+        const expectedDate = addDays(today, -i);
+        if (differenceInDays(expectedDate, sortedDates[i]) === 0) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+    
+    // Calculate longest streak
+    for (let i = 0; i < sortedDates.length; i++) {
+      if (i === 0 || differenceInDays(sortedDates[i - 1], sortedDates[i]) === 1) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+    
+    return { current: currentStreak, longest: longestStreak };
+  }, [revisionDates]);
 
   // Build only CURRENT revision items (no future projections for performance)
   const allRevisions = useMemo(() => {
@@ -251,6 +294,31 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   return (
     <div className="space-y-4">
+      {/* Revision Streak Banner */}
+      {revisionStreak.current > 0 && (
+        <div className="gradient-flame rounded-2xl p-4 shadow-card border border-primary/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <span className="text-2xl">🔥</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  {revisionStreak.current} Day Streak!
+                </h3>
+                <p className="text-sm text-white/80">
+                  Keep the momentum going
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/70">Best Streak</p>
+              <p className="text-2xl font-bold text-white">{revisionStreak.longest}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className={cn("rounded-xl p-3 text-center border", overdueCount > 0 ? "bg-destructive/10 border-destructive/20" : "bg-card border-border")}>
