@@ -156,6 +156,7 @@ export function ProfileTab(props: ProfileTabProps) {
       result[i] = (s[i] || DEFAULT_SR_SCHEDULES[i] || []).map(x => ({ ...x }));
     }
     setSrSchedules(result);
+    setMaintenanceInterval(props.srSettings.maintenanceIntervalDays ?? 90);
     setHasChanges(false);
   }, [props.examDate, props.examName, props.targetScore, props.targetRank, props.pomodoroSettings, props.breakDuration, props.markingScheme, props.pyqYearFrom, props.pyqYearTo, props.mcqGoalPerSubject]);
 
