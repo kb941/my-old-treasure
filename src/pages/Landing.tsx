@@ -57,6 +57,7 @@ const Landing = () => {
   const handleCTA = () => navigate(isLoggedIn ? '/' : '/login');
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Navbar */}
       <motion.nav
