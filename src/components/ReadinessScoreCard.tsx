@@ -209,21 +209,24 @@ function PhaseTipsCard({ score, color, label, result }: { score: number; color: 
         </div>
       </div>
 
-      {/* Phase progress indicator */}
-      <div className="flex items-center gap-1.5">
+      {/* Phase progress indicator - 6 segments */}
+      <div className="flex items-center gap-1">
         {phases.map((p, i) => {
           const isCurrent = p === phase;
           const isPast = score >= p.range[1];
+          const isReached = isPast || isCurrent;
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className={`w-full h-1.5 rounded-full transition-all ${
-                isPast ? 'bg-foreground/30' :
-                isCurrent ? 'bg-foreground/20' :
-                'bg-secondary'
-              }`} style={isPast || isCurrent ? { backgroundColor: p.color, opacity: isPast ? 0.8 : 0.4 } : {}} />
-              {isCurrent && (
-                <span className="text-[8px] font-medium text-muted-foreground">{p.emoji}</span>
-              )}
+              <div
+                className="w-full h-2 rounded-full transition-all duration-500"
+                style={{
+                  backgroundColor: isReached ? p.color : 'hsl(var(--secondary))',
+                  opacity: isPast ? 1 : isCurrent ? 0.85 : 1,
+                }}
+              />
+              <span className={`text-[8px] font-medium transition-opacity ${isCurrent ? 'opacity-100' : 'opacity-0'}`}>
+                {p.emoji}
+              </span>
             </div>
           );
         })}
