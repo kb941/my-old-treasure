@@ -169,6 +169,11 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
     setDismissed(prev => new Set(prev).add(id));
   };
 
+  const handleMarkAllAsRead = () => {
+    const allIds = notifications.map(n => n.id);
+    setDismissed(new Set(allIds));
+  };
+
   const count = notifications.length;
 
   return (
