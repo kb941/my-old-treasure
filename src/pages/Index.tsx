@@ -645,7 +645,9 @@ const Index = () => {
               examDate={examDate} examName={examName} targetScore={targetScore} targetRank={targetRank} subjects={subjects}
               pomodoroSettings={pomodoroSettings} srSettings={srSettings}
               contentTypes={contentTypes} breakDuration={breakDuration}
-              markingScheme={markingScheme} onSave={handleSaveProfile}
+              markingScheme={markingScheme}
+              pushNotificationSettings={pushNotificationSettings}
+              onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
               onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}
               pyqYearFrom={pyqYearFrom} pyqYearTo={pyqYearTo}

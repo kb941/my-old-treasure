@@ -88,6 +88,7 @@ export interface ProfileData {
   pyqYearFrom?: number;
   pyqYearTo?: number;
   mcqGoalPerSubject?: number;
+  pushNotificationSettings?: PushNotificationSettings;
 }
 
 export function ProfileModal({ 
