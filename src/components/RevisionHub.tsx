@@ -316,30 +316,12 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
       {revisionStreak.current > 0 && (
         <button 
           onClick={() => setShowStreakDialog(true)}
-          className="w-full bg-card hover:bg-accent/50 rounded-lg p-4 border border-border transition-all group"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-card hover:bg-accent/40 border border-border/60 transition-all group"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Flame className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">
-                  {revisionStreak.current} day streak
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Tap to view details
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">Best</p>
-                <p className="text-2xl font-bold text-foreground">{revisionStreak.longest}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
+          <Flame className="w-4 h-4 text-orange-500 shrink-0" />
+          <span className="text-xs font-semibold text-foreground">{revisionStreak.current}d streak</span>
+          <span className="text-[10px] text-muted-foreground">· best {revisionStreak.longest}d</span>
+          <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
 
