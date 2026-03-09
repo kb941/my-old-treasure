@@ -241,13 +241,14 @@ export function getScheduleForConfidence(
   const schedules = settings?.schedules || DEFAULT_SR_SCHEDULES;
   const tier = Math.max(1, Math.min(5, confidence || 3));
   const schedule = schedules[tier] || schedules[3];
+  const maintenanceDays = settings?.maintenanceIntervalDays ?? 90;
   
-  // Add perpetual 90-day "Maintenance" review after final session
+  // Add perpetual maintenance review after final session
   const lastSession = schedule[schedule.length - 1];
   if (lastSession && lastSession.name === 'Final') {
     return [
       ...schedule,
-      { sessionNumber: lastSession.sessionNumber + 1, name: 'Maintenance', daysAfterPrevious: 90 },
+      { sessionNumber: lastSession.sessionNumber + 1, name: 'Maintenance', daysAfterPrevious: maintenanceDays },
     ];
   }
   return schedule;
