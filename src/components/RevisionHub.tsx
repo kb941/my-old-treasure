@@ -267,36 +267,73 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         </div>
       </div>
 
-      {/* View mode toggle + filter pills */}
-      <div className="flex items-center gap-3">
-        <div className="flex gap-1 p-0.5 bg-secondary rounded-lg">
-          <button onClick={() => setViewMode('list')} className={cn(
-            "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
-            viewMode === 'list' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          )}>
-            <LayoutList className="w-3 h-3" /> List
-          </button>
-          <button onClick={() => setViewMode('calendar')} className={cn(
-            "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
-            viewMode === 'calendar' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          )}>
-            <CalendarIcon className="w-3 h-3" /> Calendar
-          </button>
+      {/* View mode toggle + filter pills + search */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1 p-0.5 bg-secondary rounded-lg shrink-0">
+            <button onClick={() => setViewMode('list')} className={cn(
+              "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === 'list' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            )}>
+              <LayoutList className="w-3 h-3" /> List
+            </button>
+            <button onClick={() => setViewMode('calendar')} className={cn(
+              "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === 'calendar' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            )}>
+              <CalendarIcon className="w-3 h-3" /> Calendar
+            </button>
+          </div>
+
+          {viewMode === 'list' && (
+            <div className="flex gap-1.5 overflow-x-auto flex-1">
+              {filters.map(f => (
+                <button key={f.id} onClick={() => handleFilterChange(f.id)} className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                  filter === f.id ? "gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                )}>
+                  {f.label}
+                  {f.count !== undefined && f.count > 0 && (
+                    <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-bold", filter === f.id ? "bg-white/20" : "bg-background")}>{f.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {viewMode === 'list' && (
-          <div className="flex gap-1.5 overflow-x-auto flex-1">
-            {filters.map(f => (
-              <button key={f.id} onClick={() => handleFilterChange(f.id)} className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
-                filter === f.id ? "gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              )}>
-                {f.label}
-                {f.count !== undefined && f.count > 0 && (
-                  <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-bold", filter === f.id ? "bg-white/20" : "bg-background")}>{f.count}</span>
-                )}
-              </button>
-            ))}
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search topics, chapters..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="w-[180px]">
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="All Subjects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Subjects</SelectItem>
+                  {subjects.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
       </div>
