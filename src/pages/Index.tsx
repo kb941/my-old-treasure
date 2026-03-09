@@ -328,6 +328,10 @@ const Index = () => {
   };
 
   const handleCompleteRevision = (topicId: string) => {
+    // Track revision date for streak
+    const today = new Date().toISOString().split('T')[0];
+    setRevisionDates(prev => prev.includes(today) ? prev : [...prev, today]);
+    
     setChapters(prev => prev.map(chapter => ({
       ...chapter,
       topics: chapter.topics.map(topic => {
