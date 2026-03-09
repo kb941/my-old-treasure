@@ -269,15 +269,16 @@ export function TaskItem({
                       setIsTimerRunning(false);
                       onTimerStart?.(null);
                     } else {
+                      if (activeTimerTaskId != null && activeTimerTaskId !== task.id) {
+                        toast.warning('Another timer was running — it has been stopped.', { duration: 2000 });
+                      }
                       setIsTimerRunning(true);
                       onTimerStart?.(task.id);
                     }
                   }}
-                  disabled={!isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
-                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15",
-                    !isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id && "opacity-40 cursor-not-allowed"
+                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
                   )}
                 >
                   {isTimerRunning ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Start</>}
