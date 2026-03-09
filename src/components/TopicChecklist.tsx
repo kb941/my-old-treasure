@@ -190,6 +190,14 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                     </button>
                   ))}
                 </div>
+                {topic.confidence > 0 && (
+                  <p className="text-[10px] text-muted-foreground px-2">
+                    Revisions: {(() => {
+                      const schedule = DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3];
+                      return schedule.map(s => `${s.daysAfterPrevious}d`).join(' → ');
+                    })()}
+                  </p>
+                )}
               </div>
 
               {/* Spaced Repetition Info */}
