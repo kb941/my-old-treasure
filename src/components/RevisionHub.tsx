@@ -308,74 +308,36 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   return (
     <div className="space-y-4">
-      {/* Revision Streak Banner */}
+      {/* Enhanced Streak Banner */}
       {revisionStreak.current > 0 && (
-        <>
-          <button 
-            onClick={() => setShowStreakCalendar(!showStreakCalendar)}
-            className="w-full bg-card hover:bg-accent/50 rounded-xl p-3 border border-border transition-colors group"
-          >
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 border border-orange-500/30">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent" />
+          <div className="relative px-4 py-3.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="text-lg">🔥</div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold">
-                    {revisionStreak.current} day streak
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Click to view calendar
-                  </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
+                  <Flame className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-2xl font-bold text-foreground">{revisionStreak.current}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Day Streak</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Keep the momentum going!</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Best</p>
-                  <p className="text-lg font-bold text-foreground">{revisionStreak.longest}</p>
+                <div className="text-right px-3 py-1.5 rounded-lg bg-background/50 border border-border/50">
+                  <div className="flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <p className="text-xs text-muted-foreground">Best</p>
+                  </div>
+                  <p className="text-xl font-bold text-foreground">{revisionStreak.longest}</p>
                 </div>
-                <ChevronDown className={cn(
-                  "w-4 h-4 text-muted-foreground transition-transform",
-                  showStreakCalendar && "rotate-180"
-                )} />
               </div>
             </div>
-          </button>
-
-          {showStreakCalendar && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-card rounded-xl p-4 border border-border">
-                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4" />
-                  Revision Days This Month
-                </h4>
-                <Calendar
-                  mode="multiple"
-                  selected={revisionDates.map(d => new Date(d))}
-                  month={new Date()}
-                  className="rounded-md"
-                  modifiers={{
-                    revision: revisionDates.map(d => new Date(d))
-                  }}
-                  modifiersStyles={{
-                    revision: {
-                      fontWeight: 'bold',
-                      backgroundColor: 'hsl(var(--primary))',
-                      color: 'hsl(var(--primary-foreground))',
-                      borderRadius: '0.375rem'
-                    }
-                  }}
-                />
-                <p className="text-xs text-muted-foreground mt-3 text-center">
-                  {revisionDates.length} revision {revisionDates.length === 1 ? 'day' : 'days'} this month
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </>
+          </div>
+        </div>
       )}
 
       {/* Summary Cards */}
