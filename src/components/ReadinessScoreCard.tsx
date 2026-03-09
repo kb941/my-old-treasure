@@ -348,13 +348,22 @@ export function ReadinessScoreCard({ result, compact = false }: ReadinessScoreCa
                 </span>
                 <TrendBadge trend={trendData} />
               </div>
-              <div className="flex gap-1">
-                {items.map(item => {
-                  const pct = item.max > 0 ? (item.value / item.max) * 100 : 0;
+              {/* 6-segment phase progress bar */}
+              <div className="flex gap-0.5">
+                {phases.map((p, i) => {
+                  const isCurrent = p === phase;
+                  const isPast = score >= p.range[1];
+                  const isReached = isPast || isCurrent;
                   return (
-                    <div key={item.label} className="flex-1 h-1 bg-secondary/60 rounded-full overflow-hidden" title={`${item.label}: ${item.value.toFixed(1)}/${item.max}`}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: phase.color }} />
-                    </div>
+                    <div
+                      key={i}
+                      className="flex-1 h-1.5 rounded-full transition-all duration-500"
+                      style={{
+                        backgroundColor: isReached ? p.color : 'hsl(var(--secondary))',
+                        opacity: isPast ? 1 : isCurrent ? 0.85 : 1,
+                      }}
+                      title={p.name}
+                    />
                   );
                 })}
               </div>
