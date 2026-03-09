@@ -198,7 +198,7 @@ export function ProfileTab(props: ProfileTabProps) {
       dailyStudyTarget,
       weeklyMockTarget,
       pomodoroSettings: { studyDuration, shortBreakDuration, longBreakDuration, sessionsBeforeLongBreak },
-      srSettings: { schedules: srSchedules },
+      srSettings: { schedules: srSchedules, maintenanceIntervalDays: maintenanceInterval },
       contentTypes: localContentTypes,
       breakDuration: breakDurationSetting,
       markingScheme: localMarkingScheme,
