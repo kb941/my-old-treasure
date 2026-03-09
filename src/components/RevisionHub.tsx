@@ -478,36 +478,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
       </div>
 
       {/* Content */}
-      {viewMode === 'streak' ? (
-        <div className="bg-card rounded-2xl p-5 shadow-card border border-border">
-          <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-primary" />
-            Revision History
-          </h3>
-          <Calendar
-            mode="multiple"
-            selected={revisionDates.map(d => new Date(d))}
-            month={new Date()}
-            className="rounded-md pointer-events-auto"
-            modifiers={{
-              revision: revisionDates.map(d => new Date(d))
-            }}
-            modifiersStyles={{
-              revision: {
-                fontWeight: 'bold',
-                backgroundColor: 'hsl(var(--primary))',
-                color: 'hsl(var(--primary-foreground))',
-                borderRadius: '0.5rem'
-              }
-            }}
-          />
-          <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center">
-              {revisionDates.length} revision {revisionDates.length === 1 ? 'day' : 'days'} this month
-            </p>
-          </div>
-        </div>
-      ) : viewMode === 'calendar' ? (
+      {viewMode === 'calendar' ? (
         <div className="bg-card rounded-2xl p-4 shadow-card border border-border">
           <RevisionCalendar chapters={chapters} srSettings={srSettings} />
         </div>
