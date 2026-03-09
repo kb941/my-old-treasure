@@ -43,8 +43,8 @@ export function RevisionHeatmap({ revisionDates }: RevisionHeatmapProps) {
   };
 
   // Group by weeks
-  const weeks: typeof heatmapData.data[][] = [];
-  let currentWeek: typeof heatmapData.data[] = [];
+  const weeks: Array<Array<{ date: Date; count: number; key: string }>> = [];
+  let currentWeek: Array<{ date: Date; count: number; key: string }> = [];
   
   heatmapData.data.forEach((day, idx) => {
     currentWeek.push(day);
