@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut, Download } from 'lucide-react';
+import { User, Calendar, Target, BookOpen, Save, Timer, Coffee, RotateCcw, Star, Plus, Trash2, Video, Hash, AlertTriangle, Moon, Sun, LogOut, Download, Upload } from 'lucide-react';
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Subject, PomodoroSettings, SpacedRepetitionSettings, DEFAULT_SR_SCHEDULES, ContentType, DEFAULT_CONTENT_TYPES, MarkingScheme, DEFAULT_MARKING_SCHEME } from '@/types';
@@ -288,6 +289,29 @@ export function ProfileTab(props: ProfileTabProps) {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        if (typeof data !== 'object' || data === null) throw new Error('Invalid format');
+        Object.entries(data).forEach(([key, value]) => {
+          localStorage.setItem(key, value as string);
+        });
+        toast({ title: 'Data imported successfully!', description: 'Reloading to apply changes...' });
+        setTimeout(() => window.location.reload(), 1200);
+      } catch {
+        toast({ title: 'Import failed', description: 'The file is not a valid backup.', variant: 'destructive' });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="space-y-4">
       {/* Profile Header */}
@@ -573,8 +597,12 @@ export function ProfileTab(props: ProfileTabProps) {
               <Button variant="outline" className="w-full" onClick={handleExportData}>
                 <Download className="w-4 h-4 mr-2" /> Download Full Backup
               </Button>
+              <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportData} />
+              <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" /> Import Backup
+              </Button>
               <p className="text-xs text-muted-foreground">
-                Exports all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
+                Export or import all your data (tasks, chapters, stats, mock tests) as JSON for backup or migration.
               </p>
             </div>
 
