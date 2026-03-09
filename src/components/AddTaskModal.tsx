@@ -334,9 +334,17 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Search topics, chapters..."
-          className="pl-9 h-9 text-sm"
+          className="pl-9 pr-8 h-9 text-sm"
           autoFocus={false}
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Search Results */}

@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, Check, Calendar, Clock, ChevronRight, AlertTriangle, 
   Sparkles, Plus, Star, Filter, RotateCcw, CalendarDays,
-  ChevronDown, BookOpen, LayoutList, CalendarIcon
+  ChevronDown, BookOpen, LayoutList, CalendarIcon, Search, X
 } from 'lucide-react';
 import { Chapter, Topic, SpacedRepetitionSettings, getScheduleForConfidence, Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isBefore, isToday, startOfDay, addDays, differenceInDays, isAfter } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { RevisionCalendar } from '@/components/RevisionCalendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface RevisionItem {
   topicId: string;
@@ -46,6 +48,8 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const [filter, setFilter] = useState<ViewFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
 
   const getSubjectName = useCallback((subjectId: string) => 
     subjects.find(s => s.id === subjectId)?.name || subjectId, [subjects]);
@@ -88,14 +92,24 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const monthEnd = addDays(today, 30);
 
   const filtered = useMemo(() => {
-    switch (filter) {
-      case 'overdue': return allRevisions.filter(r => r.isOverdue);
-      case 'today': return allRevisions.filter(r => r.isDueToday || r.isOverdue);
-      case 'week': return allRevisions.filter(r => isBefore(r.dueDate, weekEnd) || r.isOverdue);
-      case 'month': return allRevisions.filter(r => isBefore(r.dueDate, monthEnd) || r.isOverdue);
-      default: return allRevisions;
+    let result = allRevisions;
+    if (selectedSubject) result = result.filter(r => r.subjectId === selectedSubject);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(r =>
+        r.topicName.toLowerCase().includes(q) ||
+        r.chapterName.toLowerCase().includes(q) ||
+        getSubjectName(r.subjectId).toLowerCase().includes(q)
+      );
     }
-  }, [allRevisions, filter]);
+    switch (filter) {
+      case 'overdue': return result.filter(r => r.isOverdue);
+      case 'today': return result.filter(r => r.isDueToday || r.isOverdue);
+      case 'week': return result.filter(r => isBefore(r.dueDate, weekEnd) || r.isOverdue);
+      case 'month': return result.filter(r => isBefore(r.dueDate, monthEnd) || r.isOverdue);
+      default: return result;
+    }
+  }, [allRevisions, filter, selectedSubject, searchQuery, getSubjectName, weekEnd, monthEnd]);
 
   // Reset visible count when filter changes
   const handleFilterChange = (f: ViewFilter) => {
@@ -226,7 +240,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         {isCurrent && isInTasks(item.topicId) && (
           <span className="text-[10px] text-primary font-medium px-2">In tasks</span>
         )}
-        {isCurrent && (item.isOverdue || item.isDueToday) && (
+        {isCurrent && (
           <Button size="sm" onClick={() => onCompleteRevision(item.topicId)} className="h-7 px-2 text-xs">
             <Check className="w-3 h-3 mr-1" />Done
           </Button>
@@ -253,36 +267,73 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         </div>
       </div>
 
-      {/* View mode toggle + filter pills */}
-      <div className="flex items-center gap-3">
-        <div className="flex gap-1 p-0.5 bg-secondary rounded-lg">
-          <button onClick={() => setViewMode('list')} className={cn(
-            "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
-            viewMode === 'list' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          )}>
-            <LayoutList className="w-3 h-3" /> List
-          </button>
-          <button onClick={() => setViewMode('calendar')} className={cn(
-            "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
-            viewMode === 'calendar' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          )}>
-            <CalendarIcon className="w-3 h-3" /> Calendar
-          </button>
+      {/* View mode toggle + filter pills + search */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1 p-0.5 bg-secondary rounded-lg shrink-0">
+            <button onClick={() => setViewMode('list')} className={cn(
+              "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === 'list' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            )}>
+              <LayoutList className="w-3 h-3" /> List
+            </button>
+            <button onClick={() => setViewMode('calendar')} className={cn(
+              "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === 'calendar' ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            )}>
+              <CalendarIcon className="w-3 h-3" /> Calendar
+            </button>
+          </div>
+
+          {viewMode === 'list' && (
+            <div className="flex gap-1.5 overflow-x-auto flex-1">
+              {filters.map(f => (
+                <button key={f.id} onClick={() => handleFilterChange(f.id)} className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                  filter === f.id ? "gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                )}>
+                  {f.label}
+                  {f.count !== undefined && f.count > 0 && (
+                    <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-bold", filter === f.id ? "bg-white/20" : "bg-background")}>{f.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {viewMode === 'list' && (
-          <div className="flex gap-1.5 overflow-x-auto flex-1">
-            {filters.map(f => (
-              <button key={f.id} onClick={() => handleFilterChange(f.id)} className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
-                filter === f.id ? "gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              )}>
-                {f.label}
-                {f.count !== undefined && f.count > 0 && (
-                  <span className={cn("px-1.5 py-0.5 rounded-full text-[10px] font-bold", filter === f.id ? "bg-white/20" : "bg-background")}>{f.count}</span>
-                )}
-              </button>
-            ))}
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search topics, chapters..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="w-[180px]">
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="All Subjects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Subjects</SelectItem>
+                  {subjects.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
       </div>
