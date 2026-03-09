@@ -4,6 +4,7 @@ import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 const typeIcons: Record<string, typeof BookOpen> = {
   study: BookOpen,
@@ -118,6 +119,13 @@ export function TaskItem({
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isTimerRunning, timeRemaining, phase, sessionCount, pomodoroSettings]);
 
+  // Auto-pause if another task's timer started
+  useEffect(() => {
+    if (isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id) {
+      setIsTimerRunning(false);
+    }
+  }, [activeTimerTaskId, task.id, isTimerRunning]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -171,10 +179,11 @@ export function TaskItem({
 
   return (
     <motion.div
-      layout={!isDraggable}
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
+      layout={false}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       className={cn(
         "rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
         typeBorderColors[task.type] || 'border-l-primary',
@@ -267,15 +276,16 @@ export function TaskItem({
                       setIsTimerRunning(false);
                       onTimerStart?.(null);
                     } else {
+                      if (activeTimerTaskId != null && activeTimerTaskId !== task.id) {
+                        toast.warning('Another timer was running — it has been stopped.', { duration: 2000 });
+                      }
                       setIsTimerRunning(true);
                       onTimerStart?.(task.id);
                     }
                   }}
-                  disabled={!isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id}
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors",
-                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15",
-                    !isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id && "opacity-40 cursor-not-allowed"
+                    isTimerRunning ? "bg-accent/10 text-accent hover:bg-accent/15" : "bg-primary/10 text-primary hover:bg-primary/15"
                   )}
                 >
                   {isTimerRunning ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Start</>}
