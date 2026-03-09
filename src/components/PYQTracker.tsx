@@ -370,25 +370,25 @@ export function PYQTracker({ subjects, pyqYearFrom, pyqYearTo }: PYQTrackerProps
 
                           {/* Score entry row - slides open when done */}
                           {entry.done && (
-                            <div className="flex items-center gap-2 px-3 pb-2 pt-0">
-                              <span className="text-[10px] text-muted-foreground w-12">Score:</span>
-                              <div className="flex items-center gap-1.5 flex-1">
+                            <div className="flex items-center gap-1.5 px-3 pb-2 pt-0 min-w-0">
+                              <span className="text-[10px] text-muted-foreground shrink-0">Score:</span>
+                              <div className="flex items-center gap-1 flex-1 min-w-0">
                                 <input
                                   type="number"
-                                  placeholder="Correct"
+                                  placeholder="✓"
                                   value={entry.correctAnswers || ''}
                                   onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'correctAnswers', parseInt(e.target.value) || 0)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="flex-1 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                                  className="w-14 min-w-0 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
                                 />
-                                <span className="text-xs text-muted-foreground">/</span>
+                                <span className="text-xs text-muted-foreground shrink-0">/</span>
                                 <input
                                   type="number"
                                   placeholder="Total"
                                   value={entry.totalQuestions || ''}
                                   onChange={(e) => updateMarks(selectedExam, session, entry.subjectId, 'totalQuestions', parseInt(e.target.value) || 0)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="flex-1 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                                  className="w-14 min-w-0 h-7 text-xs text-center bg-background rounded-md border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
                                 />
                               </div>
                             </div>
