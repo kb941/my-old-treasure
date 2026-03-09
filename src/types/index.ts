@@ -186,6 +186,7 @@ export interface ConfidenceSchedule {
 
 export interface SpacedRepetitionSettings {
   schedules: Record<number, SpacedRepetitionSession[]>;
+  maintenanceIntervalDays?: number; // default 90
 }
 
 export const DEFAULT_SR_SCHEDULES: Record<number, SpacedRepetitionSession[]> = {
