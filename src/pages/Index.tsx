@@ -42,7 +42,7 @@ const DEFAULT_POMODORO: PomodoroSettings = {
 const Index = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<Tab>('today');
-  const [tasks, setTasks] = useLocalStorage<Task[]>('neetpg-tasks', mockTasks);
+  const [tasks, setTasks] = useLocalStorage<Task[]>('neetpg-tasks', []);
   const [subjects, setSubjects] = useLocalStorage<Subject[]>('neetpg-subjects', initialSubjects);
   const [chapters, setChapters] = useLocalStorage<Chapter[]>('neetpg-chapters', defaultChapters);
   const [stats, setStats] = useLocalStorage<UserStats>('neetpg-stats', {
