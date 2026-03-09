@@ -101,6 +101,8 @@ export function AnalyticsTab({
 
             <WeeklyStats studyLogs={studyLogs} mcqLogs={mcqLogs} period={period} />
             <McqWeeklyChart mcqLogs={mcqLogs} period={period} />
+            <SubjectStudyHours studyLogs={studyLogs} subjects={subjects} />
+            <RankPredictor mockTests={mockTests} markingScheme={markingScheme} />
             <AchievementsBadgePanel achievements={pyqAchievements} onViewAll={onViewAchievements} />
           </>
         )}
