@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bell, Check, Calendar, Clock, ChevronRight, AlertTriangle, 
-  Sparkles, Plus, Star, Filter, RotateCcw, CalendarDays,
-  ChevronDown, BookOpen, LayoutList, CalendarIcon, Search, X
+  Bell, Check, Clock, ChevronRight, AlertTriangle, 
+  Sparkles, Plus, Star, RotateCcw, CalendarDays,
+  ChevronDown, LayoutList, CalendarIcon, Search, X
 } from 'lucide-react';
 import { Chapter, Topic, SpacedRepetitionSettings, getScheduleForConfidence, Task } from '@/types';
 import { cn } from '@/lib/utils';
