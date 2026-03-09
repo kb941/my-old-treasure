@@ -264,7 +264,7 @@ export function NotificationPanel({ reminders, achievements, streakDays, tasks, 
                 )}
               </div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
