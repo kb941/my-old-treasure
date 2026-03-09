@@ -289,6 +289,29 @@ export function ProfileTab(props: ProfileTabProps) {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        if (typeof data !== 'object' || data === null) throw new Error('Invalid format');
+        Object.entries(data).forEach(([key, value]) => {
+          localStorage.setItem(key, value as string);
+        });
+        toast({ title: 'Data imported successfully!', description: 'Reloading to apply changes...' });
+        setTimeout(() => window.location.reload(), 1200);
+      } catch {
+        toast({ title: 'Import failed', description: 'The file is not a valid backup.', variant: 'destructive' });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="space-y-4">
       {/* Profile Header */}
