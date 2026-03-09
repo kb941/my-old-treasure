@@ -40,6 +40,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   const [addToColumn, setAddToColumn] = useState<TaskColumn>('today');
   const [reorderMode, setReorderMode] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [activeTimerTaskId, setActiveTimerTaskId] = useState<string | null>(null);
 
   const getColumnTasks = (columnId: TaskColumn) =>
     tasks.filter(t => t.column === columnId);
