@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Play, Pause, Coffee, CheckCircle2, SkipForward, BookOpen, Brain, FileText, Clock, Star, Gamepad2 } from 'lucide-react';
-import { Task, PomodoroSettings } from '@/types';
+import { Task, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -208,6 +208,12 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                     </button>
                   ))}
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Revisions: {(() => {
+                    const schedule = DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3];
+                    return schedule.map(s => `${s.daysAfterPrevious}d`).join(' → ');
+                  })()}
+                </p>
                 <Button onClick={() => finishCurrentTask(selectedConfidence)} className="w-full gradient-success text-primary-foreground">
                   Confirm & Next
                 </Button>

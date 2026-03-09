@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Check, Star, Trash2, RotateCcw, CalendarDays } from 'lucide-react';
-import { Topic, ContentType, DEFAULT_CONTENT_TYPES, getScheduleForConfidence, SpacedRepetitionSettings } from '@/types';
+import { Topic, ContentType, DEFAULT_CONTENT_TYPES, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, SpacedRepetitionSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { format, addDays } from 'date-fns';
@@ -190,6 +190,14 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                     </button>
                   ))}
                 </div>
+                {topic.confidence > 0 && (
+                  <p className="text-[10px] text-muted-foreground px-2">
+                    Revisions: {(() => {
+                      const schedule = DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3];
+                      return schedule.map(s => `${s.daysAfterPrevious}d`).join(' → ');
+                    })()}
+                  </p>
+                )}
               </div>
 
               {/* Spaced Repetition Info */}

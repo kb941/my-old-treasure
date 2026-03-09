@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
-import { Task, TaskColumn, PomodoroSettings } from '@/types';
+import { Task, TaskColumn, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
@@ -316,6 +316,12 @@ export function TaskItem({
                       </button>
                     ))}
                   </div>
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    Next revisions: {(() => {
+                      const schedule = DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3];
+                      return schedule.slice(0, 4).map(s => `${s.daysAfterPrevious}d`).join(' → ') + '…';
+                    })()}
+                  </p>
                   <button
                     onClick={(e) => { e.stopPropagation(); confirmDoneWithConfidence(); }}
                     className="w-full py-1.5 rounded-md text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/15 transition-colors"
