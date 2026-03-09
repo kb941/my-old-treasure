@@ -336,6 +336,19 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                     >
                       <Trash2 className="w-3.5 h-3.5 text-destructive" />
                     </button>
+                    </div>
+                    {/* Chapter progress bar */}
+                    {chapter.topics.length > 0 && (
+                      <div className="flex items-center gap-2 px-1">
+                        <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className={cn("h-full rounded-full bg-gradient-to-r transition-all", categoryColors[subject.category])}
+                            style={{ width: `${chapterProgress}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{chapterProgress}%</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Chapter Content - no animation to avoid layout issues */}
