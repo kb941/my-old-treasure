@@ -119,6 +119,13 @@ export function TaskItem({
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isTimerRunning, timeRemaining, phase, sessionCount, pomodoroSettings]);
 
+  // Auto-pause if another task's timer started
+  useEffect(() => {
+    if (isTimerRunning && activeTimerTaskId != null && activeTimerTaskId !== task.id) {
+      setIsTimerRunning(false);
+    }
+  }, [activeTimerTaskId, task.id, isTimerRunning]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
