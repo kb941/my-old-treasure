@@ -227,7 +227,7 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
     'Overdue': <AlertTriangle className="w-4 h-4 text-destructive" />,
     'Due Today': <Bell className="w-4 h-4 text-amber-500" />,
     'This Week': <CalendarDays className="w-4 h-4 text-primary" />,
-    'Upcoming': <Calendar className="w-4 h-4 text-muted-foreground" />,
+    'Upcoming': <CalendarDays className="w-4 h-4 text-muted-foreground" />,
   };
 
   const renderRevisionCard = (item: RevisionItem, isCurrent: boolean) => (
