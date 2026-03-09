@@ -92,14 +92,24 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
   const monthEnd = addDays(today, 30);
 
   const filtered = useMemo(() => {
-    switch (filter) {
-      case 'overdue': return allRevisions.filter(r => r.isOverdue);
-      case 'today': return allRevisions.filter(r => r.isDueToday || r.isOverdue);
-      case 'week': return allRevisions.filter(r => isBefore(r.dueDate, weekEnd) || r.isOverdue);
-      case 'month': return allRevisions.filter(r => isBefore(r.dueDate, monthEnd) || r.isOverdue);
-      default: return allRevisions;
+    let result = allRevisions;
+    if (selectedSubject) result = result.filter(r => r.subjectId === selectedSubject);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(r =>
+        r.topicName.toLowerCase().includes(q) ||
+        r.chapterName.toLowerCase().includes(q) ||
+        getSubjectName(r.subjectId).toLowerCase().includes(q)
+      );
     }
-  }, [allRevisions, filter]);
+    switch (filter) {
+      case 'overdue': return result.filter(r => r.isOverdue);
+      case 'today': return result.filter(r => r.isDueToday || r.isOverdue);
+      case 'week': return result.filter(r => isBefore(r.dueDate, weekEnd) || r.isOverdue);
+      case 'month': return result.filter(r => isBefore(r.dueDate, monthEnd) || r.isOverdue);
+      default: return result;
+    }
+  }, [allRevisions, filter, selectedSubject, searchQuery, getSubjectName, weekEnd, monthEnd]);
 
   // Reset visible count when filter changes
   const handleFilterChange = (f: ViewFilter) => {
