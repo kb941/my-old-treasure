@@ -7,10 +7,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageTransition } from '@/components/PageTransition';
-import screenshotDashboard from '@/assets/screenshot-dashboard.jpg';
-import screenshotAnalytics from '@/assets/screenshot-analytics.jpg';
-import screenshotSubjects from '@/assets/screenshot-subjects.jpg';
-import screenshotRevision from '@/assets/screenshot-revision.jpg';
+import screenshotDashboard from '@/assets/screenshot-dashboard.png';
+import screenshotInsights from '@/assets/screenshot-insights.png';
+import screenshotSubjects from '@/assets/screenshot-subjects.png';
+import screenshotRevision from '@/assets/screenshot-revision.png';
 
 const FadeIn = ({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
   const ref = useRef(null);
