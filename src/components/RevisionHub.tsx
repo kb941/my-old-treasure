@@ -357,16 +357,16 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
         <div className="flex items-center gap-3">
           <div className="flex gap-1 p-0.5 bg-secondary rounded-lg shrink-0">
             <button onClick={() => setViewMode('list')} className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all",
+              "flex items-center justify-center p-2 rounded-md transition-all",
               viewMode === 'list' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}>
-              <LayoutList className="w-3.5 h-3.5" /> List
+              <LayoutList className="w-4 h-4" />
             </button>
             <button onClick={() => setViewMode('calendar')} className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all",
+              "flex items-center justify-center p-2 rounded-md transition-all",
               viewMode === 'calendar' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}>
-              <CalendarIcon className="w-3.5 h-3.5" /> Calendar
+              <CalendarIcon className="w-4 h-4" />
             </button>
           </div>
 
