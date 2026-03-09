@@ -171,10 +171,11 @@ export function TaskItem({
 
   return (
     <motion.div
-      layout={!isDraggable}
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
+      layout={false}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       className={cn(
         "rounded-lg p-3 shadow-card border border-border border-l-[3px] transition-all",
         typeBorderColors[task.type] || 'border-l-primary',

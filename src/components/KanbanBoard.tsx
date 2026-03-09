@@ -129,7 +129,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
 
     return (
       <div className="space-y-2">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {columnTasks.map(task => (
             <TaskItem
               key={task.id}
