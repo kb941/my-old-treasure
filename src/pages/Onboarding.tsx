@@ -38,10 +38,12 @@ const tourCards = [
 
 export function OnboardingWizard() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const location = useLocation();
+  const nameFromLogin = (location.state as any)?.name || '';
+  const [step, setStep] = useState(nameFromLogin ? 2 : 1);
   const [tourIndex, setTourIndex] = useState(0);
   const [data, setData] = useState<OnboardingData>({
-    name: '',
+    name: nameFromLogin,
     examName: 'NEET PG',
     examDate: '2027-03-15',
     targetScore: 650,
