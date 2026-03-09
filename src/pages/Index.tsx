@@ -623,6 +623,7 @@ const Index = () => {
               onCompleteRevision={handleCompleteRevision}
               onAddToTasks={handleAddRevisionTask} subjects={subjects}
               tasks={tasks}
+              revisionDates={revisionDates}
             />
           )}
 
