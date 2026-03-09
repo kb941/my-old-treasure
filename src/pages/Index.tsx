@@ -33,6 +33,7 @@ import { NotificationPanel } from '@/components/NotificationPanel';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { addDays } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { usePushNotifications, PushNotificationSettings, DEFAULT_PUSH_SETTINGS } from '@/hooks/usePushNotifications';
 
 const DEFAULT_POMODORO: PomodoroSettings = {
   studyDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, sessionsBeforeLongBreak: 4,
