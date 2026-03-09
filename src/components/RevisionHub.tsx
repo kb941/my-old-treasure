@@ -312,37 +312,83 @@ export function RevisionHub({ chapters, srSettings, onCompleteRevision, onAddToT
 
   return (
     <div className="space-y-4">
-      {/* Enhanced Streak Banner */}
+      {/* Minimalist Streak Banner */}
       {revisionStreak.current > 0 && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-yellow-500/20 border border-orange-500/30">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent" />
-          <div className="relative px-4 py-3.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
-                  <Flame className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-2xl font-bold text-foreground">{revisionStreak.current}</p>
-                    <p className="text-sm font-medium text-muted-foreground">Day Streak</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Keep the momentum going!</p>
-                </div>
+        <button 
+          onClick={() => setShowStreakDialog(true)}
+          className="w-full bg-card hover:bg-accent/50 rounded-lg p-4 border border-border transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Flame className="w-5 h-5 text-primary" />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right px-3 py-1.5 rounded-lg bg-background/50 border border-border/50">
-                  <div className="flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                    <p className="text-xs text-muted-foreground">Best</p>
-                  </div>
-                  <p className="text-xl font-bold text-foreground">{revisionStreak.longest}</p>
-                </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-foreground">
+                  {revisionStreak.current} day streak
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tap to view details
+                </p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Best</p>
+                <p className="text-2xl font-bold text-foreground">{revisionStreak.longest}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
-        </div>
+        </button>
       )}
+
+      {/* Streak Details Dialog */}
+      <Dialog open={showStreakDialog} onOpenChange={setShowStreakDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-primary" />
+              Revision Streak
+            </DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="heatmap" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            </TabsList>
+            <TabsContent value="heatmap" className="mt-4">
+              <RevisionHeatmap revisionDates={revisionDates} />
+            </TabsContent>
+            <TabsContent value="calendar" className="mt-4">
+              <div className="space-y-4">
+                <Calendar
+                  mode="multiple"
+                  selected={revisionDates.map(d => new Date(d))}
+                  month={new Date()}
+                  className="rounded-md pointer-events-auto mx-auto"
+                  modifiers={{
+                    revision: revisionDates.map(d => new Date(d))
+                  }}
+                  modifiersStyles={{
+                    revision: {
+                      fontWeight: 'bold',
+                      backgroundColor: 'hsl(var(--primary))',
+                      color: 'hsl(var(--primary-foreground))',
+                      borderRadius: '0.5rem'
+                    }
+                  }}
+                />
+                <div className="pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground text-center">
+                    {revisionDates.length} revision {revisionDates.length === 1 ? 'day' : 'days'} this month
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-3">
