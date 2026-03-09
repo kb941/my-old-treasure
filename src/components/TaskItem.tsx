@@ -4,6 +4,7 @@ import { Task, TaskColumn, PomodoroSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 const typeIcons: Record<string, typeof BookOpen> = {
   study: BookOpen,
