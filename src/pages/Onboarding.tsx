@@ -330,7 +330,18 @@ export function OnboardingWizard() {
                     <div>
                       <label className="text-sm font-medium block mb-2">Mock tests per month</label>
                       <div className="grid grid-cols-4 gap-2">
-                        {[2, 4, 6, 8].map(n => (
+                        {[1, 2, 3, 4].map(n => (
+                          <button
+                            key={n}
+                            onClick={() => setData(prev => ({ ...prev, mocksPerMonth: n }))}
+                            className={cn(
+                              'p-2 rounded-lg text-sm font-medium border transition-all',
+                              data.mocksPerMonth === n
+                                ? 'gradient-primary text-primary-foreground border-transparent'
+                                : 'bg-card border-border'
+                            )}
+                          >{n}</button>
+                        ))}
                           <button
                             key={n}
                             onClick={() => setData(prev => ({ ...prev, mocksPerMonth: n }))}
