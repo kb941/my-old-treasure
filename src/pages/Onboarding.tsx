@@ -280,6 +280,7 @@ export function OnboardingWizard() {
                         })}
                       </div>
                     </div>
+                  </div>
                 </div>
               )}
 
