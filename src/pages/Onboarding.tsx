@@ -342,17 +342,6 @@ export function OnboardingWizard() {
                             )}
                           >{n}</button>
                         ))}
-                          <button
-                            key={n}
-                            onClick={() => setData(prev => ({ ...prev, mocksPerMonth: n }))}
-                            className={cn(
-                              'p-2 rounded-lg text-sm font-medium border transition-all',
-                              data.mocksPerMonth === n
-                                ? 'gradient-primary text-primary-foreground border-transparent'
-                                : 'bg-card border-border'
-                            )}
-                          >{n}{n === 8 ? '+' : ''}</button>
-                        ))}
                       </div>
                     </div>
 
