@@ -91,7 +91,7 @@ export function OnboardingWizard() {
     targetRank: 5000,
     contentTypes: ['main-video'],
     dailyHours: 6,
-    mocksPerMonth: 4,
+    mocksPerMonth: 2,
     questionsPerTopic: 15,
   });
   const [firstTaskTitle, setFirstTaskTitle] = useState('Study Anatomy - Upper Limb');
