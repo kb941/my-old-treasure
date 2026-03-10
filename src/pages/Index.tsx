@@ -456,7 +456,9 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <span><span className="text-primary">Plan</span><span className="text-foreground">OS</span></span>
+                <a href="/welcome" className="hover:opacity-80 transition-opacity">
+                  <span className="text-primary">Plan</span><span className="text-foreground">OS</span>
+                </a>
                 <span className="text-xs font-normal text-muted-foreground">{examName}</span>
               </h1>
             </div>

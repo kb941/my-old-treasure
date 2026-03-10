@@ -14,6 +14,46 @@ import { DEFAULT_CONTENT_TYPES } from '@/types';
 import { predictRank, predictScoreFromRank } from '@/data/neetRankData';
 import confetti from 'canvas-confetti';
 
+const EXAM_WEIGHTAGES: Record<string, Record<string, { avg: number }>> = {
+  'NEET PG': {
+    anatomy: { avg: 8 }, physiology: { avg: 9 }, biochemistry: { avg: 11 },
+    pathology: { avg: 14 }, pharmacology: { avg: 15 }, microbiology: { avg: 13 },
+    forensic: { avg: 8 }, medicine: { avg: 19 }, surgery: { avg: 19 },
+    obg: { avg: 20 }, pediatrics: { avg: 9 }, psychiatry: { avg: 5 },
+    dermatology: { avg: 5 }, radiology: { avg: 6 }, anesthesia: { avg: 4 },
+    orthopedics: { avg: 6 }, ophthalmology: { avg: 7 }, ent: { avg: 6 },
+    psm: { avg: 16 },
+  },
+  'INICET': {
+    anatomy: { avg: 12 }, physiology: { avg: 12 }, biochemistry: { avg: 10 },
+    pathology: { avg: 18 }, pharmacology: { avg: 17 }, microbiology: { avg: 15 },
+    forensic: { avg: 8 }, medicine: { avg: 19 }, surgery: { avg: 16 },
+    obg: { avg: 16 }, pediatrics: { avg: 8 }, psychiatry: { avg: 4 },
+    dermatology: { avg: 6 }, radiology: { avg: 4 }, anesthesia: { avg: 4 },
+    orthopedics: { avg: 7 }, ophthalmology: { avg: 7 }, ent: { avg: 5 },
+    psm: { avg: 12 },
+  },
+  'FMGE': {
+    anatomy: { avg: 17 }, physiology: { avg: 17 }, biochemistry: { avg: 17 },
+    pathology: { avg: 13 }, pharmacology: { avg: 13 }, microbiology: { avg: 13 },
+    forensic: { avg: 10 }, medicine: { avg: 33 }, surgery: { avg: 32 },
+    obg: { avg: 30 }, pediatrics: { avg: 15 }, psychiatry: { avg: 5 },
+    dermatology: { avg: 5 }, radiology: { avg: 10 }, anesthesia: { avg: 5 },
+    orthopedics: { avg: 5 }, ophthalmology: { avg: 15 }, ent: { avg: 15 },
+    psm: { avg: 30 },
+  },
+};
+
+const SUBJECT_NAMES: Record<string, string> = {
+  anatomy: 'Anatomy', physiology: 'Physiology', biochemistry: 'Biochemistry',
+  pathology: 'Pathology', pharmacology: 'Pharmacology', microbiology: 'Microbiology',
+  forensic: 'Forensic Med', medicine: 'Medicine', surgery: 'Surgery',
+  obg: 'OBG', pediatrics: 'Pediatrics', psychiatry: 'Psychiatry',
+  dermatology: 'Dermatology', radiology: 'Radiology', anesthesia: 'Anesthesia',
+  orthopedics: 'Orthopedics', ophthalmology: 'Ophthalmology', ent: 'ENT',
+  psm: 'PSM',
+};
+
 interface OnboardingData {
   name: string;
   examName: string;
@@ -51,7 +91,7 @@ export function OnboardingWizard() {
     targetRank: 5000,
     contentTypes: ['main-video'],
     dailyHours: 6,
-    mocksPerMonth: 4,
+    mocksPerMonth: 2,
     questionsPerTopic: 15,
   });
   const [firstTaskTitle, setFirstTaskTitle] = useState('Study Anatomy - Upper Limb');
@@ -264,6 +304,22 @@ export function OnboardingWizard() {
                       </div>
                     </div>
                     <p className="text-[10px] text-muted-foreground text-center">Score and rank auto-sync based on NEET PG data</p>
+
+                    {/* Exam Weightage Preview */}
+                    <div className="bg-secondary/50 rounded-lg p-3 space-y-1.5">
+                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Subject Weightage ({data.examName})</p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 max-h-32 overflow-y-auto">
+                        {Object.entries(EXAM_WEIGHTAGES[data.examName] || {}).map(([id, info]) => {
+                          const subjectName = SUBJECT_NAMES[id] || id;
+                          return (
+                            <div key={id} className="flex items-center justify-between text-[10px]">
+                              <span className="text-muted-foreground truncate">{subjectName}</span>
+                              <span className="font-medium shrink-0 ml-1">{(info as any).avg}Q</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -330,7 +386,7 @@ export function OnboardingWizard() {
                     <div>
                       <label className="text-sm font-medium block mb-2">Mock tests per month</label>
                       <div className="grid grid-cols-4 gap-2">
-                        {[2, 4, 6, 8].map(n => (
+                        {[1, 2, 3, 4].map(n => (
                           <button
                             key={n}
                             onClick={() => setData(prev => ({ ...prev, mocksPerMonth: n }))}
@@ -340,7 +396,7 @@ export function OnboardingWizard() {
                                 ? 'gradient-primary text-primary-foreground border-transparent'
                                 : 'bg-card border-border'
                             )}
-                          >{n}{n === 8 ? '+' : ''}</button>
+                          >{n}</button>
                         ))}
                       </div>
                     </div>

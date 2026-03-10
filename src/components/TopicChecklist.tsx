@@ -154,27 +154,50 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
             className="overflow-hidden"
           >
             <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3">
-              {/* Stage toggles */}
-              <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                {activeTypes.map(ct => {
-                  const checked = isStageComplete(ct.id);
-                  const color = stageColors[ct.id] || 'bg-primary';
-                  return (
-                    <button key={ct.id} onClick={(e) => { e.stopPropagation(); toggleStage(ct.id); }}
-                      className={cn(
-                        "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all",
-                        checked ? `${color} text-white shadow-sm` : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-                      )}>
-                      <div className={cn(
-                        "w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border flex items-center justify-center transition-all",
-                        checked ? "bg-white/20 border-white/30" : "border-muted-foreground/30"
-                      )}>
-                        {checked && <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5" />}
-                      </div>
-                      {ct.label}
-                    </button>
-                  );
-                })}
+              {/* Stage toggles + Clear button */}
+              <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap gap-1 sm:gap-1.5 flex-1">
+                  {activeTypes.map(ct => {
+                    const checked = isStageComplete(ct.id);
+                    const color = stageColors[ct.id] || 'bg-primary';
+                    return (
+                      <button key={ct.id} onClick={(e) => { e.stopPropagation(); toggleStage(ct.id); }}
+                        className={cn(
+                          "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all",
+                          checked ? `${color} text-white shadow-sm` : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                        )}>
+                        <div className={cn(
+                          "w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border flex items-center justify-center transition-all",
+                          checked ? "bg-white/20 border-white/30" : "border-muted-foreground/30"
+                        )}>
+                          {checked && <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5" />}
+                        </div>
+                        {ct.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {(stages.length > 0 || topic.confidence > 0 || topic.nextRevisionDate) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdate({
+                        ...topic,
+                        completedStages: [],
+                        confidence: 0,
+                        nextRevisionDate: null,
+                        revisionSession: 0,
+                        lastStudied: null,
+                        questionsSolved: 0,
+                        pyqDone: false,
+                      });
+                    }}
+                    className="shrink-0 px-2 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
+                    title="Clear all progress for this topic"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
 
               {/* Confidence */}

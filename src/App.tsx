@@ -11,6 +11,7 @@ import HowToUse from "./pages/HowToUse";
 import OnboardingWizard from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import NotificationHistory from "./pages/NotificationHistory";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnimatedRoutes />
+        <PWAInstallPrompt />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

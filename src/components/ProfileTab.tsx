@@ -400,6 +400,13 @@ export function ProfileTab(props: ProfileTabProps) {
             <LogOut className="w-4 h-4 text-destructive" />
             <span className="text-xs font-medium text-destructive">Logout</span>
           </button>
+          <a
+            href="/welcome"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            <BookOpen className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-primary">Features & How to Use</span>
+          </a>
         </div>
       </div>
 
