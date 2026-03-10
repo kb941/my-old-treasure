@@ -264,7 +264,22 @@ export function OnboardingWizard() {
                       </div>
                     </div>
                     <p className="text-[10px] text-muted-foreground text-center">Score and rank auto-sync based on NEET PG data</p>
-                  </div>
+
+                    {/* Exam Weightage Preview */}
+                    <div className="bg-secondary/50 rounded-lg p-3 space-y-1.5">
+                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Subject Weightage ({data.examName})</p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 max-h-32 overflow-y-auto">
+                        {Object.entries(EXAM_WEIGHTAGES[data.examName] || {}).map(([id, info]) => {
+                          const subjectName = SUBJECT_NAMES[id] || id;
+                          return (
+                            <div key={id} className="flex items-center justify-between text-[10px]">
+                              <span className="text-muted-foreground truncate">{subjectName}</span>
+                              <span className="font-medium shrink-0 ml-1">{(info as any).avg}Q</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                 </div>
               )}
 
