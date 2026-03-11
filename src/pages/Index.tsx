@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, BookOpen, BarChart3, FileText, User, Orbit, RotateCcw, Bell } from 'lucide-react';
+import { Plus, BookOpen, BarChart3, FileText, User, Orbit, RotateCcw, Bell, Sun, Moon } from 'lucide-react';
 import { ProfileTab } from '@/components/ProfileTab';
 import { AnalyticsTab } from '@/components/AnalyticsTab';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -70,6 +70,7 @@ const Index = () => {
   const [pyqYearTo, setPyqYearTo] = useLocalStorage<number>('neetpg-pyq-year-to', 2025);
   const [mcqGoalPerSubject, setMcqGoalPerSubject] = useLocalStorage<number>('neetpg-mcq-goal', 100);
   const [pushNotificationSettings, setPushNotificationSettings] = useLocalStorage<PushNotificationSettings>('neetpg-push-notifications', DEFAULT_PUSH_SETTINGS);
+  const [dailyStudyTarget, setDailyStudyTarget] = useLocalStorage<number>('neetpg-daily-study-target', 8);
   const [revisionDates, setRevisionDates] = useLocalStorage<string[]>('neetpg-revision-dates', []);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
@@ -267,6 +268,7 @@ const Index = () => {
     if (data.pyqYearTo !== undefined) setPyqYearTo(data.pyqYearTo);
     if (data.mcqGoalPerSubject !== undefined) setMcqGoalPerSubject(data.mcqGoalPerSubject);
     if (data.pushNotificationSettings) setPushNotificationSettings(data.pushNotificationSettings);
+    if (data.dailyStudyTarget !== undefined) setDailyStudyTarget(data.dailyStudyTarget);
     setSubjects(prev => prev.map(s => ({ ...s, weightage: data.subjectWeightages[s.id] || s.weightage })));
     toast({ title: "Profile updated!" });
   };
@@ -462,7 +464,21 @@ const Index = () => {
                 <span className="text-xs font-normal text-muted-foreground">{examName}</span>
               </h1>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  const next = !document.documentElement.classList.contains('dark');
+                  if (next) document.documentElement.classList.add('dark');
+                  else document.documentElement.classList.remove('dark');
+                  localStorage.setItem('theme', next ? 'dark' : 'light');
+                }}
+                className="p-2 rounded-xl hover:bg-secondary/80 transition-colors"
+              >
+                {document.documentElement.classList.contains('dark')
+                  ? <Sun className="w-[18px] h-[18px] text-foreground/70" />
+                  : <Moon className="w-[18px] h-[18px] text-foreground/70" />
+                }
+              </button>
               <NotificationPanel
                 reminders={reminders}
                 achievements={pyqAchievements}
@@ -536,7 +552,7 @@ const Index = () => {
           {activeTab === 'today' && (
             <div className="space-y-4">
               <ReadinessScoreCard result={readinessResult} compact />
-              <StatsBar stats={stats} onStatClick={(stat) => {
+              <StatsBar stats={stats} dailyStudyGoalHours={dailyStudyTarget} onStatClick={(stat) => {
                 setExpandedStat(prev => prev === stat ? null : stat);
               }} />
               {/* MCQs breakdown - single compact row */}
@@ -589,10 +605,16 @@ const Index = () => {
                   <Bell className="w-4 h-4 text-amber-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-medium">
-                      {reminders.filter(r => r.isOverdue).length > 0
-                        ? `${reminders.filter(r => r.isOverdue).length} overdue revision${reminders.filter(r => r.isOverdue).length > 1 ? 's' : ''}`
-                        : `${reminders.length} revision${reminders.length > 1 ? 's' : ''} due`
-                      }
+                      {(() => {
+                        const overdue = reminders.filter(r => r.isOverdue).length;
+                        const today = reminders.filter(r => !r.isOverdue && !r.isDueTomorrow).length;
+                        const tomorrow = reminders.filter(r => r.isDueTomorrow).length;
+                        const parts: string[] = [];
+                        if (overdue > 0) parts.push(`${overdue} overdue`);
+                        if (today > 0) parts.push(`${today} due today`);
+                        if (tomorrow > 0) parts.push(`${tomorrow} due tomorrow`);
+                        return parts.length > 0 ? parts.join(', ') : `${reminders.length} revision${reminders.length > 1 ? 's' : ''} due`;
+                      })()}
                     </span>
                   </div>
                   <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">View →</span>
@@ -643,6 +665,7 @@ const Index = () => {
                             forceExpanded={expandedSubjectId === subject.id}
                             examName={examName}
                             studyLogs={studyLogs}
+                            mcqGoalPerTopic={mcqGoalPerSubject}
                             onChaptersChange={(subjectId, newChapters) => {
                               setChapters(prev => [...prev.filter(c => c.subjectId !== subjectId), ...newChapters]);
                             }}
@@ -687,6 +710,7 @@ const Index = () => {
               contentTypes={contentTypes} breakDuration={breakDuration}
               markingScheme={markingScheme}
               pushNotificationSettings={pushNotificationSettings}
+              dailyStudyTarget={dailyStudyTarget}
               onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
               onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}

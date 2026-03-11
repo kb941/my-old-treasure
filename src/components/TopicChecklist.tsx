@@ -25,7 +25,8 @@ const stageColors: Record<string, string> = {
 
 export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSettings }: TopicChecklistProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+  const [showClearWarning, setShowClearWarning] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const stages = topic.completedStages || [];
   const schedule = getScheduleForConfidence(topic.confidence, srSettings);
@@ -181,21 +182,27 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onUpdate({
-                        ...topic,
-                        completedStages: [],
-                        confidence: 0,
-                        nextRevisionDate: null,
-                        revisionSession: 0,
-                        lastStudied: null,
-                        questionsSolved: 0,
-                        pyqDone: false,
-                      });
+                      // Check if "don't show again" is set
+                      const dontShow = localStorage.getItem('planos-hide-topic-clear-warning');
+                      if (dontShow) {
+                        onUpdate({
+                          ...topic,
+                          completedStages: [],
+                          confidence: 0,
+                          nextRevisionDate: null,
+                          revisionSession: 0,
+                          lastStudied: null,
+                          questionsSolved: 0,
+                          pyqDone: false,
+                        });
+                      } else {
+                        setShowClearWarning(true);
+                      }
                     }}
-                    className="shrink-0 px-2 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
+                    className="shrink-0 text-[10px] text-destructive hover:underline"
                     title="Clear all progress for this topic"
                   >
-                    Clear
+                    Reset
                   </button>
                 )}
               </div>
@@ -274,6 +281,46 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                 <span className="text-sm text-muted-foreground">Questions</span>
                 <span className="text-sm font-medium">{topic.questionsSolved}/{topic.targetQuestions}</span>
               </div>
+
+              {/* Clear Warning */}
+              {showClearWarning && (
+                <div className="p-2.5 bg-destructive/5 border border-destructive/20 rounded-lg space-y-2">
+                  <p className="text-xs text-destructive font-medium">Clear all progress for this topic? (Confidence, spaced repetition, MCQs)</p>
+                  <label className="flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                      className="rounded border-muted-foreground/30"
+                    />
+                    Don't show again
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowClearWarning(false); }}
+                      className="flex-1 py-1 rounded text-xs text-muted-foreground hover:bg-secondary"
+                    >Cancel</button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (dontShowAgain) localStorage.setItem('planos-hide-topic-clear-warning', 'true');
+                        onUpdate({
+                          ...topic,
+                          completedStages: [],
+                          confidence: 0,
+                          nextRevisionDate: null,
+                          revisionSession: 0,
+                          lastStudied: null,
+                          questionsSolved: 0,
+                          pyqDone: false,
+                        });
+                        setShowClearWarning(false);
+                      }}
+                      className="flex-1 py-1 rounded text-xs bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    >Clear</button>
+                  </div>
+                </div>
+              )}
 
               {/* Delete */}
               <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }}

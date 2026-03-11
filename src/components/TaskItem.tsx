@@ -157,10 +157,11 @@ export function TaskItem({
     setIsTimerRunning(false);
     onTimerStart?.(null);
     fireConfetti();
+    // Always show confidence picker if task has a topicId (even without timer usage)
     if (task.topicId) {
       setShowConfidencePicker(true);
     } else {
-      const elapsedMinutes = Math.ceil(totalElapsedStudyTime / 60);
+      const elapsedMinutes = Math.max(1, Math.ceil(totalElapsedStudyTime / 60));
       onDone?.(task.id, elapsedMinutes);
       onTimerComplete?.(task.id, elapsedMinutes);
       resetTimer();

@@ -1,12 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Bell, Trash2, Calendar, Filter } from 'lucide-react';
+import { ArrowLeft, Bell, Trash2, Calendar, Filter, RotateCcw, Trophy, Zap, Lightbulb, Target, Clock } from 'lucide-react';
 import { DismissedNotification } from '@/components/NotificationPanel';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// Map notification types to icons since stored icons can't be serialized
+const typeIconMap: Record<string, typeof Bell> = {
+  revision: RotateCcw,
+  achievement: Trophy,
+  streak: Zap,
+  reminder: Target,
+  tip: Lightbulb,
+};
 
 function loadDismissedHistory(): DismissedNotification[] {
   try {
@@ -166,7 +175,8 @@ export default function NotificationHistory() {
                 </div>
                 <div className="space-y-2">
                   {notifs.map((notif, i) => {
-                    const Icon = notif.icon;
+                    // Use type-based icon lookup instead of serialized icon
+                    const Icon = typeIconMap[notif.type] || Bell;
                     return (
                       <motion.div
                         key={`${notif.id}-${notif.dismissedAt.getTime()}`}
@@ -183,7 +193,7 @@ export default function NotificationHistory() {
                             notif.type === 'tip' ? 'bg-primary/10' :
                             'bg-primary/10'
                           )}>
-                            <Icon className={cn("w-5 h-5", notif.color)} />
+                            <Icon className={cn("w-5 h-5", notif.color || 'text-primary')} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium leading-tight">{notif.title}</p>

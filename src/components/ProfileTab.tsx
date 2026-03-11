@@ -77,6 +77,7 @@ interface ProfileTabProps {
   pyqYearTo: number;
   mcqGoalPerSubject: number;
   pushNotificationSettings: PushNotificationSettings;
+  dailyStudyTarget?: number;
   onSave: (data: ProfileData) => void;
   onResetAll?: () => void;
   onResetSyllabus?: () => void;
@@ -96,7 +97,7 @@ export function ProfileTab(props: ProfileTabProps) {
   const [newExamName, setNewExamName] = useState(props.examName);
   const [newTargetScore, setNewTargetScore] = useState(props.targetScore);
   const [newTargetRank, setNewTargetRank] = useState(props.targetRank);
-  const [dailyStudyTarget, setDailyStudyTarget] = useState(6);
+  const [dailyStudyTarget, setDailyStudyTarget] = useState(props.dailyStudyTarget ?? 8);
   const [weeklyMockTarget, setWeeklyMockTarget] = useState(2);
   const [weightages, setWeightages] = useState<Record<string, number>>(
     Object.fromEntries(subjects.map(s => [s.id, s.weightage]))
@@ -148,6 +149,7 @@ export function ProfileTab(props: ProfileTabProps) {
     setLocalPyqYearFrom(props.pyqYearFrom);
     setLocalPyqYearTo(props.pyqYearTo);
     setLocalMcqGoal(props.mcqGoalPerSubject);
+    setDailyStudyTarget(props.dailyStudyTarget ?? 8);
     setLocalPushSettings(props.pushNotificationSettings);
     setLocalContentTypes(props.contentTypes.map(ct => ({ ...ct })));
     const s = props.srSettings.schedules;
@@ -384,29 +386,22 @@ export function ProfileTab(props: ProfileTabProps) {
           </div>
         </div>
 
-        {/* Quick actions row */}
+        {/* Quick actions row - simplified to How to Use + Logout */}
         <div className="px-4 py-3 flex items-center gap-3 border-t border-border">
-          <button
-            onClick={toggleTheme}
+          <a
+            href="/how-to-use"
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors flex-1"
           >
-            {dark ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-blue-500" />}
-            <span className="text-xs font-medium">{dark ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
+            <BookOpen className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium">How to Use</span>
+          </a>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors flex-1"
           >
             <LogOut className="w-4 h-4 text-destructive" />
             <span className="text-xs font-medium text-destructive">Logout</span>
           </button>
-          <a
-            href="/welcome"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
-          >
-            <BookOpen className="w-4 h-4 text-primary" />
-            <span className="text-xs font-medium text-primary">Features & How to Use</span>
-          </a>
         </div>
       </div>
 

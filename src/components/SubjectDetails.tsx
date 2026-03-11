@@ -18,6 +18,7 @@ interface SubjectDetailsProps {
   forceExpanded?: boolean;
   examName?: string;
   studyLogs?: StudyLog[];
+  mcqGoalPerTopic?: number;
 }
 
 type WeightageInfo = { avg: number; range?: [number, number] };
@@ -55,7 +56,7 @@ const categoryColors: Record<string, string> = {
   'Short Subjects': 'from-amber-500 to-orange-500',
 };
 
-export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName, studyLogs = [] }: SubjectDetailsProps) {
+export function SubjectDetails({ subject, chapters, onChaptersChange, contentTypes, srSettings, forceExpanded, examName, studyLogs = [], mcqGoalPerTopic = 50 }: SubjectDetailsProps) {
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const [isExpanded, setIsExpanded] = useState(forceExpanded || false);
 
@@ -67,6 +68,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
   const [newChapterName, setNewChapterName] = useState('');
   const [addingTopicTo, setAddingTopicTo] = useState<string | null>(null);
   const [newTopicName, setNewTopicName] = useState('');
+  const [clearConfirmTarget, setClearConfirmTarget] = useState<{ type: 'chapter' | 'subject'; id: string } | null>(null);
 
   const subjectChapters = chapters.filter(c => c.subjectId === subject.id);
   const totalTopics = subjectChapters.reduce((acc, c) => acc + c.topics.length, 0);
@@ -126,7 +128,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
       status: 'not-started',
       completedStages: [],
       confidence: 0,
-      targetQuestions: 50,
+      targetQuestions: mcqGoalPerTopic,
       questionsSolved: 0,
       pyqDone: false,
       nextRevisionDate: null,
@@ -161,6 +163,40 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
           : c
       )
     );
+  };
+
+  const clearTopicProgress = (topic: Topic): Topic => ({
+    ...topic,
+    completedStages: [],
+    confidence: 0,
+    nextRevisionDate: null,
+    revisionSession: 0,
+    lastStudied: null,
+    questionsSolved: 0,
+    pyqDone: false,
+  });
+
+  const clearChapterProgress = (chapterId: string) => {
+    onChaptersChange(
+      subject.id,
+      subjectChapters.map(c =>
+        c.id === chapterId
+          ? { ...c, topics: c.topics.map(clearTopicProgress) }
+          : c
+      )
+    );
+    setClearConfirmTarget(null);
+  };
+
+  const clearSubjectProgress = () => {
+    onChaptersChange(
+      subject.id,
+      subjectChapters.map(c => ({
+        ...c,
+        topics: c.topics.map(clearTopicProgress),
+      }))
+    );
+    setClearConfirmTarget(null);
   };
 
   const applyStageToggleToTopic = (topic: Topic, stageId: string, shouldHaveStage: boolean): Topic => {
@@ -285,7 +321,15 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
         {/* Subject-level quick marks */}
         {subjectChapters.length > 0 && subjectChapters.some(c => c.topics.length > 0) && (
           <div className="shrink-0 p-2 bg-secondary/30 border-b border-border">
-            <p className="text-[10px] font-medium text-muted-foreground mb-1">Mark All Topics:</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-medium text-muted-foreground">Mark All Topics:</p>
+              <button
+                onClick={() => setClearConfirmTarget({ type: 'subject', id: subject.id })}
+                className="text-[10px] text-destructive hover:underline"
+              >
+                Reset All
+              </button>
+            </div>
             <div className="flex flex-wrap gap-1">
               {activeTypes.map(ct => {
                 const isComplete = isSubjectStageComplete(ct.id);
@@ -368,7 +412,15 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                       {/* Chapter-level quick marks */}
                       {chapter.topics.length > 0 && (
                         <div className="bg-secondary/30 rounded-lg p-1.5">
-                          <p className="text-[10px] text-muted-foreground mb-1">Quick Mark:</p>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] text-muted-foreground">Quick Mark:</p>
+                            <button
+                              onClick={() => setClearConfirmTarget({ type: 'chapter', id: chapter.id })}
+                              className="text-[10px] text-destructive hover:underline"
+                            >
+                              Reset
+                            </button>
+                          </div>
                           <div className="flex flex-wrap gap-1">
                             {activeTypes.map(ct => {
                               const isComplete = isChapterStageComplete(chapter.id, ct.id);
@@ -464,6 +516,45 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
               </Button>
             )}
           </div>
+
+          {/* Clear Confirmation Dialog */}
+          <AnimatePresence>
+            {clearConfirmTarget && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="bg-card border border-border rounded-xl p-4 mx-4 max-w-sm w-full shadow-lg space-y-3"
+                >
+                  <p className="text-sm font-semibold text-destructive">
+                    Clear {clearConfirmTarget.type === 'subject' ? 'Subject' : 'Chapter'} Progress?
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    This will reset all spaced repetition schedules, MCQ progress, confidence levels, and stage checkmarks for all topics in this {clearConfirmTarget.type}.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setClearConfirmTarget(null)}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium bg-secondary hover:bg-secondary/80"
+                    >Cancel</button>
+                    <button
+                      onClick={() => {
+                        if (clearConfirmTarget.type === 'subject') clearSubjectProgress();
+                        else clearChapterProgress(clearConfirmTarget.id);
+                      }}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    >Clear All Progress</button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     );
