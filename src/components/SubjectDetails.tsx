@@ -515,6 +515,45 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
               </Button>
             )}
           </div>
+
+          {/* Clear Confirmation Dialog */}
+          <AnimatePresence>
+            {clearConfirmTarget && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="bg-card border border-border rounded-xl p-4 mx-4 max-w-sm w-full shadow-lg space-y-3"
+                >
+                  <p className="text-sm font-semibold text-destructive">
+                    Clear {clearConfirmTarget.type === 'subject' ? 'Subject' : 'Chapter'} Progress?
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    This will reset all spaced repetition schedules, MCQ progress, confidence levels, and stage checkmarks for all topics in this {clearConfirmTarget.type}.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setClearConfirmTarget(null)}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium bg-secondary hover:bg-secondary/80"
+                    >Cancel</button>
+                    <button
+                      onClick={() => {
+                        if (clearConfirmTarget.type === 'subject') clearSubjectProgress();
+                        else clearChapterProgress(clearConfirmTarget.id);
+                      }}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    >Clear All Progress</button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     );
