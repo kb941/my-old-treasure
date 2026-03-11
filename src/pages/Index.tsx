@@ -665,6 +665,7 @@ const Index = () => {
                             forceExpanded={expandedSubjectId === subject.id}
                             examName={examName}
                             studyLogs={studyLogs}
+                            mcqGoalPerTopic={mcqGoalPerSubject}
                             onChaptersChange={(subjectId, newChapters) => {
                               setChapters(prev => [...prev.filter(c => c.subjectId !== subjectId), ...newChapters]);
                             }}
