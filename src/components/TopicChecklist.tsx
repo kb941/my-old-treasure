@@ -282,6 +282,46 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                 <span className="text-sm font-medium">{topic.questionsSolved}/{topic.targetQuestions}</span>
               </div>
 
+              {/* Clear Warning */}
+              {showClearWarning && (
+                <div className="p-2.5 bg-destructive/5 border border-destructive/20 rounded-lg space-y-2">
+                  <p className="text-xs text-destructive font-medium">Clear all progress for this topic? (Confidence, spaced repetition, MCQs)</p>
+                  <label className="flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                      className="rounded border-muted-foreground/30"
+                    />
+                    Don't show again
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowClearWarning(false); }}
+                      className="flex-1 py-1 rounded text-xs text-muted-foreground hover:bg-secondary"
+                    >Cancel</button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (dontShowAgain) localStorage.setItem('planos-hide-topic-clear-warning', 'true');
+                        onUpdate({
+                          ...topic,
+                          completedStages: [],
+                          confidence: 0,
+                          nextRevisionDate: null,
+                          revisionSession: 0,
+                          lastStudied: null,
+                          questionsSolved: 0,
+                          pyqDone: false,
+                        });
+                        setShowClearWarning(false);
+                      }}
+                      className="flex-1 py-1 rounded text-xs bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    >Clear</button>
+                  </div>
+                </div>
+              )}
+
               {/* Delete */}
               <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }}
                 className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
