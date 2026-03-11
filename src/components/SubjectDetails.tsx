@@ -128,7 +128,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
       status: 'not-started',
       completedStages: [],
       confidence: 0,
-      targetQuestions: 50,
+      targetQuestions: mcqGoalPerTopic,
       questionsSolved: 0,
       pyqDone: false,
       nextRevisionDate: null,
