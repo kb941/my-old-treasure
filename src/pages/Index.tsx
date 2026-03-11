@@ -605,10 +605,16 @@ const Index = () => {
                   <Bell className="w-4 h-4 text-amber-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-medium">
-                      {reminders.filter(r => r.isOverdue).length > 0
-                        ? `${reminders.filter(r => r.isOverdue).length} overdue revision${reminders.filter(r => r.isOverdue).length > 1 ? 's' : ''}`
-                        : `${reminders.length} revision${reminders.length > 1 ? 's' : ''} due`
-                      }
+                      {(() => {
+                        const overdue = reminders.filter(r => r.isOverdue).length;
+                        const today = reminders.filter(r => !r.isOverdue && !r.isDueTomorrow).length;
+                        const tomorrow = reminders.filter(r => r.isDueTomorrow).length;
+                        const parts: string[] = [];
+                        if (overdue > 0) parts.push(`${overdue} overdue`);
+                        if (today > 0) parts.push(`${today} due today`);
+                        if (tomorrow > 0) parts.push(`${tomorrow} due tomorrow`);
+                        return parts.length > 0 ? parts.join(', ') : `${reminders.length} revision${reminders.length > 1 ? 's' : ''} due`;
+                      })()}
                     </span>
                   </div>
                   <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">View →</span>
