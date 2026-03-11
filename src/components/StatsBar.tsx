@@ -4,6 +4,7 @@ import { UserStats } from '@/types';
 
 interface StatsBarProps {
   stats: UserStats;
+  dailyStudyGoalHours?: number;
   onStatClick?: (stat: 'xp' | 'streak' | 'study' | 'accuracy') => void;
 }
 
@@ -13,12 +14,13 @@ const levelTitles = [
   'Senior Consultant', 'Department Head',
 ];
 
-export function StatsBar({ stats, onStatClick }: StatsBarProps) {
+export function StatsBar({ stats, dailyStudyGoalHours = 8, onStatClick }: StatsBarProps) {
   const levelProgress = (stats.totalXP % 500) / 500 * 100;
   const levelTitle = levelTitles[Math.min(stats.level - 1, levelTitles.length - 1)];
   const hoursToday = Math.floor(stats.todayStudyMinutes / 60);
   const minutesToday = stats.todayStudyMinutes % 60;
-  const studyProgress = Math.min((stats.todayStudyMinutes / 480) * 100, 100);
+  const goalMinutes = dailyStudyGoalHours * 60;
+  const studyProgress = Math.min((stats.todayStudyMinutes / goalMinutes) * 100, 100);
   const streakProgress = stats.longestStreak > 0 ? (stats.currentStreak / stats.longestStreak) * 100 : 0;
   const accuracyProgress = stats.averageAccuracy;
 
@@ -47,7 +49,7 @@ export function StatsBar({ stats, onStatClick }: StatsBarProps) {
     {
       key: 'study', icon: Clock,
       label: 'Today', value: `${hoursToday}h ${minutesToday}m`,
-      sub: 'Goal: 8h', progress: studyProgress,
+      sub: `Goal: ${dailyStudyGoalHours}h`, progress: studyProgress,
       iconColor: 'text-sky-500', barColor: 'bg-sky-500/60',
     },
     {
