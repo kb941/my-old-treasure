@@ -464,7 +464,21 @@ const Index = () => {
                 <span className="text-xs font-normal text-muted-foreground">{examName}</span>
               </h1>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  const next = !document.documentElement.classList.contains('dark');
+                  if (next) document.documentElement.classList.add('dark');
+                  else document.documentElement.classList.remove('dark');
+                  localStorage.setItem('theme', next ? 'dark' : 'light');
+                }}
+                className="p-2 rounded-xl hover:bg-secondary/80 transition-colors"
+              >
+                {document.documentElement.classList.contains('dark')
+                  ? <Sun className="w-[18px] h-[18px] text-foreground/70" />
+                  : <Moon className="w-[18px] h-[18px] text-foreground/70" />
+                }
+              </button>
               <NotificationPanel
                 reminders={reminders}
                 achievements={pyqAchievements}
