@@ -97,7 +97,7 @@ export function ProfileTab(props: ProfileTabProps) {
   const [newExamName, setNewExamName] = useState(props.examName);
   const [newTargetScore, setNewTargetScore] = useState(props.targetScore);
   const [newTargetRank, setNewTargetRank] = useState(props.targetRank);
-  const [dailyStudyTarget, setDailyStudyTarget] = useState(6);
+  const [dailyStudyTarget, setDailyStudyTarget] = useState(props.dailyStudyTarget ?? 8);
   const [weeklyMockTarget, setWeeklyMockTarget] = useState(2);
   const [weightages, setWeightages] = useState<Record<string, number>>(
     Object.fromEntries(subjects.map(s => [s.id, s.weightage]))
