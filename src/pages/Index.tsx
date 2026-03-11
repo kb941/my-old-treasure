@@ -710,6 +710,7 @@ const Index = () => {
               contentTypes={contentTypes} breakDuration={breakDuration}
               markingScheme={markingScheme}
               pushNotificationSettings={pushNotificationSettings}
+              dailyStudyTarget={dailyStudyTarget}
               onSave={handleSaveProfile}
               onResetAll={handleResetAll} onResetSyllabus={handleResetSyllabus} onClearSampleData={handleClearSampleData}
               onRecalculateReadinessFromStages={handleRecalculateReadinessFromStages}
