@@ -67,6 +67,7 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
   const [newChapterName, setNewChapterName] = useState('');
   const [addingTopicTo, setAddingTopicTo] = useState<string | null>(null);
   const [newTopicName, setNewTopicName] = useState('');
+  const [clearConfirmTarget, setClearConfirmTarget] = useState<{ type: 'chapter' | 'subject'; id: string } | null>(null);
 
   const subjectChapters = chapters.filter(c => c.subjectId === subject.id);
   const totalTopics = subjectChapters.reduce((acc, c) => acc + c.topics.length, 0);
