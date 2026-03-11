@@ -149,6 +149,7 @@ export function ProfileTab(props: ProfileTabProps) {
     setLocalPyqYearFrom(props.pyqYearFrom);
     setLocalPyqYearTo(props.pyqYearTo);
     setLocalMcqGoal(props.mcqGoalPerSubject);
+    setDailyStudyTarget(props.dailyStudyTarget ?? 8);
     setLocalPushSettings(props.pushNotificationSettings);
     setLocalContentTypes(props.contentTypes.map(ct => ({ ...ct })));
     const s = props.srSettings.schedules;
