@@ -320,7 +320,15 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
         {/* Subject-level quick marks */}
         {subjectChapters.length > 0 && subjectChapters.some(c => c.topics.length > 0) && (
           <div className="shrink-0 p-2 bg-secondary/30 border-b border-border">
-            <p className="text-[10px] font-medium text-muted-foreground mb-1">Mark All Topics:</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-medium text-muted-foreground">Mark All Topics:</p>
+              <button
+                onClick={() => setClearConfirmTarget({ type: 'subject', id: subject.id })}
+                className="text-[10px] text-destructive hover:underline"
+              >
+                Reset All
+              </button>
+            </div>
             <div className="flex flex-wrap gap-1">
               {activeTypes.map(ct => {
                 const isComplete = isSubjectStageComplete(ct.id);
