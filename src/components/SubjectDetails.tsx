@@ -411,7 +411,15 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
                       {/* Chapter-level quick marks */}
                       {chapter.topics.length > 0 && (
                         <div className="bg-secondary/30 rounded-lg p-1.5">
-                          <p className="text-[10px] text-muted-foreground mb-1">Quick Mark:</p>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] text-muted-foreground">Quick Mark:</p>
+                            <button
+                              onClick={() => setClearConfirmTarget({ type: 'chapter', id: chapter.id })}
+                              className="text-[10px] text-destructive hover:underline"
+                            >
+                              Reset
+                            </button>
+                          </div>
                           <div className="flex flex-wrap gap-1">
                             {activeTypes.map(ct => {
                               const isComplete = isChapterStageComplete(chapter.id, ct.id);
