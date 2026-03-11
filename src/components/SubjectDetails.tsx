@@ -18,6 +18,7 @@ interface SubjectDetailsProps {
   forceExpanded?: boolean;
   examName?: string;
   studyLogs?: StudyLog[];
+  mcqGoalPerTopic?: number;
 }
 
 type WeightageInfo = { avg: number; range?: [number, number] };
