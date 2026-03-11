@@ -268,6 +268,7 @@ const Index = () => {
     if (data.pyqYearTo !== undefined) setPyqYearTo(data.pyqYearTo);
     if (data.mcqGoalPerSubject !== undefined) setMcqGoalPerSubject(data.mcqGoalPerSubject);
     if (data.pushNotificationSettings) setPushNotificationSettings(data.pushNotificationSettings);
+    if (data.dailyStudyTarget !== undefined) setDailyStudyTarget(data.dailyStudyTarget);
     setSubjects(prev => prev.map(s => ({ ...s, weightage: data.subjectWeightages[s.id] || s.weightage })));
     toast({ title: "Profile updated!" });
   };
