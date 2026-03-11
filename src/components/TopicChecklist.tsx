@@ -25,7 +25,8 @@ const stageColors: Record<string, string> = {
 
 export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSettings }: TopicChecklistProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+  const [showClearWarning, setShowClearWarning] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const activeTypes = (contentTypes || DEFAULT_CONTENT_TYPES).filter(ct => ct.enabled);
   const stages = topic.completedStages || [];
   const schedule = getScheduleForConfidence(topic.confidence, srSettings);
