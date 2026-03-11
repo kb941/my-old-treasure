@@ -181,21 +181,27 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onUpdate({
-                        ...topic,
-                        completedStages: [],
-                        confidence: 0,
-                        nextRevisionDate: null,
-                        revisionSession: 0,
-                        lastStudied: null,
-                        questionsSolved: 0,
-                        pyqDone: false,
-                      });
+                      // Check if "don't show again" is set
+                      const dontShow = localStorage.getItem('planos-hide-topic-clear-warning');
+                      if (dontShow) {
+                        onUpdate({
+                          ...topic,
+                          completedStages: [],
+                          confidence: 0,
+                          nextRevisionDate: null,
+                          revisionSession: 0,
+                          lastStudied: null,
+                          questionsSolved: 0,
+                          pyqDone: false,
+                        });
+                      } else {
+                        setShowClearWarning(true);
+                      }
                     }}
-                    className="shrink-0 px-2 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
+                    className="shrink-0 text-[10px] text-destructive hover:underline"
                     title="Clear all progress for this topic"
                   >
-                    Clear
+                    Reset
                   </button>
                 )}
               </div>
