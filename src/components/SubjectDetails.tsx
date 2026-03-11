@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronRight, Plus, X, Check, Trash2, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Subject, Chapter, Topic, TopicStatus, ContentType, DEFAULT_CONTENT_TYPES, SpacedRepetitionSettings, getScheduleForConfidence, StudyLog } from '@/types';
 import { addDays } from 'date-fns';
