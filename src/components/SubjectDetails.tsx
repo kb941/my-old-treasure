@@ -164,6 +164,40 @@ export function SubjectDetails({ subject, chapters, onChaptersChange, contentTyp
     );
   };
 
+  const clearTopicProgress = (topic: Topic): Topic => ({
+    ...topic,
+    completedStages: [],
+    confidence: 0,
+    nextRevisionDate: null,
+    revisionSession: 0,
+    lastStudied: null,
+    questionsSolved: 0,
+    pyqDone: false,
+  });
+
+  const clearChapterProgress = (chapterId: string) => {
+    onChaptersChange(
+      subject.id,
+      subjectChapters.map(c =>
+        c.id === chapterId
+          ? { ...c, topics: c.topics.map(clearTopicProgress) }
+          : c
+      )
+    );
+    setClearConfirmTarget(null);
+  };
+
+  const clearSubjectProgress = () => {
+    onChaptersChange(
+      subject.id,
+      subjectChapters.map(c => ({
+        ...c,
+        topics: c.topics.map(clearTopicProgress),
+      }))
+    );
+    setClearConfirmTarget(null);
+  };
+
   const applyStageToggleToTopic = (topic: Topic, stageId: string, shouldHaveStage: boolean): Topic => {
     const stages = topic.completedStages || [];
     const alreadyHasStage = stages.includes(stageId);
