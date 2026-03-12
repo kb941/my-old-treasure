@@ -34,7 +34,7 @@ const columnColors: Record<TaskColumn, string> = {
   done: 'bg-green-500',
 };
 
-export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onStartFocus, pomodoroSettings, chapters = [] }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onDoneMock, onStartFocus, pomodoroSettings, chapters = [] }: KanbanBoardProps) {
   const isMobile = useIsMobile();
   const [activeColumn, setActiveColumn] = useState<TaskColumn>('today');
   const [addModalOpen, setAddModalOpen] = useState(false);
