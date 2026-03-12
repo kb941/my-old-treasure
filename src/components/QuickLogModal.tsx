@@ -52,7 +52,8 @@ const VIDEO_TYPE_MAP: Record<string, { type: VideoType; label: string }> = {
 };
 
 export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenTestModal, onOpenPyqMockModal, chapters = [], contentTypes = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: QuickLogModalProps) {
-  const [logType, setLogType] = useState<'study' | 'mcq' | 'revision' | 'pyq' | null>(null);
+  const [logType, setLogType] = useState<'study' | 'mcq' | 'revision' | 'pyq' | 'test' | null>(null);
+  const [testSubType, setTestSubType] = useState<'swt' | 'random'>('swt');
   const [videoType, setVideoType] = useState<VideoType>('main');
   const [subjectId, setSubjectId] = useState('');
   const [chapterId, setChapterId] = useState('');
