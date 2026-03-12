@@ -117,6 +117,10 @@ export function AnalyticsTab({
           <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
         )}
 
+        {activeInsight === 'tests' && (
+          <MockTestInsights mockTests={mockTests} markingScheme={markingScheme} subjects={subjects} />
+        )}
+
         {activeInsight === 'pyq' && (
           <PYQAccuracyTrends subjects={subjects} />
         )}
