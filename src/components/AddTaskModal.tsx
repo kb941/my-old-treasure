@@ -690,16 +690,35 @@ export function AddTaskModal({ isOpen, onClose, onAdd, onEdit, editTask, default
       case 'test':
         return (
           <div className="space-y-3">
+            {/* SWT / Random toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setTestSource('SWT'); updateAutoTitle(undefined, subjectId, '', '', 'SWT'); }}
+                className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                  testSource === 'SWT' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                }`}
+              >
+                Subject-Wise (SWT)
+              </button>
+              <button
+                onClick={() => { setTestSource('Random'); setSubjectId(''); setChapterId(''); setTopicId(''); updateAutoTitle(undefined, '', '', '', 'Random'); }}
+                className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                  testSource === 'Random' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                }`}
+              >
+                Random
+              </button>
+            </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Source</label>
+              <label className="text-sm font-medium mb-1.5 block">Source (Optional)</label>
               <Input
-                value={testSource}
+                value={testSource === 'SWT' || testSource === 'Random' ? '' : testSource}
                 onChange={e => { setTestSource(e.target.value); setTimeout(() => updateAutoTitle(undefined, subjectId, chapterId, topicId, e.target.value), 0); }}
                 placeholder="e.g., Marrow, PrepLadder..."
                 autoFocus={false}
               />
             </div>
-            {renderSubjectPicker(true)}
+            {(testSource === 'SWT' || (!testSource || (testSource !== 'Random'))) && renderSubjectPicker(true)}
           </div>
         );
 

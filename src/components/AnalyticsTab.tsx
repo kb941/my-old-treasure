@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, BookOpen, Activity, FileText } from 'lucide-react';
+import { BarChart3, BookOpen, Activity, FileText, ClipboardList } from 'lucide-react';
 import { MockAnalytics } from '@/components/MockAnalytics';
 import { ReadinessScoreCard } from '@/components/ReadinessScoreCard';
 import { WeeklyStats } from '@/components/WeeklyStats';
@@ -11,13 +11,15 @@ import { PYQAccuracyTrends } from '@/components/PYQAccuracyTrends';
 import { AchievementsBadgePanel } from '@/components/AchievementsBadgePanel';
 import { SubjectStudyHours } from '@/components/SubjectStudyHours';
 import { RankPredictor } from '@/components/RankPredictor';
+import { MockTestInsights } from '@/components/MockTestInsights';
 import { MockTest, MarkingScheme, UserStats, Chapter, StudyLog, Subject, ContentType, Achievement } from '@/types';
 import { ReadinessResult } from '@/hooks/useReadinessScore';
 
-type InsightsTab = 'overview' | 'content' | 'patterns' | 'pyq';
+type InsightsTab = 'overview' | 'content' | 'patterns' | 'pyq' | 'tests';
 
 const tabs: { key: InsightsTab; label: string; icon: typeof BarChart3 }[] = [
   { key: 'overview', label: 'Overview', icon: BarChart3 },
+  { key: 'tests', label: 'GTs', icon: ClipboardList },
   { key: 'content', label: 'Content', icon: BookOpen },
   { key: 'patterns', label: 'Patterns', icon: Activity },
   { key: 'pyq', label: 'PYQ', icon: FileText },
@@ -113,6 +115,10 @@ export function AnalyticsTab({
 
         {activeInsight === 'patterns' && (
           <AdvancedAnalytics subjects={subjects} chapters={chapters} studyLogs={studyLogs} mockTests={mockTests} />
+        )}
+
+        {activeInsight === 'tests' && (
+          <MockTestInsights mockTests={mockTests} markingScheme={markingScheme} subjects={subjects} />
         )}
 
         {activeInsight === 'pyq' && (

@@ -13,7 +13,8 @@ interface KanbanBoardProps {
   onTasksChange: (tasks: Task[]) => void;
   onToggleTask: (id: string) => void;
   onTimerComplete?: (taskId: string, duration: number) => void;
-  onTaskDone?: (taskId: string, duration: number) => void;
+  onTaskDone?: (taskId: string, duration: number, confidence?: number, questionData?: { attempted: number; correct: number }) => void;
+  onDoneMock?: (task: Task) => void;
   onStartFocus?: (taskId: string) => void;
   pomodoroSettings?: PomodoroSettings;
   chapters?: Chapter[];
@@ -33,7 +34,7 @@ const columnColors: Record<TaskColumn, string> = {
   done: 'bg-green-500',
 };
 
-export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onStartFocus, pomodoroSettings, chapters = [] }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onDoneMock, onStartFocus, pomodoroSettings, chapters = [] }: KanbanBoardProps) {
   const isMobile = useIsMobile();
   const [activeColumn, setActiveColumn] = useState<TaskColumn>('today');
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -113,6 +114,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 onEdit={openEditModal}
                 onTimerComplete={onTimerComplete}
                 onDone={onTaskDone}
+                onDoneMock={onDoneMock}
                 onStartFocus={onStartFocus}
                 showTimer={columnId === 'today'}
                 isDraggable={true}
@@ -138,6 +140,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
               onMove={moveTask}
               onTimerComplete={onTimerComplete}
               onDone={onTaskDone}
+              onDoneMock={onDoneMock}
               onStartFocus={onStartFocus}
               showTimer={columnId === 'today'}
               isDraggable={false}

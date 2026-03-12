@@ -52,7 +52,8 @@ const VIDEO_TYPE_MAP: Record<string, { type: VideoType; label: string }> = {
 };
 
 export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenTestModal, onOpenPyqMockModal, chapters = [], contentTypes = [], pyqYearFrom = 2017, pyqYearTo = 2024, examName = '' }: QuickLogModalProps) {
-  const [logType, setLogType] = useState<'study' | 'mcq' | 'revision' | 'pyq' | null>(null);
+  const [logType, setLogType] = useState<'study' | 'mcq' | 'revision' | 'pyq' | 'test' | null>(null);
+  const [testSubType, setTestSubType] = useState<'swt' | 'random'>('swt');
   const [videoType, setVideoType] = useState<VideoType>('main');
   const [subjectId, setSubjectId] = useState('');
   const [chapterId, setChapterId] = useState('');
@@ -90,13 +91,14 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
     if (!isOpen) resetAll();
   }, [isOpen]);
 
-  const handleLogTypeChange = (type: 'study' | 'mcq' | 'revision' | 'pyq') => {
+  const handleLogTypeChange = (type: 'study' | 'mcq' | 'revision' | 'pyq' | 'test') => {
     setLogType(type);
     setSubjectId('');
     setChapterId('');
     setTopicId('');
     setExpandedSubject(null);
     setExpandedChapter(null);
+    setTestSubType('swt');
   };
 
   const enabledVideoTypes = contentTypes.length > 0
@@ -525,7 +527,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                   </Button>
                 )}
                 <h2 className="text-lg font-bold">
-                  {!logType ? 'Quick Log' : logType === 'study' ? 'Log Study' : logType === 'mcq' ? 'Log MCQs' : logType === 'revision' ? 'Log Revision' : 'Log PYQs'}
+                  {!logType ? 'Quick Log' : logType === 'study' ? 'Log Study' : logType === 'mcq' ? 'Log MCQs' : logType === 'revision' ? 'Log Revision' : logType === 'test' ? 'Log Test' : 'Log PYQs'}
                 </h2>
               </div>
               <Button variant="ghost" size="icon" onClick={onClose}>
@@ -552,6 +554,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                           { type: 'mcq' as const, icon: FileText, label: 'MCQs' },
                           { type: 'revision' as const, icon: Brain, label: 'Revision' },
                           { type: 'pyq' as const, icon: FileText, label: 'PYQs' },
+                          { type: 'test' as const, icon: ClipboardList, label: 'Test' },
                         ].map(({ type, icon: Icon, label }) => (
                           <button
                             key={type}
@@ -564,21 +567,14 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                         ))}
                       </div>
 
-                      {/* Mock & Test buttons */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Mock button */}
+                      <div className="grid grid-cols-1 gap-2">
                         <button
                           onClick={() => { onClose(); onOpenMockModal?.(); }}
                           className="p-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-muted-foreground hover:text-primary"
                         >
                           <FileText className="w-4 h-4" />
-                          <span className="text-xs font-medium">Log Full Mock</span>
-                        </button>
-                        <button
-                          onClick={() => { onClose(); onOpenTestModal?.(); }}
-                          className="p-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-muted-foreground hover:text-primary"
-                        >
-                          <ClipboardList className="w-4 h-4" />
-                          <span className="text-xs font-medium">Log Test</span>
+                          <span className="text-xs font-medium">Log Full Mock / GT</span>
                         </button>
                       </div>
                     </motion.div>
@@ -627,8 +623,58 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                         {renderSubjectChapterPicker(true)}
                         {renderDurationPicker()}
                         {renderQuestionsFields()}
-                        <Button onClick={handleSubmit} disabled={!subjectId} className="w-full gradient-primary text-primary-foreground">
+                        <Button onClick={handleSubmit} className="w-full gradient-primary text-primary-foreground">
                           Log MCQs (+10 XP)
+                        </Button>
+                      </>
+                    )}
+
+                    {/* ═══════ TEST (SWT/Random) ═══════ */}
+                    {logType === 'test' && (
+                      <>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setTestSubType('swt')}
+                            className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                              testSubType === 'swt' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                            }`}
+                          >
+                            Subject-Wise (SWT)
+                          </button>
+                          <button
+                            onClick={() => { setTestSubType('random'); setSubjectId(''); setChapterId(''); setTopicId(''); }}
+                            className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                              testSubType === 'random' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                            }`}
+                          >
+                            Random
+                          </button>
+                        </div>
+                        {testSubType === 'swt' && (
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Subject</label>
+                            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                              {initialSubjects.map(s => (
+                                <button
+                                  key={s.id}
+                                  onClick={() => setSubjectId(s.id)}
+                                  className={`px-2.5 py-1 rounded-full text-xs transition-all ${
+                                    subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
+                                  }`}
+                                >
+                                  {s.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {renderDurationPicker()}
+                        {renderQuestionsFields()}
+                        <Button onClick={() => { onClose(); onOpenTestModal?.(); }} variant="outline" className="w-full text-xs">
+                          Need full test logging? Use Test Modal →
+                        </Button>
+                        <Button onClick={handleSubmit} disabled={testSubType === 'swt' && !subjectId} className="w-full gradient-primary text-primary-foreground">
+                          Log Test (+10 XP)
                         </Button>
                       </>
                     )}
