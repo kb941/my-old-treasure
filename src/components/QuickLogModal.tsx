@@ -554,6 +554,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                           { type: 'mcq' as const, icon: FileText, label: 'MCQs' },
                           { type: 'revision' as const, icon: Brain, label: 'Revision' },
                           { type: 'pyq' as const, icon: FileText, label: 'PYQs' },
+                          { type: 'test' as const, icon: ClipboardList, label: 'Test' },
                         ].map(({ type, icon: Icon, label }) => (
                           <button
                             key={type}
@@ -566,21 +567,14 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                         ))}
                       </div>
 
-                      {/* Mock & Test buttons */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Mock button */}
+                      <div className="grid grid-cols-1 gap-2">
                         <button
                           onClick={() => { onClose(); onOpenMockModal?.(); }}
                           className="p-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-muted-foreground hover:text-primary"
                         >
                           <FileText className="w-4 h-4" />
-                          <span className="text-xs font-medium">Log Full Mock</span>
-                        </button>
-                        <button
-                          onClick={() => { onClose(); onOpenTestModal?.(); }}
-                          className="p-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-muted-foreground hover:text-primary"
-                        >
-                          <ClipboardList className="w-4 h-4" />
-                          <span className="text-xs font-medium">Log Test</span>
+                          <span className="text-xs font-medium">Log Full Mock / GT</span>
                         </button>
                       </div>
                     </motion.div>
