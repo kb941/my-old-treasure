@@ -312,10 +312,15 @@ const Index = () => {
     });
   };
 
-  const handleTaskDone = (taskId: string, duration: number, confidence?: number) => {
+  const handleTaskDone = (taskId: string, duration: number, confidence?: number, questionData?: { attempted: number; correct: number }) => {
     const task = tasks.find(t => t.id === taskId);
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: true, column: 'done' as const } : t));
     setStats(s => ({ ...s, todayStudyMinutes: s.todayStudyMinutes + duration, totalXP: s.totalXP + 15 }));
+
+    // Log MCQ data if question data provided
+    if (questionData && questionData.attempted > 0) {
+      setMcqLogs(prev => [...prev, { date: new Date().toISOString().split('T')[0], count: questionData.attempted }]);
+    }
 
     if (task?.topicId && task?.subjectId) {
       setChapters(prev => prev.map(chapter => {
@@ -334,14 +339,17 @@ const Index = () => {
               const currentIdx = statusOrder.indexOf(topic.status);
               if (currentIdx < statusOrder.length - 1 && currentIdx >= 0) updates.status = statusOrder[currentIdx + 1];
               else if (topic.status === 'not-started') updates.status = 'main-videos';
-            } else if (task.type === 'mcq') {
-              updates.questionsSolved = topic.questionsSolved + 50;
-              setMcqLogs(prev => [...prev, { date: new Date().toISOString().split('T')[0], count: 50 }]);
+            } else if (task.type === 'mcq' || task.type === 'pyq') {
+              const qSolved = questionData?.attempted || 50;
+              updates.questionsSolved = topic.questionsSolved + qSolved;
+              if (!questionData) {
+                setMcqLogs(prev => [...prev, { date: new Date().toISOString().split('T')[0], count: qSolved }]);
+              }
               if (['extra-videos', 'btr-videos', 'rr-videos', 'main-videos'].includes(topic.status)) updates.status = 'mcqs-in-progress';
+              if (task.type === 'pyq') updates.pyqDone = true;
             } else if (task.type === 'revision') {
-              const schedule = getScheduleForConfidence(topic.confidence, srSettings);
+              const schedule = getScheduleForConfidence(confidence ?? topic.confidence, srSettings);
               const nextSession = topic.revisionSession + 1;
-              // Handle maintenance session (perpetual cycle)
               const maintenanceIdx = schedule.findIndex(s => s.name === 'Maintenance');
               if (maintenanceIdx >= 0 && nextSession >= maintenanceIdx) {
                 const maintenanceSched = schedule[maintenanceIdx];
@@ -355,7 +363,7 @@ const Index = () => {
               if (topic.status === 'pyq-done' || topic.status === 'mcqs-in-progress') updates.status = 'revision';
             }
             if (!topic.lastStudied && !topic.nextRevisionDate) {
-              const schedule = getScheduleForConfidence(topic.confidence, srSettings);
+              const schedule = getScheduleForConfidence(confidence ?? topic.confidence, srSettings);
               updates.nextRevisionDate = addDays(new Date(), schedule[0].daysAfterPrevious);
               updates.revisionSession = 0;
             }
