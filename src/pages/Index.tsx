@@ -253,6 +253,17 @@ const Index = () => {
     setMockTests(prev => [mockTest, ...prev]);
     setStats(s => ({ ...s, totalXP: s.totalXP + 25 }));
     toast({ title: "Mock test logged! +25 XP 📝", description: `Score: ${mockTest.score}/${markingScheme.totalMarks || 800}` });
+    // If triggered from task completion, mark the task done
+    if (pendingMockTaskId) {
+      setTasks(prev => prev.map(t => t.id === pendingMockTaskId ? { ...t, completed: true, column: 'done' as const } : t));
+      setPendingMockTaskId(null);
+    }
+  };
+
+  const handleDoneMockTask = (task: Task) => {
+    setPendingMockTaskId(task.id);
+    setMockModalMode(task.type === 'test' ? 'test' : 'mock');
+    setIsMockModalOpen(true);
   };
 
   const handleSaveProfile = (data: ProfileData) => {
