@@ -91,13 +91,14 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
     if (!isOpen) resetAll();
   }, [isOpen]);
 
-  const handleLogTypeChange = (type: 'study' | 'mcq' | 'revision' | 'pyq') => {
+  const handleLogTypeChange = (type: 'study' | 'mcq' | 'revision' | 'pyq' | 'test') => {
     setLogType(type);
     setSubjectId('');
     setChapterId('');
     setTopicId('');
     setExpandedSubject(null);
     setExpandedChapter(null);
+    setTestSubType('swt');
   };
 
   const enabledVideoTypes = contentTypes.length > 0
