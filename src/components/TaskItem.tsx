@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil } from 'lucide-react';
+import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil, Plus, Minus } from 'lucide-react';
 import { Task, TaskColumn, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -48,7 +48,8 @@ interface TaskItemProps {
   onToggle: (id: string) => void;
   onMove: (taskId: string, direction: 'left' | 'right') => void;
   onTimerComplete?: (taskId: string, duration: number) => void;
-  onDone?: (taskId: string, elapsedMinutes: number, confidence?: number) => void;
+  onDone?: (taskId: string, elapsedMinutes: number, confidence?: number, questionData?: { attempted: number; correct: number }) => void;
+  onDoneMock?: (task: Task) => void;
   onDelete?: (taskId: string) => void;
   onEdit?: (task: Task) => void;
   onStartFocus?: (taskId: string) => void;
@@ -61,7 +62,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({
-  task, onToggle, onMove, onTimerComplete, onDone, onDelete, onEdit, onStartFocus,
+  task, onToggle, onMove, onTimerComplete, onDone, onDoneMock, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false, isEditMode = false,
   pomodoroSettings = DEFAULT_POMODORO, activeTimerTaskId, onTimerStart
 }: TaskItemProps) {
@@ -74,6 +75,8 @@ export function TaskItem({
   const [totalElapsedStudyTime, setTotalElapsedStudyTime] = useState(0);
   const [showConfidencePicker, setShowConfidencePicker] = useState(false);
   const [selectedConfidence, setSelectedConfidence] = useState(3);
+  const [questionsAttempted, setQuestionsAttempted] = useState(50);
+  const [questionsCorrect, setQuestionsCorrect] = useState(35);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const checkboxRef = useRef<HTMLButtonElement | null>(null);
 
