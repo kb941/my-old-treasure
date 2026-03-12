@@ -76,6 +76,7 @@ const Index = () => {
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const [expandedSubjectId, setExpandedSubjectId] = useState<string | null>(null);
   const [expandedStat, setExpandedStat] = useState<'xp' | 'streak' | 'study' | 'accuracy' | null>(null);
+  const [pendingMockTaskId, setPendingMockTaskId] = useState<string | null>(null);
 
   // Migrate existing users with empty chapters to syllabus defaults
   useEffect(() => {
