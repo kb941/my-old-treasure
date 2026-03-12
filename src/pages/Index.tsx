@@ -643,6 +643,7 @@ const Index = () => {
               <KanbanBoard
                 tasks={tasks} onTasksChange={setTasks} onToggleTask={handleToggleTask}
                 onTimerComplete={handleTaskComplete} onTaskDone={handleTaskDone}
+                onDoneMock={handleDoneMockTask}
                 onStartFocus={(taskId) => { setFocusTaskId(taskId); setIsFocusMode(true); }}
                 pomodoroSettings={pomodoroSettings} chapters={chapters}
               />

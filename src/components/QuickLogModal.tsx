@@ -623,8 +623,58 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                         {renderSubjectChapterPicker(true)}
                         {renderDurationPicker()}
                         {renderQuestionsFields()}
-                        <Button onClick={handleSubmit} disabled={!subjectId} className="w-full gradient-primary text-primary-foreground">
+                        <Button onClick={handleSubmit} className="w-full gradient-primary text-primary-foreground">
                           Log MCQs (+10 XP)
+                        </Button>
+                      </>
+                    )}
+
+                    {/* ═══════ TEST (SWT/Random) ═══════ */}
+                    {logType === 'test' && (
+                      <>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setTestSubType('swt')}
+                            className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                              testSubType === 'swt' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                            }`}
+                          >
+                            Subject-Wise (SWT)
+                          </button>
+                          <button
+                            onClick={() => { setTestSubType('random'); setSubjectId(''); setChapterId(''); setTopicId(''); }}
+                            className={`flex-1 p-2.5 rounded-lg border-2 text-xs font-medium transition-all text-center ${
+                              testSubType === 'random' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                            }`}
+                          >
+                            Random
+                          </button>
+                        </div>
+                        {testSubType === 'swt' && (
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Subject</label>
+                            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                              {initialSubjects.map(s => (
+                                <button
+                                  key={s.id}
+                                  onClick={() => setSubjectId(s.id)}
+                                  className={`px-2.5 py-1 rounded-full text-xs transition-all ${
+                                    subjectId === s.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
+                                  }`}
+                                >
+                                  {s.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {renderDurationPicker()}
+                        {renderQuestionsFields()}
+                        <Button onClick={() => { onClose(); onOpenTestModal?.(); }} variant="outline" className="w-full text-xs">
+                          Need full test logging? Use Test Modal →
+                        </Button>
+                        <Button onClick={handleSubmit} disabled={testSubType === 'swt' && !subjectId} className="w-full gradient-primary text-primary-foreground">
+                          Log Test (+10 XP)
                         </Button>
                       </>
                     )}
