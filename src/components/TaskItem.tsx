@@ -160,7 +160,23 @@ export function TaskItem({
     setIsTimerRunning(false);
     onTimerStart?.(null);
     fireConfetti();
-    // Always show confidence picker if task has a topicId (even without timer usage)
+    // Mock/Test tasks: open full mock logging modal
+    if (task.type === 'mock' || task.type === 'test') {
+      if (onDoneMock) {
+        onDoneMock(task);
+      } else {
+        const elapsedMinutes = Math.max(1, Math.ceil(totalElapsedStudyTime / 60));
+        onDone?.(task.id, elapsedMinutes);
+        resetTimer();
+      }
+      return;
+    }
+    // MCQ/PYQ: show question + confidence picker
+    if (task.type === 'mcq' || task.type === 'pyq') {
+      setShowConfidencePicker(true);
+      return;
+    }
+    // Study/Revision: show confidence picker if has topicId
     if (task.topicId) {
       setShowConfidencePicker(true);
     } else {
@@ -173,7 +189,10 @@ export function TaskItem({
 
   const confirmDoneWithConfidence = () => {
     const elapsedMinutes = Math.ceil(totalElapsedStudyTime / 60);
-    onDone?.(task.id, elapsedMinutes, selectedConfidence);
+    const questionData = (task.type === 'mcq' || task.type === 'pyq')
+      ? { attempted: questionsAttempted, correct: questionsCorrect }
+      : undefined;
+    onDone?.(task.id, elapsedMinutes, task.topicId ? selectedConfidence : undefined, questionData);
     onTimerComplete?.(task.id, elapsedMinutes);
     resetTimer();
     setShowConfidencePicker(false);
