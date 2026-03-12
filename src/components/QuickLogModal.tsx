@@ -527,7 +527,7 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
                   </Button>
                 )}
                 <h2 className="text-lg font-bold">
-                  {!logType ? 'Quick Log' : logType === 'study' ? 'Log Study' : logType === 'mcq' ? 'Log MCQs' : logType === 'revision' ? 'Log Revision' : 'Log PYQs'}
+                  {!logType ? 'Quick Log' : logType === 'study' ? 'Log Study' : logType === 'mcq' ? 'Log MCQs' : logType === 'revision' ? 'Log Revision' : logType === 'test' ? 'Log Test' : 'Log PYQs'}
                 </h2>
               </div>
               <Button variant="ghost" size="icon" onClick={onClose}>
