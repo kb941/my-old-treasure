@@ -13,7 +13,8 @@ interface KanbanBoardProps {
   onTasksChange: (tasks: Task[]) => void;
   onToggleTask: (id: string) => void;
   onTimerComplete?: (taskId: string, duration: number) => void;
-  onTaskDone?: (taskId: string, duration: number) => void;
+  onTaskDone?: (taskId: string, duration: number, confidence?: number, questionData?: { attempted: number; correct: number }) => void;
+  onDoneMock?: (task: Task) => void;
   onStartFocus?: (taskId: string) => void;
   pomodoroSettings?: PomodoroSettings;
   chapters?: Chapter[];
