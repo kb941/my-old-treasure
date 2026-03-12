@@ -67,15 +67,14 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
   };
 
   const setConfidence = (value: number) => {
-    // Recalculate next revision based on new confidence
     const newSchedule = getScheduleForConfidence(value, srSettings);
     const updates: Partial<Topic> = { confidence: value };
     
-    // If topic has a revision date, recalculate based on new schedule
-    if (topic.lastStudied && topic.revisionSession < newSchedule.length) {
+    // Recalculate next revision from NOW using new confidence schedule
+    if (topic.nextRevisionDate && topic.revisionSession < newSchedule.length) {
       const sessionInfo = newSchedule[topic.revisionSession];
       if (sessionInfo) {
-        updates.nextRevisionDate = addDays(topic.lastStudied, sessionInfo.daysAfterPrevious);
+        updates.nextRevisionDate = addDays(new Date(), sessionInfo.daysAfterPrevious);
       }
     }
     
