@@ -209,21 +209,23 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
               {/* Confidence */}
               <div className="flex items-center justify-between p-2 bg-secondary/30 rounded-lg">
                 <span className="text-sm text-muted-foreground">Confidence</span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button key={star} onClick={(e) => { e.stopPropagation(); setConfidence(star); }} className="p-0.5">
-                      <Star className={cn(
-                        "w-5 h-5 transition-all",
-                        star <= topic.confidence ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30 hover:text-amber-400/50"
-                      )} />
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button key={star} onClick={(e) => { e.stopPropagation(); setConfidence(star); }} className="p-0.5">
+                        <Star className={cn(
+                          "w-5 h-5 transition-all",
+                          star <= topic.confidence ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30 hover:text-amber-400/50"
+                        )} />
+                      </button>
+                    ))}
+                  </div>
+                  {topic.confidence > 0 && topic.nextRevisionDate && (
+                    <span className="text-[10px] text-muted-foreground">
+                      Next: {format(new Date(topic.nextRevisionDate), 'MMM d')}
+                    </span>
+                  )}
                 </div>
-                {topic.confidence > 0 && (
-                  <p className="text-[10px] text-muted-foreground px-2">
-                    Next: {(DEFAULT_SR_SCHEDULES[topic.confidence] || DEFAULT_SR_SCHEDULES[3]).slice(0, 3).map(s => `${s.daysAfterPrevious}d`).join(' → ')}…
-                  </p>
-                )}
               </div>
 
               {/* Spaced Repetition Info */}

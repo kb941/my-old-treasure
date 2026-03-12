@@ -331,17 +331,51 @@ export function TaskItem({
 
               {showConfidencePicker && (
                 <div className="mt-2 p-2.5 bg-secondary/50 rounded-lg border border-border space-y-2">
-                  <p className="text-xs font-medium text-center">How confident are you?</p>
-                  <div className="flex justify-center gap-1">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button key={star} onClick={(e) => { e.stopPropagation(); setSelectedConfidence(star); }} className="p-0.5">
-                        <Star className={cn("w-5 h-5 transition-all", star <= selectedConfidence ? "text-accent fill-accent" : "text-muted-foreground/20")} />
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center">
-                    Next: {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d → {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3]).slice(1, 4).map(s => `${s.daysAfterPrevious}d`).join(' → ')}
-                  </p>
+                  {/* Question fields for MCQ/PYQ */}
+                  {(task.type === 'mcq' || task.type === 'pyq') && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-center">Questions</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-muted-foreground block mb-1">Attempted</label>
+                          <div className="flex items-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); setQuestionsAttempted(prev => Math.max(1, prev - 5)); }} className="p-1 rounded bg-secondary hover:bg-secondary/80"><Minus className="w-3 h-3" /></button>
+                            <span className="text-sm font-bold flex-1 text-center">{questionsAttempted}</span>
+                            <button onClick={(e) => { e.stopPropagation(); setQuestionsAttempted(prev => prev + 5); }} className="p-1 rounded bg-secondary hover:bg-secondary/80"><Plus className="w-3 h-3" /></button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted-foreground block mb-1">Correct</label>
+                          <div className="flex items-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); setQuestionsCorrect(prev => Math.max(0, prev - 5)); }} className="p-1 rounded bg-secondary hover:bg-secondary/80"><Minus className="w-3 h-3" /></button>
+                            <span className="text-sm font-bold flex-1 text-center">{questionsCorrect}</span>
+                            <button onClick={(e) => { e.stopPropagation(); setQuestionsCorrect(prev => Math.min(questionsAttempted, prev + 5)); }} className="p-1 rounded bg-secondary hover:bg-secondary/80"><Plus className="w-3 h-3" /></button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <span className={cn("text-xs font-medium", questionsAttempted > 0 ? (questionsCorrect / questionsAttempted >= 0.75 ? 'text-green-500' : questionsCorrect / questionsAttempted >= 0.5 ? 'text-yellow-500' : 'text-red-500') : 'text-muted-foreground')}>
+                          {questionsAttempted > 0 ? Math.round((questionsCorrect / questionsAttempted) * 100) : 0}% accuracy
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Confidence picker - show for tasks with topicId */}
+                  {task.topicId && (
+                    <>
+                      <p className="text-xs font-medium text-center">How confident are you?</p>
+                      <div className="flex justify-center gap-1">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button key={star} onClick={(e) => { e.stopPropagation(); setSelectedConfidence(star); }} className="p-0.5">
+                            <Star className={cn("w-5 h-5 transition-all", star <= selectedConfidence ? "text-accent fill-accent" : "text-muted-foreground/20")} />
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        Next review in {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d
+                      </p>
+                    </>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); confirmDoneWithConfidence(); }}
                     className="w-full py-1.5 rounded-md text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/15 transition-colors"
