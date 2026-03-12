@@ -114,6 +114,7 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
                 onEdit={openEditModal}
                 onTimerComplete={onTimerComplete}
                 onDone={onTaskDone}
+                onDoneMock={onDoneMock}
                 onStartFocus={onStartFocus}
                 showTimer={columnId === 'today'}
                 isDraggable={true}
