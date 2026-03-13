@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Check, Star, Trash2, RotateCcw, CalendarDays } from 'lucide-react';
-import { Topic, ContentType, DEFAULT_CONTENT_TYPES, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, SpacedRepetitionSettings } from '@/types';
+import { Topic, ContentType, DEFAULT_CONTENT_TYPES, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, getCumulativeDays, SpacedRepetitionSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { format, addDays } from 'date-fns';
@@ -70,12 +70,11 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
     const newSchedule = getScheduleForConfidence(value, srSettings);
     const updates: Partial<Topic> = { confidence: value };
     
-    // Recalculate next revision from NOW using new confidence schedule
+    // Recalculate next revision from lastStudied using cumulative days
     if (topic.nextRevisionDate && topic.revisionSession < newSchedule.length) {
-      const sessionInfo = newSchedule[topic.revisionSession];
-      if (sessionInfo) {
-        updates.nextRevisionDate = addDays(new Date(), sessionInfo.daysAfterPrevious);
-      }
+      const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
+      const cumulDays = getCumulativeDays(newSchedule, topic.revisionSession);
+      updates.nextRevisionDate = addDays(baseDate, cumulDays);
     }
     
     onUpdate({ ...topic, ...updates });

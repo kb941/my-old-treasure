@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Task, Chapter, Topic, StudySession, SPACED_REPETITION_SCHEDULE } from '@/types';
+import { Task, Chapter, Topic, StudySession, SPACED_REPETITION_SCHEDULE, getScheduleForConfidence, getCumulativeDays } from '@/types';
 import { addDays } from 'date-fns';
 
 interface UseActivitySyncProps {
@@ -25,13 +25,15 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
           };
 
           if (task.type === 'revision') {
-            const nextSession = Math.min(topic.revisionSession + 1, SPACED_REPETITION_SCHEDULE.length);
-            const schedule = SPACED_REPETITION_SCHEDULE[nextSession - 1];
-
+            const topicSchedule = getScheduleForConfidence(topic.confidence);
+            const nextSession = Math.min(topic.revisionSession + 1, topicSchedule.length);
             updates.revisionSession = nextSession;
-            updates.nextRevisionDate = schedule
-              ? addDays(new Date(), schedule.daysAfterPrevious)
-              : null;
+            if (nextSession <= topicSchedule.length) {
+              const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
+              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1));
+            } else {
+              updates.nextRevisionDate = null;
+            }
           }
 
           return { ...topic, ...updates };
@@ -84,13 +86,15 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
           }
 
           if (type === 'revision') {
-            const nextSession = Math.min(topic.revisionSession + 1, SPACED_REPETITION_SCHEDULE.length);
-            const schedule = SPACED_REPETITION_SCHEDULE[nextSession - 1];
-
+            const topicSchedule = getScheduleForConfidence(topic.confidence);
+            const nextSession = Math.min(topic.revisionSession + 1, topicSchedule.length);
             updates.revisionSession = nextSession;
-            updates.nextRevisionDate = schedule
-              ? addDays(new Date(), schedule.daysAfterPrevious)
-              : null;
+            if (nextSession <= topicSchedule.length) {
+              const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
+              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1));
+            } else {
+              updates.nextRevisionDate = null;
+            }
           }
 
           return { ...topic, ...updates };
@@ -122,15 +126,15 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
       topics: chapter.topics.map(topic => {
         if (topic.id !== topicId) return topic;
 
-        const nextSession = Math.min(topic.revisionSession + 1, SPACED_REPETITION_SCHEDULE.length);
-        const schedule = SPACED_REPETITION_SCHEDULE[nextSession - 1];
+        const topicSchedule = getScheduleForConfidence(topic.confidence);
+        const nextSession = Math.min(topic.revisionSession + 1, topicSchedule.length);
+        const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
 
         return {
           ...topic,
           revisionSession: nextSession,
-          lastStudied: new Date(),
-          nextRevisionDate: schedule
-            ? addDays(new Date(), schedule.daysAfterPrevious)
+          nextRevisionDate: nextSession <= topicSchedule.length
+            ? addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1))
             : null,
         };
       })
@@ -145,13 +149,14 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
       topics: chapter.topics.map(topic => {
         if (topic.id !== topicId) return topic;
 
-        const firstSchedule = SPACED_REPETITION_SCHEDULE[0];
+        const topicSchedule = getScheduleForConfidence(topic.confidence);
+        const now = new Date();
 
         return {
           ...topic,
           revisionSession: 0,
-          lastStudied: new Date(),
-          nextRevisionDate: addDays(new Date(), firstSchedule.daysAfterPrevious),
+          lastStudied: now,
+          nextRevisionDate: addDays(now, topicSchedule[0].daysAfterPrevious),
         };
       })
     }));

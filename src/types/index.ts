@@ -261,6 +261,15 @@ export function isMaintenanceSession(sessionNumber: number, schedule: SpacedRepe
   return last?.name === 'Maintenance' && sessionNumber >= last.sessionNumber;
 }
 
+// Get cumulative days from first study to a given session index
+export function getCumulativeDays(schedule: SpacedRepetitionSession[], sessionIndex: number): number {
+  let total = 0;
+  for (let i = 0; i <= sessionIndex && i < schedule.length; i++) {
+    total += schedule[i].daysAfterPrevious;
+  }
+  return total;
+}
+
 export interface RevisionReminder {
   topicId: string;
   topicName: string;
