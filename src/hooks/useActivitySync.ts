@@ -86,13 +86,15 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
           }
 
           if (type === 'revision') {
-            const nextSession = Math.min(topic.revisionSession + 1, SPACED_REPETITION_SCHEDULE.length);
-            const schedule = SPACED_REPETITION_SCHEDULE[nextSession - 1];
-
+            const topicSchedule = getScheduleForConfidence(topic.confidence);
+            const nextSession = Math.min(topic.revisionSession + 1, topicSchedule.length);
             updates.revisionSession = nextSession;
-            updates.nextRevisionDate = schedule
-              ? addDays(new Date(), schedule.daysAfterPrevious)
-              : null;
+            if (nextSession <= topicSchedule.length) {
+              const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
+              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1));
+            } else {
+              updates.nextRevisionDate = null;
+            }
           }
 
           return { ...topic, ...updates };
