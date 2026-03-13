@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Check, Star, Trash2, RotateCcw, CalendarDays } from 'lucide-react';
-import { Topic, ContentType, DEFAULT_CONTENT_TYPES, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, SpacedRepetitionSettings } from '@/types';
+import { Topic, ContentType, DEFAULT_CONTENT_TYPES, DEFAULT_SR_SCHEDULES, getScheduleForConfidence, getCumulativeDays, SpacedRepetitionSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { format, addDays } from 'date-fns';
