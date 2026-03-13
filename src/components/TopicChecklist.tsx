@@ -69,12 +69,19 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
   const setConfidence = (value: number) => {
     const newSchedule = getScheduleForConfidence(value, srSettings);
     const updates: Partial<Topic> = { confidence: value };
-    
-    // Use the NEW schedule's interval for the CURRENT session, counted from now
-    if (topic.nextRevisionDate && topic.revisionSession < newSchedule.length) {
-      updates.nextRevisionDate = addDays(new Date(), newSchedule[topic.revisionSession].daysAfterPrevious);
+
+    if (topic.nextRevisionDate && newSchedule.length > 0) {
+      const now = new Date();
+      const nextRevision = new Date(topic.nextRevisionDate);
+      const isCurrentReviewDue = nextRevision.getTime() <= now.getTime();
+      const targetSessionIdx = isCurrentReviewDue
+        ? topic.revisionSession + 1
+        : topic.revisionSession;
+      const clampedIdx = Math.min(Math.max(0, targetSessionIdx), newSchedule.length - 1);
+
+      updates.nextRevisionDate = addDays(now, newSchedule[clampedIdx].daysAfterPrevious);
     }
-    
+
     onUpdate({ ...topic, ...updates });
   };
 
