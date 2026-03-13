@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Task, Chapter, Topic, StudySession, SPACED_REPETITION_SCHEDULE } from '@/types';
+import { Task, Chapter, Topic, StudySession, SPACED_REPETITION_SCHEDULE, getScheduleForConfidence, getCumulativeDays } from '@/types';
 import { addDays } from 'date-fns';
 
 interface UseActivitySyncProps {
