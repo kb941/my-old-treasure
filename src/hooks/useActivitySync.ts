@@ -149,13 +149,14 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
       topics: chapter.topics.map(topic => {
         if (topic.id !== topicId) return topic;
 
-        const firstSchedule = SPACED_REPETITION_SCHEDULE[0];
+        const topicSchedule = getScheduleForConfidence(topic.confidence);
+        const now = new Date();
 
         return {
           ...topic,
           revisionSession: 0,
-          lastStudied: new Date(),
-          nextRevisionDate: addDays(new Date(), firstSchedule.daysAfterPrevious),
+          lastStudied: now,
+          nextRevisionDate: addDays(now, topicSchedule[0].daysAfterPrevious),
         };
       })
     }));

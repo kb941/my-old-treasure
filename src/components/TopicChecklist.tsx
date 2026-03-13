@@ -70,12 +70,11 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
     const newSchedule = getScheduleForConfidence(value, srSettings);
     const updates: Partial<Topic> = { confidence: value };
     
-    // Recalculate next revision from NOW using new confidence schedule
+    // Recalculate next revision from lastStudied using cumulative days
     if (topic.nextRevisionDate && topic.revisionSession < newSchedule.length) {
-      const sessionInfo = newSchedule[topic.revisionSession];
-      if (sessionInfo) {
-        updates.nextRevisionDate = addDays(new Date(), sessionInfo.daysAfterPrevious);
-      }
+      const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
+      const cumulDays = getCumulativeDays(newSchedule, topic.revisionSession);
+      updates.nextRevisionDate = addDays(baseDate, cumulDays);
     }
     
     onUpdate({ ...topic, ...updates });
