@@ -762,7 +762,10 @@ const Index = () => {
           if (idx <= 0) return todayTasks;
           return [todayTasks[idx], ...todayTasks.slice(0, idx), ...todayTasks.slice(idx + 1)];
         })()}
-        pomodoroSettings={pomodoroSettings} breakDuration={breakDuration}
+        pomodoroSettings={pomodoroSettings}
+        srSettings={srSettings}
+        chapters={chapters}
+        breakDuration={breakDuration}
         onTaskDone={handleTaskDone}
       />
     </div>
