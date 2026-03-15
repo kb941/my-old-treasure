@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Play, Pause, Coffee, CheckCircle2, SkipForward, BookOpen, Brain, FileText, Clock, Star, Gamepad2 } from 'lucide-react';
-import { Task, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
+import { Task, PomodoroSettings, SpacedRepetitionSettings, Chapter, Topic, getScheduleForConfidence } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
