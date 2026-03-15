@@ -41,8 +41,17 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, srSettings
   const [skippedTasks, setSkippedTasks] = useState<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const topicById = useMemo(() => {
+    const map = new Map<string, Topic>();
+    chapters.forEach((chapter) => {
+      chapter.topics.forEach((topic) => map.set(topic.id, topic));
+    });
+    return map;
+  }, [chapters]);
+
   const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id) && !skippedTasks.has(t.id));
   const currentTask = incompleteTasks[0] || null;
+  const currentTopic = currentTask?.topicId ? topicById.get(currentTask.topicId) : undefined;
 
   const getPhaseDuration = (p: TimerPhase) => {
     switch (p) {
