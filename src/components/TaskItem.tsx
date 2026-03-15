@@ -394,9 +394,11 @@ export function TaskItem({
                           </button>
                         ))}
                       </div>
-                      <p className="text-[10px] text-muted-foreground text-center">
-                        Next review in {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d
-                      </p>
+                      {nextReviewIntervalDays !== null && (
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          Next review in {nextReviewIntervalDays}d
+                        </p>
+                      )}
                     </>
                   )}
                   <button
