@@ -134,7 +134,7 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
           ...topic,
           revisionSession: nextSession,
           nextRevisionDate: nextSession <= topicSchedule.length
-            ? addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1))
+            ? addDays(baseDate, getCumulativeDays(topicSchedule, nextSession))
             : null,
         };
       })
