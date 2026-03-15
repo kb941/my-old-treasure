@@ -64,7 +64,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({
-  task, onToggle, onMove, onTimerComplete, onDone, onDoneMock, onDelete, onEdit, onStartFocus,
+  task, topic, srSettings, onToggle, onMove, onTimerComplete, onDone, onDoneMock, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false, isEditMode = false,
   pomodoroSettings = DEFAULT_POMODORO, activeTimerTaskId, onTimerStart
 }: TaskItemProps) {
