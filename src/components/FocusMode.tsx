@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Play, Pause, Coffee, CheckCircle2, SkipForward, BookOpen, Brain, FileText, Clock, Star, Gamepad2 } from 'lucide-react';
-import { Task, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
+import { Task, PomodoroSettings, SpacedRepetitionSettings, Chapter, Topic, getScheduleForConfidence } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -11,6 +11,8 @@ interface FocusModeProps {
   onClose: () => void;
   tasks: Task[];
   pomodoroSettings: PomodoroSettings;
+  srSettings: SpacedRepetitionSettings;
+  chapters?: Chapter[];
   breakDuration?: number;
   onTaskDone: (taskId: string, duration: number, confidence?: number) => void;
 }
@@ -26,7 +28,7 @@ const typeIcons: Record<string, typeof BookOpen> = {
 
 type TimerPhase = 'study' | 'short-break' | 'long-break' | 'custom-break';
 
-export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDuration = 10, onTaskDone }: FocusModeProps) {
+export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, srSettings, chapters = [], breakDuration = 10, onTaskDone }: FocusModeProps) {
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [phase, setPhase] = useState<TimerPhase>('study');
   const [isRunning, setIsRunning] = useState(false);
@@ -39,8 +41,17 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
   const [skippedTasks, setSkippedTasks] = useState<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const topicById = useMemo(() => {
+    const map = new Map<string, Topic>();
+    chapters.forEach((chapter) => {
+      chapter.topics.forEach((topic) => map.set(topic.id, topic));
+    });
+    return map;
+  }, [chapters]);
+
   const incompleteTasks = tasks.filter(t => !t.completed && !completedTasks.has(t.id) && !skippedTasks.has(t.id));
   const currentTask = incompleteTasks[0] || null;
+  const currentTopic = currentTask?.topicId ? topicById.get(currentTask.topicId) : undefined;
 
   const getPhaseDuration = (p: TimerPhase) => {
     switch (p) {
@@ -145,6 +156,27 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
   const circumference = 2 * Math.PI * timerRadius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+  const getNextReviewIntervalDays = () => {
+    if (!currentTask?.topicId) return null;
+
+    const schedule = getScheduleForConfidence(selectedConfidence, srSettings);
+    if (schedule.length === 0) return null;
+
+    if (currentTask.type === 'revision' && currentTopic) {
+      const nextSession = currentTopic.revisionSession + 1;
+      const maintenanceIdx = schedule.findIndex((session) => session.name === 'Maintenance');
+      const sessionIndex = maintenanceIdx >= 0 && nextSession >= maintenanceIdx
+        ? maintenanceIdx
+        : Math.min(nextSession, schedule.length - 1);
+
+      return schedule[sessionIndex]?.daysAfterPrevious ?? schedule[schedule.length - 1].daysAfterPrevious;
+    }
+
+    return schedule[0].daysAfterPrevious;
+  };
+
+  const nextReviewIntervalDays = getNextReviewIntervalDays();
+
   if (!isOpen) return null;
 
   const allDone = incompleteTasks.length === 0;
@@ -208,9 +240,11 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDurat
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Next: {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3]).slice(0, 4).map(s => `${s.daysAfterPrevious}d`).join(' → ')}
-                </p>
+                {nextReviewIntervalDays !== null && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Next review in {nextReviewIntervalDays}d
+                  </p>
+                )}
                 <Button onClick={() => finishCurrentTask(selectedConfidence)} className="w-full gradient-success text-primary-foreground">
                   Confirm & Next
                 </Button>

@@ -645,7 +645,7 @@ const Index = () => {
                 onTimerComplete={handleTaskComplete} onTaskDone={handleTaskDone}
                 onDoneMock={handleDoneMockTask}
                 onStartFocus={(taskId) => { setFocusTaskId(taskId); setIsFocusMode(true); }}
-                pomodoroSettings={pomodoroSettings} chapters={chapters}
+                pomodoroSettings={pomodoroSettings} chapters={chapters} srSettings={srSettings}
               />
               {tasks.filter(t => t.column === 'today' && !t.completed).length > 0 && (
                 <div className="flex justify-center">
@@ -762,7 +762,10 @@ const Index = () => {
           if (idx <= 0) return todayTasks;
           return [todayTasks[idx], ...todayTasks.slice(0, idx), ...todayTasks.slice(idx + 1)];
         })()}
-        pomodoroSettings={pomodoroSettings} breakDuration={breakDuration}
+        pomodoroSettings={pomodoroSettings}
+        srSettings={srSettings}
+        chapters={chapters}
+        breakDuration={breakDuration}
         onTaskDone={handleTaskDone}
       />
     </div>

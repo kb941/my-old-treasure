@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, Pencil } from 'lucide-react';
-import { Task, TaskColumn, PomodoroSettings, Chapter } from '@/types';
+import { Task, TaskColumn, PomodoroSettings, Chapter, SpacedRepetitionSettings, Topic } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { TaskItem } from '@/components/TaskItem';
@@ -18,6 +18,7 @@ interface KanbanBoardProps {
   onStartFocus?: (taskId: string) => void;
   pomodoroSettings?: PomodoroSettings;
   chapters?: Chapter[];
+  srSettings?: SpacedRepetitionSettings;
 }
 
 const columns: { id: TaskColumn; label: string; icon: typeof Archive }[] = [
@@ -34,7 +35,7 @@ const columnColors: Record<TaskColumn, string> = {
   done: 'bg-green-500',
 };
 
-export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onDoneMock, onStartFocus, pomodoroSettings, chapters = [] }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplete, onTaskDone, onDoneMock, onStartFocus, pomodoroSettings, chapters = [], srSettings }: KanbanBoardProps) {
   const isMobile = useIsMobile();
   const [activeColumn, setActiveColumn] = useState<TaskColumn>('today');
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -42,6 +43,14 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   const [reorderMode, setReorderMode] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<string | null>(null);
+
+  const topicById = useMemo(() => {
+    const map = new Map<string, Topic>();
+    chapters.forEach(chapter => {
+      chapter.topics.forEach(topic => map.set(topic.id, topic));
+    });
+    return map;
+  }, [chapters]);
 
   const getColumnTasks = (columnId: TaskColumn) =>
     tasks.filter(t => t.column === columnId);
@@ -108,6 +117,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
             <Reorder.Item key={task.id} value={task}>
               <TaskItem
                 task={task}
+                topic={task.topicId ? topicById.get(task.topicId) : undefined}
+                srSettings={srSettings}
                 onToggle={onToggleTask}
                 onMove={moveTask}
                 onDelete={deleteTask}
@@ -136,6 +147,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
             <TaskItem
               key={task.id}
               task={task}
+              topic={task.topicId ? topicById.get(task.topicId) : undefined}
+              srSettings={srSettings}
               onToggle={onToggleTask}
               onMove={moveTask}
               onTimerComplete={onTimerComplete}

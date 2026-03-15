@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Play, Clock, BookOpen, Brain, FileText, Check, GripVertical, ArrowRight, ArrowLeft, Pause, SkipForward, Coffee, CheckCircle2, Star, Trash2, Pencil, Plus, Minus } from 'lucide-react';
-import { Task, TaskColumn, PomodoroSettings, DEFAULT_SR_SCHEDULES } from '@/types';
+import { Task, TaskColumn, PomodoroSettings, SpacedRepetitionSettings, Topic, getScheduleForConfidence } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
@@ -45,6 +45,8 @@ type TimerPhase = 'study' | 'short-break' | 'long-break';
 
 interface TaskItemProps {
   task: Task;
+  topic?: Topic;
+  srSettings?: SpacedRepetitionSettings;
   onToggle: (id: string) => void;
   onMove: (taskId: string, direction: 'left' | 'right') => void;
   onTimerComplete?: (taskId: string, duration: number) => void;
@@ -62,7 +64,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({
-  task, onToggle, onMove, onTimerComplete, onDone, onDoneMock, onDelete, onEdit, onStartFocus,
+  task, topic, srSettings, onToggle, onMove, onTimerComplete, onDone, onDoneMock, onDelete, onEdit, onStartFocus,
   showTimer = false, isDraggable = false, isEditMode = false,
   pomodoroSettings = DEFAULT_POMODORO, activeTimerTaskId, onTimerStart
 }: TaskItemProps) {
@@ -199,6 +201,27 @@ export function TaskItem({
   };
 
   const progress = ((getPhaseDuration(phase) - timeRemaining) / getPhaseDuration(phase)) * 100;
+
+  const getNextReviewIntervalDays = () => {
+    if (!task.topicId) return null;
+
+    const schedule = getScheduleForConfidence(selectedConfidence, srSettings);
+    if (schedule.length === 0) return null;
+
+    if (task.type === 'revision' && topic) {
+      const nextSession = topic.revisionSession + 1;
+      const maintenanceIdx = schedule.findIndex((session) => session.name === 'Maintenance');
+      const sessionIndex = maintenanceIdx >= 0 && nextSession >= maintenanceIdx
+        ? maintenanceIdx
+        : Math.min(nextSession, schedule.length - 1);
+
+      return schedule[sessionIndex]?.daysAfterPrevious ?? schedule[schedule.length - 1].daysAfterPrevious;
+    }
+
+    return schedule[0].daysAfterPrevious;
+  };
+
+  const nextReviewIntervalDays = getNextReviewIntervalDays();
 
   return (
     <motion.div
@@ -371,9 +394,11 @@ export function TaskItem({
                           </button>
                         ))}
                       </div>
-                      <p className="text-[10px] text-muted-foreground text-center">
-                        Next review in {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3])[0].daysAfterPrevious}d
-                      </p>
+                      {nextReviewIntervalDays !== null && (
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          Next review in {nextReviewIntervalDays}d
+                        </p>
+                      )}
                     </>
                   )}
                   <button
