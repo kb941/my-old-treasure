@@ -117,6 +117,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
             <Reorder.Item key={task.id} value={task}>
               <TaskItem
                 task={task}
+                topic={task.topicId ? topicById.get(task.topicId) : undefined}
+                srSettings={srSettings}
                 onToggle={onToggleTask}
                 onMove={moveTask}
                 onDelete={deleteTask}
