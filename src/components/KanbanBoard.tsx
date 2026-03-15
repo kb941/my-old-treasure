@@ -18,6 +18,7 @@ interface KanbanBoardProps {
   onStartFocus?: (taskId: string) => void;
   pomodoroSettings?: PomodoroSettings;
   chapters?: Chapter[];
+  srSettings?: SpacedRepetitionSettings;
 }
 
 const columns: { id: TaskColumn; label: string; icon: typeof Archive }[] = [
