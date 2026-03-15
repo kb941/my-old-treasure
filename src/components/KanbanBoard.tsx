@@ -147,6 +147,8 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
             <TaskItem
               key={task.id}
               task={task}
+              topic={task.topicId ? topicById.get(task.topicId) : undefined}
+              srSettings={srSettings}
               onToggle={onToggleTask}
               onMove={moveTask}
               onTimerComplete={onTimerComplete}
