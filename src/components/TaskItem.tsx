@@ -202,6 +202,27 @@ export function TaskItem({
 
   const progress = ((getPhaseDuration(phase) - timeRemaining) / getPhaseDuration(phase)) * 100;
 
+  const getNextReviewIntervalDays = () => {
+    if (!task.topicId) return null;
+
+    const schedule = getScheduleForConfidence(selectedConfidence, srSettings);
+    if (schedule.length === 0) return null;
+
+    if (task.type === 'revision' && topic) {
+      const nextSession = topic.revisionSession + 1;
+      const maintenanceIdx = schedule.findIndex((session) => session.name === 'Maintenance');
+      const sessionIndex = maintenanceIdx >= 0 && nextSession >= maintenanceIdx
+        ? maintenanceIdx
+        : Math.min(nextSession, schedule.length - 1);
+
+      return schedule[sessionIndex]?.daysAfterPrevious ?? schedule[schedule.length - 1].daysAfterPrevious;
+    }
+
+    return schedule[0].daysAfterPrevious;
+  };
+
+  const nextReviewIntervalDays = getNextReviewIntervalDays();
+
   return (
     <motion.div
       layout={false}
