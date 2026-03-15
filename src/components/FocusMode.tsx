@@ -240,9 +240,11 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, srSettings
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Next: {(DEFAULT_SR_SCHEDULES[selectedConfidence] || DEFAULT_SR_SCHEDULES[3]).slice(0, 4).map(s => `${s.daysAfterPrevious}d`).join(' → ')}
-                </p>
+                {nextReviewIntervalDays !== null && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Next review in {nextReviewIntervalDays}d
+                  </p>
+                )}
                 <Button onClick={() => finishCurrentTask(selectedConfidence)} className="w-full gradient-success text-primary-foreground">
                   Confirm & Next
                 </Button>
