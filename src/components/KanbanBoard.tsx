@@ -44,6 +44,14 @@ export function KanbanBoard({ tasks, onTasksChange, onToggleTask, onTimerComplet
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<string | null>(null);
 
+  const topicById = useMemo(() => {
+    const map = new Map<string, Topic>();
+    chapters.forEach(chapter => {
+      chapter.topics.forEach(topic => map.set(topic.id, topic));
+    });
+    return map;
+  }, [chapters]);
+
   const getColumnTasks = (columnId: TaskColumn) =>
     tasks.filter(t => t.column === columnId);
 
