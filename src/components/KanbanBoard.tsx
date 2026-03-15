@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { Plus, Archive, CalendarDays, CalendarCheck, CheckCircle2, Trash2, Pencil } from 'lucide-react';
-import { Task, TaskColumn, PomodoroSettings, Chapter } from '@/types';
+import { Task, TaskColumn, PomodoroSettings, Chapter, SpacedRepetitionSettings, Topic } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { TaskItem } from '@/components/TaskItem';
