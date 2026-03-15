@@ -156,6 +156,27 @@ export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, srSettings
   const circumference = 2 * Math.PI * timerRadius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+  const getNextReviewIntervalDays = () => {
+    if (!currentTask?.topicId) return null;
+
+    const schedule = getScheduleForConfidence(selectedConfidence, srSettings);
+    if (schedule.length === 0) return null;
+
+    if (currentTask.type === 'revision' && currentTopic) {
+      const nextSession = currentTopic.revisionSession + 1;
+      const maintenanceIdx = schedule.findIndex((session) => session.name === 'Maintenance');
+      const sessionIndex = maintenanceIdx >= 0 && nextSession >= maintenanceIdx
+        ? maintenanceIdx
+        : Math.min(nextSession, schedule.length - 1);
+
+      return schedule[sessionIndex]?.daysAfterPrevious ?? schedule[schedule.length - 1].daysAfterPrevious;
+    }
+
+    return schedule[0].daysAfterPrevious;
+  };
+
+  const nextReviewIntervalDays = getNextReviewIntervalDays();
+
   if (!isOpen) return null;
 
   const allDone = incompleteTasks.length === 0;
