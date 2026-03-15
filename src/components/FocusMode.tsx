@@ -28,7 +28,7 @@ const typeIcons: Record<string, typeof BookOpen> = {
 
 type TimerPhase = 'study' | 'short-break' | 'long-break' | 'custom-break';
 
-export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, breakDuration = 10, onTaskDone }: FocusModeProps) {
+export function FocusMode({ isOpen, onClose, tasks, pomodoroSettings, srSettings, chapters = [], breakDuration = 10, onTaskDone }: FocusModeProps) {
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [phase, setPhase] = useState<TimerPhase>('study');
   const [isRunning, setIsRunning] = useState(false);
