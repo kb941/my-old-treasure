@@ -11,6 +11,8 @@ interface FocusModeProps {
   onClose: () => void;
   tasks: Task[];
   pomodoroSettings: PomodoroSettings;
+  srSettings: SpacedRepetitionSettings;
+  chapters?: Chapter[];
   breakDuration?: number;
   onTaskDone: (taskId: string, duration: number, confidence?: number) => void;
 }
