@@ -45,6 +45,8 @@ type TimerPhase = 'study' | 'short-break' | 'long-break';
 
 interface TaskItemProps {
   task: Task;
+  topic?: Topic;
+  srSettings?: SpacedRepetitionSettings;
   onToggle: (id: string) => void;
   onMove: (taskId: string, direction: 'left' | 'right') => void;
   onTimerComplete?: (taskId: string, duration: number) => void;
