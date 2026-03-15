@@ -72,14 +72,8 @@ export function TopicChecklist({ topic, onUpdate, onDelete, contentTypes, srSett
 
     if (topic.nextRevisionDate && newSchedule.length > 0) {
       const now = new Date();
-      const nextRevision = new Date(topic.nextRevisionDate);
-      const isCurrentReviewDue = nextRevision.getTime() <= now.getTime();
-      const targetSessionIdx = isCurrentReviewDue
-        ? topic.revisionSession + 1
-        : topic.revisionSession;
-      const clampedIdx = Math.min(Math.max(0, targetSessionIdx), newSchedule.length - 1);
-
-      updates.nextRevisionDate = addDays(now, newSchedule[clampedIdx].daysAfterPrevious);
+      const sessionIndex = Math.min(Math.max(0, topic.revisionSession), newSchedule.length - 1);
+      updates.nextRevisionDate = addDays(now, newSchedule[sessionIndex].daysAfterPrevious);
     }
 
     onUpdate({ ...topic, ...updates });

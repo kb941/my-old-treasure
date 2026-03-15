@@ -30,7 +30,7 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
             updates.revisionSession = nextSession;
             if (nextSession <= topicSchedule.length) {
               const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
-              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1));
+              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession));
             } else {
               updates.nextRevisionDate = null;
             }
@@ -91,7 +91,7 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
             updates.revisionSession = nextSession;
             if (nextSession <= topicSchedule.length) {
               const baseDate = topic.lastStudied ? new Date(topic.lastStudied) : new Date();
-              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1));
+              updates.nextRevisionDate = addDays(baseDate, getCumulativeDays(topicSchedule, nextSession));
             } else {
               updates.nextRevisionDate = null;
             }
@@ -134,7 +134,7 @@ export function useActivitySync({ chapters, onChaptersChange, onAddSession }: Us
           ...topic,
           revisionSession: nextSession,
           nextRevisionDate: nextSession <= topicSchedule.length
-            ? addDays(baseDate, getCumulativeDays(topicSchedule, nextSession - 1))
+            ? addDays(baseDate, getCumulativeDays(topicSchedule, nextSession))
             : null,
         };
       })
