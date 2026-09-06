@@ -93,6 +93,17 @@ const Index = () => {
       setSubjects(prev => prev.map(s => SHORT_SUBJECT_IDS.includes(s.id) ? { ...s, category: 'Short Subjects' as const } : s));
     }
   }, []);
+  // Sync MCQ goal for existing topics that are still using the old default (20)
+  useEffect(() => {
+    const needsSync = chapters.some(ch => ch.topics.some(t => t.targetQuestions === 20));
+    if (needsSync) {
+      setChapters(prev => prev.map(ch => ({
+        ...ch,
+        topics: ch.topics.map(t => t.targetQuestions === 20 ? { ...t, targetQuestions: mcqGoalPerSubject } : t)
+      })));
+    }
+  }, [chapters, mcqGoalPerSubject]);
+
 
   // Auto-move revision tasks from "week" to "today" if their topic's revision is due
   useEffect(() => {
@@ -278,6 +289,12 @@ const Index = () => {
     if (data.markingScheme) setMarkingScheme(data.markingScheme);
     if (data.pyqYearFrom !== undefined) setPyqYearFrom(data.pyqYearFrom);
     if (data.pyqYearTo !== undefined) setPyqYearTo(data.pyqYearTo);
+    if (data.mcqGoalPerSubject !== undefined && data.mcqGoalPerSubject !== mcqGoalPerSubject) {
+      setChapters(prev => prev.map(ch => ({
+        ...ch,
+        topics: ch.topics.map(t => ({ ...t, targetQuestions: data.mcqGoalPerSubject! }))
+      })));
+    }
     if (data.mcqGoalPerSubject !== undefined) setMcqGoalPerSubject(data.mcqGoalPerSubject);
     if (data.pushNotificationSettings) setPushNotificationSettings(data.pushNotificationSettings);
     if (data.dailyStudyTarget !== undefined) setDailyStudyTarget(data.dailyStudyTarget);
