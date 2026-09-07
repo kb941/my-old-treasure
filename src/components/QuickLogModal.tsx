@@ -511,10 +511,10 @@ export function QuickLogModal({ isOpen, onClose, onLog, onOpenMockModal, onOpenT
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-card rounded-t-2xl md:rounded-2xl shadow-card-hover border border-border z-50 max-h-[95vh] md:max-h-[85vh] flex flex-col"
+            className="relative w-[calc(100%-1.5rem)] max-w-md max-h-[calc(100dvh-1.5rem)] bg-card rounded-2xl shadow-card-hover border border-border z-50 flex flex-col"
           >
             {/* Drag Handle */}
-            <div className="md:hidden flex justify-center pt-3">
+            <div className="hidden md:flex justify-center pt-3">
               <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
             </div>
 

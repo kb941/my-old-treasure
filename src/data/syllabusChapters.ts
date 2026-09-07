@@ -6,7 +6,7 @@ function makeTopic(id: string, name: string, subjectId: string): Topic {
     status: 'not-started',
     completedStages: [],
     confidence: 0,
-    targetQuestions: 20,
+    targetQuestions: 100,
     questionsSolved: 0,
     pyqDone: false,
     nextRevisionDate: null,
