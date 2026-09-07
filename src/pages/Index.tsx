@@ -93,13 +93,13 @@ const Index = () => {
       setSubjects(prev => prev.map(s => SHORT_SUBJECT_IDS.includes(s.id) ? { ...s, category: 'Short Subjects' as const } : s));
     }
   }, []);
-  // Sync MCQ goal for existing topics that are still using the old default (20)
+  // Keep every topic aligned with the MCQ goal configured in Profile.
   useEffect(() => {
-    const needsSync = chapters.some(ch => ch.topics.some(t => t.targetQuestions === 20));
+    const needsSync = chapters.some(ch => ch.topics.some(t => t.targetQuestions !== mcqGoalPerSubject));
     if (needsSync) {
       setChapters(prev => prev.map(ch => ({
         ...ch,
-        topics: ch.topics.map(t => t.targetQuestions === 20 ? { ...t, targetQuestions: mcqGoalPerSubject } : t)
+        topics: ch.topics.map(t => t.targetQuestions === mcqGoalPerSubject ? t : { ...t, targetQuestions: mcqGoalPerSubject })
       })));
     }
   }, [chapters, mcqGoalPerSubject]);
@@ -314,8 +314,8 @@ const Index = () => {
 
           return {
             ...topic,
-            questionsSolved: hasMcqs
-              ? Math.max(topic.questionsSolved ?? 0, topic.targetQuestions ?? 50)
+              questionsSolved: hasMcqs
+                ? Math.max(topic.questionsSolved ?? 0, topic.targetQuestions ?? mcqGoalPerSubject)
               : (topic.questionsSolved ?? 0),
             pyqDone: hasPyqs,
           };
@@ -357,7 +357,7 @@ const Index = () => {
               if (currentIdx < statusOrder.length - 1 && currentIdx >= 0) updates.status = statusOrder[currentIdx + 1];
               else if (topic.status === 'not-started') updates.status = 'main-videos';
             } else if (task.type === 'mcq' || task.type === 'pyq') {
-              const qSolved = questionData?.attempted || 50;
+              const qSolved = questionData?.attempted || mcqGoalPerSubject;
               updates.questionsSolved = topic.questionsSolved + qSolved;
               if (!questionData) {
                 setMcqLogs(prev => [...prev, { date: new Date().toISOString().split('T')[0], count: qSolved }]);
@@ -524,9 +524,6 @@ const Index = () => {
                 onCompleteRevision={handleCompleteRevision}
                 onNavigateToRevision={() => setActiveTab('revision')}
               />
-              <Button variant="outline" size="sm" onClick={() => { setMockModalMode('mock'); setIsMockModalOpen(true); }} className="hidden sm:flex h-8 text-xs">
-                <FileText className="w-3.5 h-3.5 mr-1.5" /> Mock
-              </Button>
               <Button onClick={() => setIsLogModalOpen(true)} size="sm" className="gradient-primary text-primary-foreground h-8 text-xs">
                 <Plus className="w-3.5 h-3.5 sm:mr-1.5" />
                 <span className="hidden sm:inline">Log</span>

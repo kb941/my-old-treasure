@@ -237,7 +237,7 @@ export function StatDetailPanel({ stat, stats, studyLogs, subjects, onClose }: S
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             onClick={(e) => e.stopPropagation()}
-            className="absolute inset-x-3 top-6 bottom-20 md:bottom-6 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[420px] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
+            className="relative w-[calc(100%-1.5rem)] max-w-[420px] max-h-[calc(100dvh-3rem)] bg-card rounded-2xl border border-border shadow-lg overflow-y-auto"
           >
             {/* Gradient Header */}
             <div className={`sticky top-0 z-10 ${config.gradient} px-5 py-4 flex items-center justify-between rounded-t-2xl`}>

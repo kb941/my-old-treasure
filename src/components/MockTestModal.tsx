@@ -156,7 +156,7 @@ export function MockTestModal({ isOpen, onClose, onLog, mode = 'mock', pyqYearFr
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-x-4 top-4 bottom-4 mx-auto max-w-lg overflow-y-auto bg-card rounded-2xl shadow-card-hover border border-border p-4 sm:p-6 z-50 sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-h-[90vh]"
+            className="relative w-[calc(100%-1.5rem)] max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto bg-card rounded-2xl shadow-card-hover border border-border p-4 sm:p-6 z-50"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
